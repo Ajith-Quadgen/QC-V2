@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <%- include('../partials/dependencies') %>
+</head>
+
+<body>
+    <header>
+        <%- include('../partials/engineer-header') %>
+    </header>
+    <main class="main_container">
+        <form action="#" method="post" enctype="multipart/form-data" id="QCFrom">
+        <div class="m-3 section1">
+            <div class="row">
+
+                <div class="col-mb-3 w-25">
+                    <label for="cfas_no" class="form-label">Checklist </label>
+                    <input type="text" class="form-control" id="checklist" required value=" <%= title %>" readonly>
+                </div>
+                <div class="col-mb-3 w-25">
+                    <label for="cfas_no" class="form-label">Enter Job Number </label>
+                    <input type="text" class="form-control" id="cfas_no" onchange="getBasicData(this);" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="qc_type" class="form-label">QC Type</label>
+                    <select id="qc_type" class="form-select" required>
+                        <option value="">Select</option>
+                        <option value="Self QC">Self QC</option>
+                        <option value="IQC">IQC</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="qc_state" class="form-label">State</label>
+                    <input type="text" class="form-control" id="qc_state" class="form-select" required disabled>
+                </div>
+                <div class="col-md-3">
+                    <label for="qc_city" class="form-label">City</label>
+                    <input type="text" class="form-control" id="qc_city" class="form-select" required disabled>
+                </div>
+                <div class="col-md-3">
+                    <label for="remarks" class="form-label">Remarks
+                    </label>
+                    <input type="text" class="form-control" id="remarks">
+                </div>
+            </div>
+        </div>
+        <hr>
+        </div>
+        <div class="d-flex w-100 table-responsive-sm">
+            <table class="table table-sm table-hover m-2  table-striped align-middle table-light" id="QCTable">
+                <thead class="table-primary sticky-lg-top">
+                    <tr>
+                        <th scope="col">Sl.No</th>
+                        <th scope="col">Item</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Reference Document</th>
+                        <th scope="col" style="width: 10%;">Check</th>
+                        <th scope="col">Reviewer Note</th>
+                    </tr>
+                </thead>
+                <tbody id="content-area">
+                    <% if (Object.values(Data).length>0) { %>
+                        <% let sectionNumber=1; %>
+                            <% for (const Section in Data) { %>
+
+                                <tr class="table-danger section">
+                                    <td>
+                                        <%= sectionNumber%>
+                                    </td>
+                                    <td colspan="5" class="sectionName">
+                                        <%= Section %>
+                                    </td>
+                                </tr>
+                                <% let itemNumber=1; %>
+                                    <% for (const row of Data[Section]) { %>
+                                        <tr class="item-row">
+                                            <td>
+                                                <%= sectionNumber%>.<%= itemNumber%>
+                                            </td>
+                                            <td style="text-align: start; align-items:start;" class="item">
+                                                <%= row.Item %>
+                                            </td>
+                                            <td style="text-align: start; align-items:start;" class="Description">
+                                                <%- row.Description %>
+                                            </td>
+                                            <td>
+                                                <% if (row.Reference_Link) { %>
+                                                    <a href="<%= row.Reference_Link %>"><button type="button"
+                                                            class="btn btn-outline-secondary btn-sm "
+                                                            style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+                                                            <%= row.Reference_Document %>
+                                                        </button></a>
+                                                    <% } %>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-row align-items-stretch">
+                                                    <span> <input type="radio" name="Check_<%= row.Question_ID %>"
+                                                            value="Yes" class="form-check-input" onchange="toggleRequired(this)" checked>Yes</span>
+                                                    <span> <input type="radio" name="Check_<%= row.Question_ID %>"
+                                                            value="No" class="form-check-input" onchange="toggleRequired(this)">No</span>
+                                                    <span> <input type="radio" name="Check_<%= row.Question_ID %>"
+                                                            value="N/A" class="form-check-input" onchange="toggleRequired(this)">N/A</span>
+                                                </div>
+                                            </td>
+                                            <td><input type="text" class="form-control"
+                                                    id="Note_<%= row.Question_ID %>" placeholder="Reviewer Note">
+                                            </td>
+                                        </tr>
+                                        <% itemNumber++; %>
+
+                                            <% } %>
+
+                                                <% sectionNumber++; %>
+
+                                                    <% } %>
+
+                                                        <% } else { %>
+                                                            <tr>
+                                                                <td colspan="11">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                                        style="display: none;">
+                                                                        <symbol id="check-circle-fill"
+                                                                            viewBox="0 0 16 16">
+                                                                            <path
+                                                                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                                                                        </symbol>
+                                                                        <symbol id="info-fill" viewBox="0 0 16 16">
+                                                                            <path
+                                                                                d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                                        </symbol>
+                                                                        <symbol id="exclamation-triangle-fill"
+                                                                            viewBox="0 0 16 16">
+                                                                            <path
+                                                                                d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                                                                        </symbol>
+                                                                    </svg>
+                                                                    <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center"
+                                                                        role="alert">
+                                                                        <svg class="bi flex-shrink-0 me-2" role="img"
+                                                                            aria-label="Info:">
+                                                                            <use xlink:href="#info-fill" />
+                                                                        </svg>
+
+                                                                        <strong>Sorry...!😕</strong> Data not found.
+                                                                        <button type="button" class="btn-close"
+                                                                            data-bs-dismiss="alert"
+                                                                            aria-label="Close"></button>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td colspan="9" class="text-center">
+
+                                                                    <a href="/login"
+                                                                        class="btn btn-outline-primary rounded-pill"><i
+                                                                            class="bi bi-arrow-left-circle-fill"></i> Go
+                                                                        Back To Home</a>
+
+                                                                </td>
+                                                            </tr>
+                                                            <% } %>
+                </tbody>
+            </table>
+
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-outline-success m-5">Submit</button>
+        </div>
+        <button type="button" class="scoreButton btn btn-success rounded-circle" id="ScoreButton">100.0%</button>
+        <button onclick="topFunction()" id="myBtn" title="Go to top" style="z-index: 100;"
+            class="btn btn-info btn-sm"><i class="bi bi-arrow-up-circle"></i></button>
+        </form>
+    </main>
+
+    <footer>
+        <%- include('../partials/footer') %>
+    </footer>
+    <%- include('../partials/dependencies-js') %>
+        <script>
+            function getBasicData(e) {
+                if (e.value.length > 3) {
+                    axios.post('/api/getJobData', {
+                        params: {
+                            jobID: e.value
+                        }
+                    }).then(res => {
+                        if (res.status == 200) {
+                            updateBasicData(res.data);
+                        }
+                    })
+                        .catch(e => {
+                            console.log(e);
+                            alert(e.response.data);
+                        })
+                }
+            }
+
+            function updateBasicData(data) {
+                document.getElementById("qc_state").value = data.State;
+                document.getElementById("qc_city").value = data.City;
+
+            }
+            function processData() {
+                const contentArea = document.getElementById('content-area');
+                const rows = contentArea.querySelectorAll('tr');
+                const capturedData = [];
+                let currentSection = null;
+                let currentSectionData = null;
+                let total_yes =0;
+                let total_na =0;
+                let total_no = 0;
+                rows.forEach((row) => {
+                    if (row.classList.contains('section')) {
+                        if (currentSectionData !== null) {
+                            capturedData.push(currentSectionData);
+                        }
+                        currentSection = row.querySelector('.sectionName').textContent.trim();
+                        currentSectionData = {
+                            sectionName: currentSection,
+                            items: []
+                        };
+                    } else {
+                        const item = {
+                            Item: row.querySelector('.item').textContent.trim(),
+                            Description: row.querySelector('.Description').textContent.trim(),
+                            Check: row.querySelector(`input[name*="Check_"]:checked`).value,
+                            Note: row.querySelector(`input[id*="Note_"]`).value.trim()
+                        };
+                        switch (row.querySelector(`input[name*="Check_"]:checked`).value) {
+                            case 'Yes':
+                                total_yes++;
+                                break;
+                            case 'No':
+                                total_no++;
+                                break;
+                            case 'N/A':
+                                total_na++
+                                break
+                        }
+
+                        currentSectionData.items.push(item);
+                    }
+                });
+                var Percentage = ((total_yes + total_na) / (total_na + total_no + total_yes));
+                Percentage = (Percentage * 100).toFixed(1);
+                document.getElementById("ScoreButton").innerText=Percentage+'%'
+                if (currentSectionData !== null) {
+                    capturedData.push(currentSectionData);
+                }
+                return ({capturedData,Percentage})
+            }
+
+            document.getElementById("QCFrom").addEventListener('submit',async (e)=>{
+                e.preventDefault()
+               var Data= await processData();
+               var percentage=Data.Percentage;
+               var data=Data.capturedData;
+               var QC=document.getElementById("checklist").value.trim();
+               var JobID=document.getElementById("cfas_no").value.trim();
+               var type=document.getElementById("qc_type").value.trim();
+               var state=document.getElementById("qc_state").value;
+               var city=document.getElementById("qc_city").value;
+               var remark=document.getElementById("remarks").value.trim();
+               
+               let newData=[]
+               data.forEach((section)=>{
+                section.items.forEach((row)=>{
+                    let finalData={};
+                    finalData.Checklist=QC;
+                    finalData.state=state;
+                    finalData.city=city;
+                    finalData.type=type;
+                    finalData.JobID=JobID;
+                    finalData.Section=section.sectionName;
+                    finalData.Item=row.Item;
+                    finalData.Description=row.Description;
+                    finalData.Check=row.Check;
+                    finalData.Note=row.Note;
+                    finalData.Percentage=percentage;
+                    finalData.Remarks=remark;
+                    newData.push(finalData)
+                })
+               })
+               axios.post('/api/SubmitQC',{
+                params:{
+                    inputData:newData
+                }
+               }).then(res => {
+                        if (res.status == 200) {
+                            // updateBasicData(res.data);
+                            alert(res.data.Message)
+                            window.location.reload('/engineer')
+                        }
+                    })
+                        .catch(e => {
+                            console.log(e);
+                            alert(e.response.data);
+                        })
+            })
+            function toggleRequired(radioButton) {
+  const noteInputId = 'Note_' + radioButton.name.split('_')[1];
+  const noteInput = document.getElementById(noteInputId);
+
+  if(radioButton.value == 'No'){
+    noteInput.setAttribute('required','')
+  }else{
+    noteInput.removeAttribute('required')
+ 
+  };
+  noteInput.setAttribute('placeholder','* Reviewer Note')
+  processData()
+}
+        </script>
+</body>
+
+</html>

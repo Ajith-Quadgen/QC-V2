@@ -1,0 +1,136 @@
+Employee_ID,Full_Name,Email_ID,Designation,Location,Role,Reporting_Manager_Name,Reporting_Manager_Mail
+QGIA407,Soumyaranjan Sethy,soumyaranjan.sethy@quadgenwireless.com,Associate Manager,BBSR,Manager,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGI465,Gagan Kumar Behura,gagan.behura@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Soumyaranjan Sethy,soumyaranjan.sethy@quadgenwireless.com
+QGI470,Abinash Garnaik,abinash.garnaik@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI471,Satyaki Biswas,satyaki.biswas@quadgenwireless.com,GET-OSP Drafter,BBSR,Engineers,Suman H K,suman.g@quadgenwireless.com
+QGI473,Happy Prasad Nath,happy.nath@quadgenwireless.com,Manager - Production,BBSR,Manager,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGIA587,Biswajit Bhoi,biswajit.bhoi@quadgenwireless.com,OSP Drafter II,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI481,Saktisuman Pradhan,saktisuman.pradhan@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI482,Anurag Padhy,anurag.padhy@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Sumit Kumar Sahani,sumitkumar.sahani@quadgenwireless.com
+QGI466,Ashutosh Nayak,ashutosh.nayak@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI468,Kiran Pratap Singh Nayak,kiranpratapsingh.nayak@quadgenwireless.com,GET-OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI469,Satyajeet behera,satyajeet.behera@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Soumyaranjan Sethy,soumyaranjan.sethy@quadgenwireless.com
+QGI472,Atul Prasad Samantaray,atulprasad.samantaray@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI474,Rabishankar Rath,rabishankar.rath@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI475,Ajitesh Pattanayak,ajitesh.pattanayak@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI476,Sandeep Maharana,sandeep.maharana@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI478,Bibhuti Rout,bibhuti.rout@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI480,Amit Kumar Das,amitkumar.das@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI484,Pabitra Nanda,pabitra.nanda@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI495,Sunita Behera,sunita.behera@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI496,Shakti Swaroop Mahapatra,shaktiswaroop.mahapatra@quadgenwireless.com,GET-OSP Drafter,BBSR,Engineers,,
+QGI497,Linu Padhan,linu.padhan@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI498,Khirodra Behera,khirodra.behera@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI499,Supritee Mahali,supritee.mahali@quadgenwireless.com,OSP Drafter,BBSR,Engineers,,
+QGI500,Smaranika Rath,smaranika.rath@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI501,Bijayananda Behara,bijayananda.behera@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI502,Swaraj Laxmi Mallick,swarajlaxmi.mallick@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI503,Dhanmay Sharma,dhanmya.sharma@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI504,Ajit Kumar,ajit.kumar@quadgenwireless.com,OSP Drafter,BBSR,Engineers,,
+QGI505,Khahnu Charan Mohanty,kahnu.mohanty@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI506,Pravakara Singh,pravakara.singh@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI511,Braja Kishore Rout,brajakishore.rout@quadgenwireless.com,GET-OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI512,Sangram Nayak,sangram.nayak@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI513,Sukadev Majhi,sukadev.majhi@quadgenwireless.com,GET-OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI514,Kamala Kanta Nayak,kamalakanta.nayak@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI515,Bibhuti Bhusan Lenka,bibhutibhusan.lenka@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI516,Subhakanta Behera,subhakanta.behera@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI518,Ankita Ojha,ankita.ojha@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI519,Deepak Kumar Jena,deepakkumar.jena@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI521,Chinmayee Priyadarsini Khatua,chinmayeepriyadarsini.khatua@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI524,Chiranjit Sahoo,chiranjit.sahoo@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI526,Pradyumna Kumar Jena,pradyumnakumar.jena@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI530,Rajesh Kumar Sahoo,rajeshkumar.sahoo@quadgenwireless.com,GET-OSP Drafter,BBSR,Engineers,Sumit Kumar Sahani,sumitkumar.sahani@quadgenwireless.com
+QGI531,Rakesh Shantinath Chavare,rakeshshantinath.chavare@quadgenwireless.com,OSP Drafter,BLR,Engineers,Suman H K,suman.g@quadgenwireless.com
+QGI532,Kamal Kumar Samal,kamalkumar.samal@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI533,Kaleram Durga Prasad Baskey,kaleramdurgaprasad.baskey@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Sumit Kumar Sahani,sumitkumar.sahani@quadgenwireless.com
+QGI535,Jully Lohar,jully.lohar@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI536,Sanigdha Mohanty,sanigdha.mohanty@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Soumyaranjan Sethy,soumyaranjan.sethy@quadgenwireless.com
+QGI537,Geetanjali Mallick,geetanjali.mallick@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Sumit Kumar Sahani,sumitkumar.sahani@quadgenwireless.com
+QGI538,Biswajita Routray,biswajitha.routray@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Soumyaranjan Sethy,soumyaranjan.sethy@quadgenwireless.com
+QGI539,Priyabrata Behera,priyabrata.behera@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI543,Sumit Kumar Sahani,sumitkumar.sahani@quadgenwireless.com,Lead OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI353,Jyotirmaya Jena,jyotirmaya.jena@quadgenwireless.com,Assistant Manager Projects,BBSR,Manager,Jaaswanth CH,"jaaswanth.ch@quadgenwireless.com,"
+QGI553,Swati Swarupa Rajguru,swati.rajguru@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Soumyaranjan Sethy,soumyaranjan.sethy@quadgenwireless.com
+QGI554,Kalinga Kumar Biswal,kalinga.biswal@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Sumit Kumar Sahani,sumitkumar.sahani@quadgenwireless.com
+QGI556,Smitaranjan Samantaray,smitaranjan.samantaray@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Soumyaranjan Sethy,soumyaranjan.sethy@quadgenwireless.com
+QGI557,Sudhansu Prasad routray,sudhansu.routray@quadgenwireless.com,GET-OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI558,Biswa Ranjan Behera,biswa.behera@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGI562,Suryakanta Murudi,suryakanta.murudi@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Sumit Kumar Sahani,sumitkumar.sahani@quadgenwireless.com
+QGI563,Mayank Jain,mayank.jain@quadgenwireless.com,Senior OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI568,Mohammed Takir Khan,mdtakir.khan@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+QGI454,Mahesh Bopparapu,mahesh.bopparapu@quadgenwireless.com,Lead OSP Drafter,HYD,Engineers,Shyam Sundar,shyam.sundar@quadgenwireless.com
+QGI458,Lokesh Akurathi,lokesh.akurathi@quadgenwireless.com,Lead OSP Drafter,HYD,Engineers,Shyam Sundar,shyam.sundar@quadgenwireless.com
+QGI567,Pavan kumar Anugula,pavankumar.anugula@quadgenwireless.com,Lead OSP Drafter,HYD,Engineers,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGI570,Damodar Yarrapotu,damodar.yarrapotu@quadgenwireless.com,Senior OSP Drafter,HYD,Engineers,Shyam Sundar,shyam.sundar@quadgenwireless.com
+QGI573,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com,Lead OSP Drafter,VIJ,Engineers,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGI572,Akhil Odugu,akhil.odugu@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI571,Naresh Kumar Kandula,nareshkumar.kandula@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI574,Sri Lakshmi Prameela Mogali,lakshmiprameela.mogali@quadgenwireless.com,Senior OSP Drafter,VIJ,Engineers,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGI452,Jinesh V R,jinesh.reji@quadgenwireless.com,Fiber Design Engineer,BLR,Engineers,Shyam Sundar,shyam.sundar@quadgenwireless.com
+QGI486,Adarsh Kumar,adarsh.kumar@quadgenwireless.com,OSP Drafter,BLR,Engineers,Shyam Sundar,shyam.sundar@quadgenwireless.com
+QGIA443,Suman HK,suman.g@quadgenwireless.com,Manager - Production,BLR,Manager,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGI485,Boddapati Nagendra Sai Naveen Kumar,naveenkumar.boddapati@quadgenwireless.com,OSP Drafter,BLR,Engineers,Shyam Sundar,shyam.sundar@quadgenwireless.com
+QGI490,Nallabothula Dilli Prasad,dilliprasad.nallabothula@quadgenwireless.com,OSP Drafter,BLR,Engineers,Shyam Sundar,shyam.sundar@quadgenwireless.com
+QGI491,Apoorva M,apoorva.doddamallappa@quadgenwireless.com,OSP Drafter,BLR,Engineers,Shyam Sundar,shyam.sundar@quadgenwireless.com
+QGI509,Bharath R,bharath.raja@quadgenwireless.com,OSP Drafter,BLR,Engineers,Suman H K,suman.g@quadgenwireless.com
+QGI510,Regi Priyanka C,priyanka.regi@quadgenwireless.com,OSP Drafter,BLR,Engineers,Shyam Sundar,shyam.sundar@quadgenwireless.com
+QGI447,Shyam Sundar,shyam.sundar@quadgenwireless.com,Manager - Production,BLR,Manager,Suman H K,suman.g@quadgenwireless.com
+QGI460,Manoj Jairamdas Wadhwa,manoj.wadhwa@quadgenwireless.com,Fiber Design Engineer,BLR,PMO,-,-
+QGI464,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com,Head-OSP Design,BLR,Admin,-,-
+QGI575,Pratyusha Allu,prathyusha.allu@quadgenwireless.com,OSP Drafter,BLR,Engineers,Suman H K,suman.g@quadgenwireless.com
+QGI577,Gowtham Kumar Raghumanda,gowthamkumar.raghumanda@quadgenwireless.com,GET-OSP Drafter,HYD,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI576,Akula Venkata Sai Sasidhar Saketh,saisasidhar.akula@quadgenwireless.com,OSP Drafter,HYD,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI578,Shaik Moen Kamal,moenkamal.shaik@quadgenwireless.com,OSP Drafter,HYD,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI579,Dhruv Joshi,dhruvpravin.joshi@quadgenwireless.com,OSP Drafter,BLR,Engineers,,
+QGI581,Jagadish Prasad Dash,jagadish.prasad@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Soumyaranjan Sethy,soumyaranjan.sethy@quadgenwireless.com
+QGI257,Jaaswanth CH,jaaswanth.ch@quadgenwireless.com,Project Manager,Manager,Engineers,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGI586,Bhakata Ram Suna,bhaktaram.suna@quadgenwireless.com,OSP Drafter,BBSR,Engineers,Soumyaranjan Sethy,soumyaranjan.sethy@quadgenwireless.com
+INT/22/002,Ajith V,ajith.venkatesh@quadgenwireless.com,Developer,BLR,Engineers,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGI643,Lekkala Vamshikrishna,lekkala.vamshikrishna@quadgenwireless.com,Senior OSP Drafter,HYD,Engineers,Jaaswanth CH,"jaaswanth.ch@quadgenwireless.com,"
+QGI604,Maddala Vara Prasad,prasad.maddala@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI611,Sagiri Mahendra,mahendra.sagiri@quadgenwireless.com,GET-OSP Drafter,VIJ,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI608,Palaparthi Anand,anand.palaparthi@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI609,Pilly Sujay,sujay.pilly@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI613,Sivakumar Thupakula,siva.thupakula@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI615,Vemula Rajesh,rajesh.vemula@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI606,Mavuri Jayanthi,jayanthi.mavuri@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Sri Lakshmi Prameela Mogali,lakshmiprameela.mogali@quadgenwireless.com
+QGI614,Velamala Anusha,anusha.velamala@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Sri Lakshmi Prameela Mogali,lakshmiprameela.mogali@quadgenwireless.com
+QGI616,Vutukuri Leela Sravani,sravani.vutukuri@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Sri Lakshmi Prameela Mogali,lakshmiprameela.mogali@quadgenwireless.com
+QGI610,Rongala Sravani,sravani.rongala@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Sri Lakshmi Prameela Mogali,lakshmiprameela.mogali@quadgenwireless.com
+QGI605,Mangaraju Vasundhara,vasundhara.mangaraju@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Sri Lakshmi Prameela Mogali,lakshmiprameela.mogali@quadgenwireless.com
+QGI612,Shaik Gousiya,gousiya.shaik@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Sri Lakshmi Prameela Mogali,lakshmiprameela.mogali@quadgenwireless.com
+QGI603,Kornu Ramanamurthy,ramanamurthy.kornu@quadgenwireless.com,OSP Drafter,VIJ,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI607,Orsu Saisrinivas,saisrinivas.orsu@quadgenwireless.com,GET-OSP Drafter,VIJ,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI635,Uppalapati Nithisha,uppalapati.nithisha@quadgenwireless.com,GET-OSP Drafter,VIJ,Engineers,Sri Lakshmi Prameela Mogali,lakshmiprameela.mogali@quadgenwireless.com
+QGIA249,Pavani Kolukula,pavani.kolukula@quadgenwireless.com,OSP Drafter,HYD,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI591,Telagamsetti Srihari Chaitanya,srihari.chaitanya@quadgenwireless.com,Lead OSP Drafter,HYD,Engineers,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGI626,Gaddam Saikumar,gaddam.saikumar@quadgenwireless.com,GET-OSP Drafter,HYD,Engineers,Telagamsetti Srihari Chaitanya,srihari.chaitanya@quadgenwireless.com
+QGI646,Rajashekar Vadla,vadla.rajashekar@quadgenwireless.com,Senior OSP Drafter,HYD,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI645,Avijit Barick,avijit.barick@quadgenwireless.com,OSP Drafter,Bhubaneswar,Engineers,Happy Prasad Nath,happy.nath@quadgenwireless.com
+CMS-QWS/400,Pritam Behera,pritam.behera@quadgenwireless.com,Project Coordinator,Bhubaneswar,Engineers,Mayank Jain,mayank.jain@quadgenwireless.com
+QGIA427,Vinod Kumar Chinta,vinodkumar.chinta@quadgenwireless.com,Project Manager,Bengaluru,Manager,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGI647,Badaraveni Shravan,badaraveni.shravan@quadgenwireless.com,Senior OSP Drafter,HYD,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI661,Naveen Jilla,jilla.naveen@quadgenwireless.com,Senior OSP Drafter,HYD,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI665,Shivani Kasagoni,kasagoni.shivani@quadgenwireless.com,OSP Drafter,Hyderabad,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI663,Jayanth Kumpatala,jayanth.srinu@quadgenwireless.com,GET-OSP Drafter,VIJ,Engineers,Rajesh Tangellamudi,rajesh.tangellamudi@quadgenwireless.com
+QGI666,Satish Bangla,bangla.satish@quadgenwireless.com,Senior OSP Drafter,Hyderabad,Engineers,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGI668,Ganesh Madaka,madaka.ganesh@quadgenwireless.com,Senior OSP Drafter,Hyderabad,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI669,Srilakshmi Bussareddy,srilakshmi.bussareddy@quadgenwireless.com,Senior OSP Drafter,HYD,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI672,Meghana Pasham,pasham.meghana@quadgenwireless.com,OSP Drafter,HYD,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI675,Himanshu Singh,himanshu.singh@quadgenwireless.com,Lead OSP Drafter,Bhubaneswar,Engineers,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGI674,Myakala Raju,myakala.raju@quadgenwireless.com,Senior OSP Drafter,Hyderabad,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI676,Suryaprakash Bobbili,suryaprakash.bobbili@quadgenwireless.com,Senior OSP Drafter,Hyderabad,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI677,Ravi Dasarapally,dasarapally.ravi@quadgenwireless.com,Senior OSP Drafter,HYD,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGIA310,Kondal Reddy,kondalreddy.donakonda@quadgenwireless.com,OSP Drafter,Hyderabad,Engineers,Lokesh Aakruthi,lokesh.akurathi@quadgenwireless.com
+QGI678,Poojitha Guguloth,guguloth.poojitha@quadgenwireless.com,OSP Drafter,Hyderabad,Engineers,Telagamsetti Srihari Chaitanya,srihari.chaitanya@quadgenwireless.com
+QGI679,Valaboju Vijaykumar,valaboju.vijaykumar@quadgenwireless.com,Senior OSP Drafter,Hyderabad,Engineers,Telagamsetti Srihari Chaitanya,srihari.chaitanya@quadgenwireless.com
+QGI680,Vamsi Sairam Tarlana,tarlana.vamsisairam@quadgenwireless.com,OSP Drafter,Hyderabad,Engineers,Telagamsetti Srihari Chaitanya,srihari.chaitanya@quadgenwireless.com
+QGI681,Shiva Anumandla,anumandla.shiva@quadgenwireless.com,Senior OSP Drafter,Hyderabad,Engineers,Telagamsetti Srihari Chaitanya,srihari.chaitanya@quadgenwireless.com
+QGIXYZ,Only for testing ,software.development@quadgenwireless.com,Manager - Production,BBSR,Manager,Shrikant Sriramulu Bomma,ajith.venkatesh@quadgenwireless.com
+QGI682,Gangadhar Betha,gangadhar.betha@quadgenwireless.com,Lead OSP Drafter,VIJ,Engineers,Shrikant Sriramulu Bomma,shrikant.bomma@quadgenwireless.com
+QGI683,Sravan Kumar Kheta,sravan.kumar@quadgenwireless.com,OSP Drafter,Hyderabad,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI670,Bhavani Modumpalli,bhavani.modumpalli@quadgenwireless.com,OSP Drafter,Hyderabad,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI671,Umamaheshwari Sattharapu,uma.maheshwari@quadgenwireless.com,OSP Drafter,HYD,Engineers,Anugula Pavan Kumar,pavankumar.anugula@quadgenwireless.com
+QGI686,Nallapu Rohit Joshi,rohit.joshi@quadgenwireless.com,OSP DRAFTER,HYD,Engineers,Satish Bangla,bangla.satish@quadgenwireless.com
+QGI685,Dharmajit Rout,dharmajit.rout@quadgenwireless.com,OSP DRAFTER,BBSR,Engineers,Sumit Kumar Sahani,sumitkumar.sahani@quadgenwireless.com

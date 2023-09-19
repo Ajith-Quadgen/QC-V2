@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Checklist</title>
+    <%- include('../partials/dependencies') %>
+</head>
+
+<body>
+    <header>
+        <%- include('../partials/admin-header') %>
+    </header>
+    <main class="main_container">
+        <form action="#" method="POST" enctype="multipart/form-data" id="QC-Excel-UploadForm"
+            class="d-flex justify-content-center align-items-center">
+            <p class="form-label">Select Only Excel File</p>
+            <label class="input-group-text" for="QCFile">Select Checklist File</label>
+            <input type="file" class="form-control m-2" name="QCFile" id="QCFile"
+                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                required style="display: none;">
+            <button type="submit" class="btn btn-primary m-2">Upload &nbsp; <i
+                    class="bi bi-cloud-arrow-up"></i></button>
+            <input type="button" value="Add New Check" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
+                data-bs-target="#UserInputModel">
+                <% if (Checklist) { %>
+                    <a href="/api/DownloadQCResponses/<%= Checklist%>" target="_self">Download</a>
+
+                <% } %>
+        </form>
+        <div class="d-flex w-100">
+            <table class="table table-hover m-2  table-striped caption-top table-responsive">
+                <thead class="table-dark sticky-top">
+                    <tr>
+                        <th scope="col">Sl.No</th>
+                        <th scope="col">Checklist</th>
+                        <th scope="col">Section</th>
+                        <th scope="col">Item</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Reference Document</th>
+                        <th scope="col" style="width: 300px; word-wrap: break-word;">Reference Link(URL)</th>
+                        <th scope="col" colspan="3">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="content-area">
+                    <% if (Object.values(Data).length>0) { %>
+                        <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
+                            <tr>
+                                <td>
+                                    <%= index+1%>
+                                </td>
+                                <td>
+                                    <%= Data[index]["Checklist"] %>
+                                </td>
+                                <td>
+                                    <%= Data[index]['Section'] %>
+                                </td>
+                                <td>
+                                    <%= Data[index]['Item'] %>
+                                </td>
+                                <td>
+                                    <%- Data[index]['Description'] %>
+                                </td>
+                                <td>
+                                    <%= Data[index]['Reference_Document'] %>
+                                </td>
+                                <td style="width: 300px; word-wrap: break-word;">
+                                    <%= Data[index]['Reference_Link'] %>
+                                </td>
+                                <td>
+                                    <%=Data[index]['Status']%>
+                                </td>
+                                <td>
+                                    <% if (Data[index]['Status']=="Active" ) { %>
+                                        <button type="button" class="btn btn-danger  ms-2"
+                                            onclick="updateStatusAPI('<%= Data[index]['Question_ID'] %>','Inactive')"><i
+                                                class="bi bi-x-circle"></i></button>
+                                        <% }else{ %>
+                                            <button type="button" class="btn btn-success  ms-2 me-2"
+                                                onclick="updateStatusAPI('<%= Data[index]['Question_ID'] %>','Active')"><i
+                                                    class="bi bi-check-circle-fill"></i></button>
+                                            <% } %>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-primary" onclick='gatherRowData(this)'
+                                        id="<%= Data[index]['Question_ID'] %>" data-bs-toggle="modal"
+                                        data-bs-target="#UpdateQCModal">Edit</button>
+                                </td>
+
+                            </tr>
+                            <% } %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="11">
+                                            <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                                                <symbol id="check-circle-fill" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                                                </symbol>
+                                                <symbol id="info-fill" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                </symbol>
+                                                <symbol id="exclamation-triangle-fill" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                                                </symbol>
+                                            </svg>
+                                            <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center"
+                                                role="alert">
+                                                <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Info:">
+                                                    <use xlink:href="#info-fill" />
+                                                </svg>
+
+                                                <strong>Sorry...!😕</strong> Data not found.
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9" class="text-center">
+
+                                            <a href="/login" class="btn btn-outline-primary rounded-pill"><i
+                                                    class="bi bi-arrow-left-circle-fill"></i> Go Back To Home</a>
+
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <!-- Add QC Modal -->
+    <div class="modal fade" id="UserInputModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content ">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5" id="staticBackdropLabel">Add New User
+                    </h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="#" method="post" id="addQCCheckForm">
+                    <div class="modal-body">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="qc" placeholder="key" readonly>
+                            <label for="qc">QC</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="section" placeholder="key">
+                            <label for="section">Select Section</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="Description" placeholder="key">
+                            <label for="Description">Description</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="referDocName" placeholder="key">
+                            <label for="referDocName">Reference Document Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="url" class="form-control" id="referDocLink" placeholder="key">
+                            <label for="referDocLink">Reference Document Link</label>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="addQCCheckbtn">Add &nbsp;<i
+                                class="bi bi-send-fill"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update QC Modal -->
+    <div class="modal fade" id="UpdateQCModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content ">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5" id="staticBackdropLabel">Update the QC
+                    </h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="#" method="post" id="UpdateQC">
+                    <div class="modal-body">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="updateqc" placeholder="key" readonly>
+                            <input type="hidden" name="" readonly value="" id="updateID">
+                            <label for="updateqc">QC</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="updatesection" placeholder="key" required>
+                            <label for="updatesection">Section</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="updateitem" placeholder="key">
+                            <label for="updateitem">Item</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <textarea name="" class="form-control" style="height: 100px;" id="updateDescription"
+                                placeholder="key"></textarea>
+                            <!-- <input type="text" class="form-control" id="updateDescription" placeholder="key" required> -->
+                            <label for="updateDescription">Description</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="updatereferDocName" placeholder="key">
+                            <label for="updatereferDocName">Reference Document Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="url" class="form-control" id="updatereferDocLink" placeholder="key">
+                            <label for="updatereferDocLink">Reference Document Link</label>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="updateQCCheckbtn">Update &nbsp;<i
+                                class="bi bi-send-fill"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <%- include('../partials/footer') %>
+    </footer>
+    <%- include('../partials/dependencies-js') %>
+        <script>
+
+            document.getElementById('addQCCheckForm').addEventListener("submit", async (e) => {
+                e.preventDefault();
+                await axios.post('/api/AddQCCheck', {
+                    params: {
+                        "Employee_ID": document.getElementById("empId").value,
+                        "Full_Name": document.getElementById("empName").value,
+                        "Email_ID": document.getElementById("empEmail").value,
+                        "Designation": document.getElementById("empDesignation").value,
+                        "Location": document.getElementById("empLocation").value,
+                        "Role": document.getElementById("empRole").value,
+                        "Reporting_Manager_Name": document.getElementById("empReportingManager").value,
+                    }
+                }).then(res => {
+                    if (res.status == 200) {
+                        $("#UserInputModel").modal('hide')
+                        alert(res.data);
+                    }
+                }).catch(e => {
+                    $("#UserInputModel").modal('hide')
+                    console.log(e);
+                    alert(e.response.data);
+                })
+            })
+            document.getElementById('QC-Excel-UploadForm').addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const fileInput = document.getElementById('QCFile');
+                const file = fileInput.files[0];
+                let fromData = new FormData();
+                fromData.append("QCFile", file)
+                await axios.post('/api/uploadChecklist', fromData).then(res => {
+                    if (res.status == 200) {
+                        alert(res.data);
+                        //updateContentArea(res.data.Data);
+                    }
+                }).catch(e => {
+                    alert(e.response.data);
+                })
+            })
+
+            function updateStatusAPI(id, newStatus) {
+                axios.post('/api/updateCheckListStatus', {
+                    params: {
+                        id: id,
+                        status: newStatus,
+                        QC: '<%- Checklist %>'
+                    }
+                }).then(res => {
+                    if (res.status == 200) {
+                        updateContentArea(res.data);
+                    }
+                })
+                    .catch(e => {
+                        console.log(e);
+                        alert("Unable to Update the Status...\nPlease Contact Admin");
+                    })
+            }
+
+            function updateContentArea(data) {
+                if (data.length > 0) {
+                    $('#content-area').empty();
+                    const table = document.getElementById("content-area");
+                    for (let i = 0; i < data.length; i++) {
+                        table.innerHTML += `<tr>
+                                    <td>${i + 1}</td>
+                                    <td>${data[i]["Checklist"]}</td>
+                                    <td>${data[i]["Section"]}</td>
+                                    <td>${data[i]["Item"]}</td>
+                                    <td>${data[i]["Description"]}</td>
+                                    <td>${data[i]["Reference_Document"]}</td>
+                                    <td>${data[i]["Reference_Link"]}</td>
+                                    <td>${data[i]["Status"]}</td>
+                                    <td>${data[i]["Status"] === "Inactive" ?
+                                `<button type="button" class="btn btn-success ms-2 me-2" onclick="updateStatusAPI('${data[i]['Question_ID']}','Active')"><i class="bi bi-check-circle-fill"></i></button>` :
+                                `<button type="button" class="btn btn-danger  ms-2"  onclick="updateStatusAPI('${data[i]['Question_ID']}','Inactive')"><i class="bi bi-x-circle"></i></button>`}
+                                    </td>
+                                    <td>                                    <button type="button" class="btn btn-outline-primary" onclick="UpdateQC('${data[i]['Question_ID']}')">Edit</button>  </td>`;
+                    }
+                }
+
+            }
+            function gatherRowData(button) {
+                const row = button.closest('tr'); // Get the parent tr using closest
+                const cells = Array.from(row.cells); // Convert HTMLCollection to array
+                var rowData = cells.map((cell) => cell.innerHTML.trim());
+                rowData = rowData.slice(1, -3)
+                document.getElementById("updateID").value = button.id;
+                document.getElementById("updateqc").value = rowData[0];
+                document.getElementById("updatesection").value = rowData[1];
+                document.getElementById("updateitem").value = rowData[2];
+                document.getElementById("updateDescription").textContent = rowData[3];
+                document.getElementById("updatereferDocName").value = rowData[4];
+                document.getElementById("updatereferDocLink").value = rowData[5];
+            }
+            document.getElementById("UpdateQC").addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById("updateID").value;
+                const qc = document.getElementById("updateqc").value;
+                const sec = document.getElementById("updatesection").value;
+                const item = document.getElementById("updateitem").value;
+                const desc = document.getElementById("updateDescription").value;
+                const docName = document.getElementById("updatereferDocName").value;
+                const docLink = document.getElementById("updatereferDocLink").value;
+                axios.post(`/api/updateCheckListStatus/${id}`, {
+                    params: {
+                        "Checklist": qc,
+                        "Section": sec,
+                        "Item": item,
+                        "Description": desc,
+                        "Reference_Document": docName,
+                        "Reference_Link": docLink
+                    }
+                }).then(res => {
+                    if (res.status == 200) {
+                        $("#UpdateQCModal").modal('hide')
+                        updateContentArea(res.data);
+                    }
+                })
+                    .catch(e => {
+                        $("#UpdateQCModal").modal('hide')
+                        alert(e.message);
+                        //alert("Unable to Update the Checklist...\nPlease Contact Admin");
+                    })
+            })
+
+            // document.getElementById("QCResDownload").addEventListener('click', () => {
+            //     var qc_name='<%= Checklist %>'
+            //   axios.post('/api/DownloadQCResponses', {
+            //         params: {
+            //             QC: qc_name.trim()
+            //         },
+            //         responseType: 'blob'
+            //     }).then(res => {
+            //         var data = new Blob([res.data]);
+            //         if (typeof window.navigator.msSaveBlob === 'function') {
+            //             // If it is IE that support download blob directly.
+            //             window.navigator.msSaveBlob(data, defaultFilename);
+            //         } else {
+            //             var blob = data;
+            //             var link = document.createElement('a');
+            //             link.href = window.URL.createObjectURL(blob);
+            //             link.download ="QC-Responses.xlsx";
+
+            //             document.body.appendChild(link);
+
+            //             link.click(); // create an <a> element and simulate the click operation.
+            //         }
+            //     })
+            //         .catch(e => {
+            //             console.log(e);
+            //             alert("An Error Occurred while generating Excel File");
+            //         })
+            // });
+            
+        </script>
+</body>
+
+</html>

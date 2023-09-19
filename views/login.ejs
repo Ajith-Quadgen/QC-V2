@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <%- include('partials/dependencies') %>
+  <meta name="theme-color" content="#319197">
+  <meta name="color-scheme" content="dark">
+  <link rel="stylesheet" href="../static/css/loginpage.css">
+
+</head>
+<%- include('partials/header') %>
+
+  <body>
+    <div class="session">
+      <div class="left">
+      </div>
+      <form action="/AuthenticateLogin" class="log-in" id="loginform" autocomplete="off" method="post">
+        <h4><span>QuadGen OSP QC Portal</span></h4>
+        <h5> <span>Login</span></h5>
+        <p>Welcome! Log in to your account to complete the QC for assigned Jobs</p>
+        <div class="floating-label">
+          <input placeholder="Employee ID" type="text" name="email" id="email" autocomplete="off" value="" required minlength="5">
+          <label for="email">Employee ID</label>
+        </div>
+        <div class="floating-label">
+          <input placeholder="Password" type="password" name="password" id="password" autocomplete="off" required
+            minlength="8"  pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_=+-]).{8,16}$" value="User@123">
+          <label for="password">Password</label>
+        </div>
+        <button type="submit" id="SubmitButon">Log in</button>
+        <div>
+            <!-- <a href="/forgetPassword">Forget Password?</a> -->
+          </div>
+      </form>
+    </div>
+
+
+
+<footer>
+  <%- include('partials/footer') %>
+</footer>
+  </body>
+  <%- include('partials/dependencies-js') %>
+</html>
