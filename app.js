@@ -63,11 +63,9 @@ const server = app.listen(port, function () {
 
 
 app.get('/',(req,res)=>{
-  console.log(req.session)
     res.render('../views/login')
 })
 app.get('/login', (req, res) => {
-  console.log(req.session)
   if (req.session.UserID) {
     switch (req.session.UserRole) {
       case "Engineer":
@@ -105,7 +103,6 @@ app.post('/AuthenticateLogin', (req, res) => {
         req.session.UserRole = result[0]['Role'];
         req.session.UserName=result[0]['Full_Name'];
         req.session.UserMail=result[0]['Email_ID'];
-        console.log(req.session)
         if (result[0]['Role'] == "Engineer") {
           res.redirect('/engineer');
         } else if (result[0]['Role'] == "PMO") {

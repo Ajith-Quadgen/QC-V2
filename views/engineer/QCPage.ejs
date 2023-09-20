@@ -294,14 +294,14 @@
                 }
                }).then(res => {
                         if (res.status == 200) {
-                            // updateBasicData(res.data);
-                            alert(res.data.Message)
+                            console.log(res)
+                            alert(res.data.Message+'\n Score is '+res.data.Score)
                             window.location.reload('/engineer')
                         }
                     })
                         .catch(e => {
                             console.log(e);
-                            alert(e.response.data);
+                            alert(e.response.data.Message);
                         })
             })
             function toggleRequired(radioButton) {

@@ -8,9 +8,17 @@ function getTimeStamp() {
 
 engineer_router.get("/", (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Engineer") {
+        let log;
+        db.query("select *,DATE_FORMAT(`Date`,'%b %D %y / %r') as Date from qc_log where User_ID=?",[req.session.UserID],(error,result)=>{
+            if(error){
+                res.status(400).json({Message:"Internal server Error"})
+            }else{
+                log=result
+            }
+        })
         db.query("select * from checklist", (error, result) => {
             if (error) throw error
-            res.render('../views/engineer/home', { Data: result })
+            res.render('../views/engineer/home', { Data: result,Log:log })
         })
     } else {
         res.redirect('/')
@@ -41,7 +49,7 @@ engineer_router.get("/QC/:QC_Name", (req, res) => {
         });
         res.render('../views/engineer/QCpage', { Data: organizedData, title: result[0].Checklist })
     }else{
-        res.send("QC Is Not Ready Contact Manager")
+        res.send("Checklist is Not Prepared Yer, Contact Manager")
     }
     })
     

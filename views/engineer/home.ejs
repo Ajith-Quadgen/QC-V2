@@ -15,12 +15,14 @@
     <header>
         <%- include('../partials/engineer-header') %>
     </header>
-    <main class="main_container d-flex justify-content-center">
+    <main class="d-flex flex-column mb-3 justify-content-center w-100">
+        <section class="d-flex justify-content-center">
         <% if (Object.values(Data).length>0) { %>
             <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
                 <a href="/Engineer/QC/<%= Data[index].Checklist_Name %>">
-                    <div class="localcard m-4">
-                       <h3> <%= Data[index].Checklist_Name %></h3>
+                    <div class="localcard m-4 text-center">
+                       <h3 class="m-3"> <%= Data[index].Checklist_Name %></h3>
+                       <img src="../../public/uploads/Checklist-Icon/<%= Data[index].Icon%>" alt="Icon_<%= Data[index].Checklist_Name %>" class="rounded checklist-icon">
                     </div>
                 </a>
                 <%}%>
@@ -28,6 +30,67 @@
 
                         <p>NO QC</p>
                         <%}%>
+                    </section>
+                        <section class="d-flex w-100 table-responsive-sm">
+                            <% if (Object.values(Log).length>0) { %>
+                                <% for( let index=0; index < Object.values(Log).length; index++ ) { %>
+                                    <table class="table table-hover m-2  table-striped caption-top">
+                                        <thead class="table-dark sticky-top">
+                                            <tr>
+                                                <th scope="col">Sl.No</th>
+                                                <th scope="col">Date/Time</th>
+                                                <th scope="col">Project</th>
+                                                <th scope="col">QC</th>
+                                                <th scope="col">CFAS/Job </th>
+                                                <th scope="col">State</th>
+                                                <th scope="col">City</th>
+                                                <th scope="col">QC-Type </th>
+                                                <th scope="col">Work Print No</th>
+                                                <th scope="col">Iteration</th>
+                                                <th scope="col">Score </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <%= index+1%>
+                                                </td>
+                                                <td>
+                                                    <%= Log[index]["Date"] %>
+                                                </td>
+                                                <td>
+                                                    <%= Log[index]["Project"] %>
+                                                </td>
+                                                <td>
+                                                    <%= Log[index]["QC"] %>
+                                                </td>
+                                                <td>
+                                                    <%= Log[index]["Job_ID"] %>
+                                                </td>
+                                                <td>
+                                                    <%= Log[index]["State"] %>
+                                                </td>
+                                                <td>
+                                                    <%= Log[index]["City"] %>
+                                                </td>
+                                                <td>
+                                                    <%= Log[index]["Type"] %>
+                                                </td>
+                                                <td>
+                                                    <%= Log[index]["Workprint_No"] %>
+                                                </td>
+                                                <td>
+                                                    <%= Log[index]["Iteration"] %>
+                                                </td>
+                                                <td>
+                                                    <%= Log[index]["Score"] %> %
+                                                </td>
+                                                </tr>
+                                        </tbody>
+                                        </table>
+                                    <% } %>
+                                    <% } %>  
+                        </section>
     </main>
 </body>
 

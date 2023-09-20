@@ -9,6 +9,7 @@ var dateTime = require('node-datetime');
 let dt = dateTime.create();
 let CurrentDate = dt.format('Y-m-d H:M:S');
 const fs = require('fs');
+const { error } = require('console');
 
 function getTimeStamp() {
     return (new Date().toISOString().slice(0, 10) + " " + new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata' }));
@@ -242,25 +243,48 @@ api_Router.post("/SubmitQC", (req, res) => {
     if (req.session.UserID) {
         //console.log(req.body.params.inputData)
         let inputData = req.body.params.inputData;
-        let newData = inputData.map(v => ({ ...v, Submitted_By: req.session.UserName, Submitted_Date: getTimeStamp() }))
-        const values = newData.map(item => [null,
-            item.Checklist,
-            item.Submitted_Date,
-            item.JobID,
-            item.state,
-            item.city,
-            item.type,
-            item.Remarks,
-            item.Section,
-            item.Item,
-            item.Description,
-            item.Check,
-            item.Note,
-            item.Percentage,
-            item.Submitted_By]);
-        db.query("insert into responses VALUES ?", [values], (error, result) => {
-            if (error) throw error
-            return res.status(200).json({ Message: 'QC Submitted Successfully', Score: newData[0].Percentage });
+        var Iter = 1;
+        var time = getTimeStamp();
+        db.query("select * from responses where Checklist=? and Job_ID=? and Type=? order by responses_ID desc limit 1", [inputData[0].Checklist, inputData[0].JobID, inputData[0].type], (error, result) => {
+            if (error) {
+                return res.status(400).json({ Message: "Internal Server Error" })
+            } else {
+                if (result.length > 0) {
+                    Iter = result[0].Iteration
+                    Iter++;
+                }
+                let newData = inputData.map(v => ({ ...v, Iteration: Iter, Submitted_By: req.session.UserName, Submitted_Date: time }))
+                const values = newData.map(item => [null,
+                    item.Checklist,
+                    item.Submitted_Date,
+                    item.JobID,
+                    item.state,
+                    item.city,
+                    item.type,
+                    item.Iteration,
+                    item.Remarks,
+                    item.Section,
+                    item.Item,
+                    item.Description,
+                    item.Check,
+                    item.Note,
+                    item.Percentage,
+                    item.Submitted_By]);
+                db.query("insert into responses VALUES ?", [values], (error, result) => {
+                    if (error) {
+                        return res.status(400).json({ Message: "Internal Server Error" })
+                    } else {
+                        db.query("insert into qc_log (User_ID,Date,Project,QC,Job_ID,State,City,Type,Workprint_No,Iteration,Score) values (?,?,(select Customer from checklist where Checklist_Name=? ),?,?,?,?,?,?,?,?) ", [req.session.UserID,time, inputData[0].Checklist, inputData[0].Checklist, inputData[0].JobID, inputData[0].state, inputData[0].city, inputData[0].type, null, Iter, inputData[0].Percentage], (error, result) => {
+                            if (error) {
+                                console.log(error)
+                                return res.status(400).json({ Message: "Internal Server Error" })
+                            } else {
+                                return res.status(200).json({ Message: 'QC Submitted Successfully', Score: newData[0].Percentage });
+                            }
+                        })
+                    }
+                })
+            }
         })
     } else {
         res.status(400).send("Access Denied")
@@ -279,8 +303,8 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
                 }
                 if (result.length > 0) {
                     var mycolumns = [
-
                         { header: "Checklist", key: "Checklist", width: 20 },
+                        { header: "Date", key: "Submitted_Date", width: 20 },
                         { header: "Job-ID/CFAS", key: "Job_ID", width: 20 },
                         { header: "State", key: "State", width: 20 },
                         { header: "City", key: "City", width: 20 },
@@ -300,9 +324,13 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
                     });
                     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                     res.setHeader('Content-Disposition', 'attachment; filename=QC_sResponse_Report.xlsx');
-                    const filename = req.params.QC.replace(" ","_") + req.session.UserID + ".xlsx"
-                    await workbook.xlsx.writeFile(`public/Generated/${filename}`)
-                    const filestream = fs.createReadStream(`public/Generated/${filename}`)
+                    const filename = req.params.QC.replace(" ", "_") + req.session.UserID + ".xlsx"
+                    let filestream
+                    await workbook.xlsx.writeFile(`public/Generated/${filename}`).then(() => {
+                        filestream = fs.createReadStream(`public/Generated/${filename}`)
+                    }).catch((error) => {
+                        console.log(error)
+                    })
                     filestream.pipe(res)
 
                     fs.unlink(`public/Generated/${filename}`, (error) => {
@@ -311,7 +339,7 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
                         }
                     })
 
-                }else{
+                } else {
                     res.send("Data Not Found")
                 }
             })

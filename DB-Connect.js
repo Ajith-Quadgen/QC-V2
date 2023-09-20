@@ -3,10 +3,10 @@ const mysql = require('mysql');
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    //password: '@Renu001',
-    password:'@Quadgen23',
-    //database: 'qc-portal',
-    database:'qc-portal',
+    password: '@Renu001',
+    //password:'@Quadgen23',
+    database: 'qc-portal',
+    //database:'qc-portal',
     multipleStatements: true
   });
 
