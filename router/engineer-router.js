@@ -9,16 +9,21 @@ function getTimeStamp() {
 engineer_router.get("/", (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Engineer") {
         let log;
-        db.query("select *,DATE_FORMAT(`Date`,'%b %D %y / %r') as Date from qc_log where User_ID=?",[req.session.UserID],(error,result)=>{
+        db.query("select *,DATE_FORMAT(`Date`,'%b %D %y / %r') as Date from qc_log where User_ID=? order by Log_ID Desc limit 5 ",[req.session.UserID],(error,result)=>{
             if(error){
                 res.status(400).json({Message:"Internal server Error"})
             }else{
                 log=result
             }
         })
+        var userData;
+        db.query('select * from users where Employee_ID=?',[req.session.UserID],(error,result)=>{
+            if(error) throw error
+            userData=result[0];
+        })
         db.query("select * from checklist", (error, result) => {
             if (error) throw error
-            res.render('../views/engineer/home', { Data: result,Log:log })
+            res.render('../views/engineer/home', { Data: result,Log:log,title:"Dashboard",User:userData,Role:req.session.UserRole })
         })
     } else {
         res.redirect('/')
@@ -26,7 +31,7 @@ engineer_router.get("/", (req, res) => {
 })
 
 engineer_router.get("/QC/:QC_Name", (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Engineer") {
+    if (req.session.UserID) {
     db.query("Select * from questions where checklist=? and Status='Active' ", [req.params.QC_Name], (error, result) => {
         if(result.length>0){
         const groupedData = result.reduce((acc, { Section, Item, Description, Reference_Document, Reference_Link }) => {
@@ -47,7 +52,7 @@ engineer_router.get("/QC/:QC_Name", (req, res) => {
             }
             organizedData[Section].push(row);
         });
-        res.render('../views/engineer/QCpage', { Data: organizedData, title: result[0].Checklist })
+        res.render('../views/engineer/QCpage', { Data: organizedData, title: result[0].Checklist,Role:req.session.UserRole })
     }else{
         res.send("Checklist is Not Prepared Yer, Contact Manager")
     }

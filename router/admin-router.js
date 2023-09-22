@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require("path");
 var dateTime = require('node-datetime');
 const { error } = require('console');
+const { title } = require('process');
 
 const myStorage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -35,7 +36,23 @@ function getTimeStamp() {
 }
 admin_router.get("/", (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
-        res.render('../views/admin/adminHome')
+        let log;
+        db.query("select *,DATE_FORMAT(`Date`,'%b %D %y / %r') as Date from qc_log where User_ID=? order by Log_ID Desc limit 5 ",[req.session.UserID],(error,result)=>{
+            if(error){
+                res.status(400).json({Message:"Internal server Error"})
+            }else{
+                log=result
+            }
+        })
+        var userData;
+        db.query('select * from users where Employee_ID=?',[req.session.UserID],(error,result)=>{
+            if(error) throw error
+            userData=result[0];
+        })
+        db.query("select * from checklist", (error, result) => {
+            if (error) throw error
+            res.render('../views/admin/adminHome', { Data: result,Log:log,title:"Dashboard",User:userData,Role:req.session.UserRole })
+        })
     } else {
         res.redirect('/')
     }
@@ -136,10 +153,20 @@ admin_router.get('/ListChecklist/:Customer_Name', (req, res) => {
 })
 admin_router.get('/ViewChecklist/:QC_Name', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
-        console.log( req.params.QC_Name)
         db.query("select * from questions where Checklist=? order by Question_ID", [req.params.QC_Name], (error, result) => {
             if (error) throw error
             res.render("../views/admin/viewChecklist", { Data: result, Checklist: req.params.QC_Name })
+        })
+    } else {
+        res.redirect('/')
+    }
+})
+
+admin_router.get('/viewResponses/:QC_Name', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Admin") {
+        db.query("select *,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Checklist=? order by responses_ID limit 100", [req.params.QC_Name], (error, result) => {
+            if (error) throw error
+            res.render("../views/admin/viewResponses", { Data: result, Checklist: req.params.QC_Name,title:req.params.QC_Name})
         })
     } else {
         res.redirect('/')

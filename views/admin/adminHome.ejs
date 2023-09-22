@@ -11,8 +11,110 @@
     <header>
         <%- include('../partials/admin-header') %>
     </header>
-    <footer>
-        <%- include('../partials/footer') %>
-    </footer>
+    <main class="d-flex flex-column mb-3 justify-content-center w-100" style="position: absolute; top: 100px; align-self: baseline;">
+        <section class="d-flex justify-content-end">
+            <div class="profile-card d-flex flex-row">
+                <div class="right-side">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="left-side">
+                    <figure>
+                        <blockquote class="blockquote">
+                            <p>
+                                <%= User.Full_Name %> 
+                            </p>
+                        </blockquote>
+                        <figcaption class="blockquote-footer">
+                            <%= User.Designation %> (<%= User.Employee_ID %>) <br>
+                            <i class="bi bi-envelope-at-fill"></i> <%= User.Email_ID %><br>
+                            <i class="bi bi-geo-alt-fill"></i><%= User.Location %>
+                            <p>RM: <%= User.Reporting_Manager_Name %></p>
+
+                        </figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+        <section class="d-flex justify-content-center">
+            <% if (Object.values(Data).length>0) { %>
+                <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
+                    <a href="/Engineer/QC/<%= Data[index].Checklist_Name %>">
+                        <div class="localcard m-4 text-center">
+                            <h3 class="m-3">
+                                <%= Data[index].Checklist_Name %>
+                            </h3>
+                            <img src="../../public/uploads/Checklist-Icon/<%= Data[index].Icon%>"
+                                alt="Icon_<%= Data[index].Checklist_Name %>" class="rounded checklist-icon">
+                        </div>
+                    </a>
+                    <%}%>
+                        <%}else{%>
+
+                            <p>NO QC</p>
+                            <%}%>
+        </section>
+        <section class="d-flex w-100 table-responsive-sm">
+            <% if (Object.values(Log).length>0) { %>
+                <table class="table table-hover m-2  table-striped caption-top">
+                    <thead class="table-dark sticky-top">
+                        <tr>
+                            <th scope="col">Sl.No</th>
+                            <th scope="col">Date/Time</th>
+                            <th scope="col">Project</th>
+                            <th scope="col">QC</th>
+                            <th scope="col">CFAS/Job </th>
+                            <th scope="col">State</th>
+                            <th scope="col">City</th>
+                            <th scope="col">QC-Type </th>
+                            <th scope="col">Work Print No</th>
+                            <th scope="col">Iteration</th>
+                            <th scope="col">Score </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for( let index=0; index < Object.values(Log).length; index++ ) { %>
+
+                            <tr>
+                                <td>
+                                    <%= index+1%>
+                                </td>
+                                <td>
+                                    <%= Log[index]["Date"] %>
+                                </td>
+                                <td>
+                                    <%= Log[index]["Project"] %>
+                                </td>
+                                <td>
+                                    <%= Log[index]["QC"] %>
+                                </td>
+                                <td>
+                                    <%= Log[index]["Job_ID"] %>
+                                </td>
+                                <td>
+                                    <%= Log[index]["State"] %>
+                                </td>
+                                <td>
+                                    <%= Log[index]["City"] %>
+                                </td>
+                                <td>
+                                    <%= Log[index]["Type"] %>
+                                </td>
+                                <td>
+                                    <%= Log[index]["Workprint_No"] %>
+                                </td>
+                                <td>
+                                    <%= Log[index]["Iteration"] %>
+                                </td>
+                                <td>
+                                    <%= Log[index]["Score"] %> %
+                                </td>
+                            </tr>
+
+                            <% } %>
+                    </tbody>
+                </table>
+                <% } %>
+        </section>
+    </main>
 </body>
 </html>

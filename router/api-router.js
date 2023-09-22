@@ -10,7 +10,20 @@ let dt = dateTime.create();
 let CurrentDate = dt.format('Y-m-d H:M:S');
 const fs = require('fs');
 const { error } = require('console');
+const nodemailer = require('nodemailer');
+const smtpTransport = require('nodemailer-smtp-transport');
 
+const transporter = nodemailer.createTransport(
+    smtpTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true, // true for 465, false for other ports
+        auth: {
+            user: 'ajith.venkatesh@quadgenwireless.com', // Your Gmail email address
+            pass: 'fnucwdtycntobyon'   // Your Gmail password or app-specific password
+        }
+    })
+);
 function getTimeStamp() {
     return (new Date().toISOString().slice(0, 10) + " " + new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata' }));
 }
@@ -55,7 +68,6 @@ api_Router.post('/updateUserStatus', (req, res) => {
                     console.log(error)
                     res.status(400).send(error);
                 } else {
-                    console.log("ok4")
                     res.status(200).send(Data);
                 }
             });
@@ -201,7 +213,7 @@ api_Router.post('/uploadChecklist', Upload.single('QCFile'), (req, res) => {
     }
 })
 
-api_Router.post('/updateCheckListStatus/:id', (req, res) => {
+api_Router.post('/updateCheckList/:id', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         db.query("update questions set ? where `Question_ID`=?", [req.body.params, req.params.id], (error, result) => {
             if (error) {
@@ -222,6 +234,27 @@ api_Router.post('/updateCheckListStatus/:id', (req, res) => {
         res.status(400).send("Access Denied")
     }
 })
+api_Router.post('/updateCheckListStatus', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Admin") {
+        db.query("update questions set Status=? where `Question_ID`=?", [req.body.params.status, req.body.params.id], (error, result) => {
+            if (error) {
+                console.error(error)
+                return res.status(400).send(error)
+            } else {
+                db.query("Select * from questions where Checklist=?", [req.body.params.QC], function (error, Data) {
+                    if (error) {
+                        console.log(error)
+                        return res.status(400).send(error);
+                    }
+                    res.status(200).send(Data);
+                });
+            }
+        })
+    } else {
+        res.status(400).send("Access Denied")
+    }
+})
+
 api_Router.post('/getJobData', (req, res) => {
     if (req.session.UserID) {
         db.query("select * from jobs where Job_Number=?", [req.body.params.jobID], (error, result) => {
@@ -238,9 +271,17 @@ api_Router.post('/getJobData', (req, res) => {
         res.status(400).send("Access Denied")
     }
 })
+api_Router.get("/getPreciousRecord", (req, res) => {
+    // if(req.session.UserID){
 
+    // }else{
+    //     res.status(400).send("Access Denied")
+    // }
+
+    db.query("select * from responses")
+})
 api_Router.post("/SubmitQC", (req, res) => {
-    if (req.session.UserID) {
+    if (req.session.UserID && req.session.UserMail) {
         //console.log(req.body.params.inputData)
         let inputData = req.body.params.inputData;
         var Iter = 1;
@@ -274,13 +315,101 @@ api_Router.post("/SubmitQC", (req, res) => {
                     if (error) {
                         return res.status(400).json({ Message: "Internal Server Error" })
                     } else {
-                        db.query("insert into qc_log (User_ID,Date,Project,QC,Job_ID,State,City,Type,Workprint_No,Iteration,Score) values (?,?,(select Customer from checklist where Checklist_Name=? ),?,?,?,?,?,?,?,?) ", [req.session.UserID,time, inputData[0].Checklist, inputData[0].Checklist, inputData[0].JobID, inputData[0].state, inputData[0].city, inputData[0].type, null, Iter, inputData[0].Percentage], (error, result) => {
+                        db.query("insert into qc_log (User_ID,Date,Project,QC,Job_ID,State,City,Type,Workprint_No,Iteration,Score) values (?,?,(select Customer from checklist where Checklist_Name=? ),?,?,?,?,?,?,?,?) ", [req.session.UserID, time, inputData[0].Checklist, inputData[0].Checklist, inputData[0].JobID, inputData[0].state, inputData[0].city, inputData[0].type, null, Iter, inputData[0].Percentage], async (error, result) => {
                             if (error) {
                                 console.log(error)
                                 return res.status(400).json({ Message: "Internal Server Error" })
-                            } else {
-                                return res.status(200).json({ Message: 'QC Submitted Successfully', Score: newData[0].Percentage });
                             }
+                            var mycolumns = [
+                                { header: "Checklist", key: "Checklist", width: 20 },
+                                { header: "Date", key: "Submitted_Date", width: 20 },
+                                { header: "Job-ID/CFAS", key: "JobID", width: 20 },
+                                { header: "State", key: "state", width: 20 },
+                                { header: "City", key: "city", width: 20 },
+                                { header: "Type", key: "type", width: 20 },
+                                { header: "Iteration", key: "Iteration", width: 20 },
+                                { header: "Remarks", key: "Remarks", width: 20 },
+                                { header: "Section", key: "Section", width: 20 },
+                                { header: "Item", key: "Item", width: 20 },
+                                { header: "Description", key: "Description", width: 40 },
+                                { header: "Check", key: "Check", width: 20 },
+                                { header: "Reviewer-Note", key: "Note", width: 20 },
+                                { header: "Score-(%)", key: "Percentage", width: 20 },
+                                { header: "Submitted-By", key: "Submitted_By", width: 20 }
+                            ]
+
+                            const filePath = `./public/Repository/${inputData[0].JobID}_${inputData[0].Checklist}_${inputData[0].type}.xlsx`;
+                            if (fs.existsSync(filePath)) {
+                                let workbook = new excel_js.Workbook();
+                                await workbook.xlsx.readFile(filePath)
+                                let version = workbook.worksheets.length + 1;
+                                let sheetName = `V${version}_${new Date().toISOString().slice(0, 10)}`;
+                                console.log(sheetName)
+                                try {
+                                    let sheet = workbook.addWorksheet(sheetName);
+                                    sheet.columns = mycolumns;
+                                    newData.forEach(record => {
+                                        sheet.addRow(record)
+                                    })
+                                } catch (error) {
+                                    console.log("Check one")
+                                    console.error(error)
+                                }
+                                try {
+                                    await workbook.xlsx.writeFile(filePath).then(() => {
+                                        console.log("done")
+                                    });
+                                } catch (error) {
+                                    console.log("Check two")
+                                    console.error(error)
+                                }
+
+                            } else {
+                                let workbook = new excel_js.Workbook();
+                                let version = 1;
+                                let sheetName = `V${version}_${new Date().toISOString().slice(0, 10)}`;
+                                let sheet = workbook.addWorksheet(sheetName);
+                                console.log(sheetName)
+                                try {
+                                    sheet.columns = mycolumns;
+                                    newData.forEach(record => {
+                                        sheet.addRow(record)
+                                    })
+                                } catch (error) {
+                                    console.log("Check one")
+                                    console.error(error)
+                                }
+                                try {
+                                    await workbook.xlsx.writeFile(filePath).then(() => {
+                                        console.log("done")
+                                    });
+                                } catch (error) {
+                                    console.log("Check two")
+                                    console.error(error)
+                                }
+                            }
+                            const mailOptions = {
+                                from: 'ajith.venkatesh@quadgenwireless.com',
+                                to: req.session.UserMail,
+                                subject: `QC Submission Confirmation Mail_${inputData[0].JobID}_${inputData[0].Checklist}_${inputData[0].type}`,
+                                text: `You have Successfully Submitted the ${inputData[0].Checklist} with Score of ${inputData[0].Percentage}\nThis is System Generated Mail, No need to reply.`,
+                                attachments: [
+                                    {
+                                        path: filePath
+                                    }
+                                ]
+                            };
+
+                            transporter.sendMail(mailOptions, (error, info) => {
+                                if (error) {
+                                    console.error('Error sending email:', error);
+                                } else {
+                                    console.log('Email sent:', info.response);
+                                }
+                            });
+
+                            return res.status(200).json({ Message: 'QC Submitted Successfully', Score: newData[0].Percentage });
+
                         })
                     }
                 })
@@ -326,14 +455,15 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
                     res.setHeader('Content-Disposition', 'attachment; filename=QC_sResponse_Report.xlsx');
                     const filename = req.params.QC.replace(" ", "_") + req.session.UserID + ".xlsx"
                     let filestream
-                    await workbook.xlsx.writeFile(`public/Generated/${filename}`).then(() => {
-                        filestream = fs.createReadStream(`public/Generated/${filename}`)
+                    await workbook.xlsx.writeFile(filename).then(async () => {
+                        filestream = await fs.createReadStream(filename)
                     }).catch((error) => {
                         console.log(error)
                     })
+                    filestream = await fs.createReadStream(filename)
                     filestream.pipe(res)
 
-                    fs.unlink(`public/Generated/${filename}`, (error) => {
+                    fs.unlink(filename, (error) => {
                         if (error) {
                             throw error
                         }
@@ -347,6 +477,29 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
             console.log(error)
             res.status(400).send(error.message)
         }
+    } else {
+        res.status(400).send("Access Denied")
+    }
+})
+api_Router.post('/filterResponses', (req, res) => {
+    if (req.session.UserID) {
+        var data = req.body.params;
+        let main;
+        let query1 = `select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where Job_ID='${data.id}' or Type='${data.type}' or Submitted_Date between '${data.from}' and '${data.to}' order by responses_ID desc`
+        let query2 = `select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where Job_ID='${data.id}' or Type='${data.type}' order by responses_ID desc`
+        let query3 = `select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where Job_ID='${data.id}' and Type='${data.type}' order by responses_ID desc`
+
+        if (data.from && data.to) {
+            main = query1
+        } else if(data.id && data.type) { main = query3 }else{main=query2}
+        db.query(main, (error, result) => {
+            if (error) {
+                console.error(error)
+                res.status(400).send("Unable to Apply Filer")
+            } else {
+                res.status(200).send(result)
+            }
+        })
     } else {
         res.status(400).send("Access Denied")
     }

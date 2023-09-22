@@ -11,6 +11,9 @@ const multer = require('multer');
 const PDFGenerator = require('pdfkit');
 const cors=require('cors')
 const https=require('https')
+const nodemailer=require('nodemailer')
+
+
 process.env.tz='Asia/Calcutta';
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json())
@@ -119,7 +122,7 @@ app.post('/AuthenticateLogin', (req, res) => {
       }
     })
   });
- app.get('/forgetPassword',(req,res)=>{
+ app.get('/forgetPassword',async(req,res,next)=>{
 res.render('resetPassword');
  }); 
  app.post('/updatePassword',(req,res)=>{

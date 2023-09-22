@@ -1,15 +1,25 @@
 <nav>
     <input type="checkbox" id="nav-toggle">
-    <div class="logo"><img src="../../static/images/Quadgen_Logo.png" alt="Quadgen_Logo" srcset="" ></div>
-   <ul class="links">
-    <li><a href="/Engineer">&nbsp; Home &nbsp;<span><i class="bi bi-house-fill"></i></span></a></li>
-     <li><a href="/logout">&nbsp;Log out &nbsp;<span><i class="bi bi-arrow-right-circle"></i></span></a></li>
+    <div class="d-flex justify-content-between">
+    <div class="logo">
+        <button type="button" class="btn btn-outline-secondary" onclick="javascript:history.go(-1)"><i
+                class="bi bi-arrow-left"></i></button>
+        <img src="../../static/images/Quadgen_Logo.png" alt="Quadgen_Logo" srcset="">
+        <button type="button" class="btn btn-outline-secondary" onclick="javascript:history.forward()"><i
+                class="bi bi-arrow-right"></i></button>
+    </div>
+    <div class="d-flex justify-content-center fs-3 align-baseline"><%= title %></div>
+
+    <ul class="links d-flex align-items-end">
+        <li><a href="/Engineer">&nbsp; Home &nbsp;<span><i class="bi bi-house-fill"></i></span></a></li>
+        <li><a href="/logout">&nbsp;Log out &nbsp;<span><i class="bi bi-arrow-right-circle"></i></span></a></li>
     </ul>
-   <label for="nav-toggle" class="icon-burger">
-       <div class="line"></div>
-       <div class="line"></div>
-       <div class="line"></div>
-   </label>
+</div>
+    <label for="nav-toggle" class="icon-burger">
+        <div class="line"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+    </label>
 </nav>
 <label for="nav-toggle" class="icon-burger">
     <div class="line"></div>

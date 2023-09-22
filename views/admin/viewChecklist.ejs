@@ -26,12 +26,13 @@
             <input type="button" value="Add New Check" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
                 data-bs-target="#UserInputModel">
                 <% if (Checklist) { %>
+                    <a href="/admin/viewResponses/<%= Checklist%>" target="_self">View Responses</a>
                     <a href="/api/DownloadQCResponses/<%= Checklist%>" target="_self">Download</a>
 
                 <% } %>
         </form>
         <div class="d-flex w-100">
-            <table class="table table-hover m-2  table-striped caption-top table-responsive">
+            <table class="table table-hover m-2  table-striped caption-top">
                 <thead class="table-dark sticky-top">
                     <tr>
                         <th scope="col">Sl.No</th>
@@ -41,7 +42,8 @@
                         <th scope="col">Description</th>
                         <th scope="col">Reference Document</th>
                         <th scope="col" style="width: 300px; word-wrap: break-word;">Reference Link(URL)</th>
-                        <th scope="col" colspan="3">Status</th>
+                        <th scope="col" colspan="2">Status</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody id="content-area">
@@ -212,7 +214,7 @@
                             <label for="updatereferDocName">Reference Document Name</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <input type="url" class="form-control" id="updatereferDocLink" placeholder="key">
+                            <input type="text" class="form-control" id="updatereferDocLink" placeholder="key">
                             <label for="updatereferDocLink">Reference Document Link</label>
                         </div>
                     </div>
@@ -306,10 +308,10 @@
                                 `<button type="button" class="btn btn-success ms-2 me-2" onclick="updateStatusAPI('${data[i]['Question_ID']}','Active')"><i class="bi bi-check-circle-fill"></i></button>` :
                                 `<button type="button" class="btn btn-danger  ms-2"  onclick="updateStatusAPI('${data[i]['Question_ID']}','Inactive')"><i class="bi bi-x-circle"></i></button>`}
                                     </td>
-                                    <td>                                    <button type="button" class="btn btn-outline-primary" onclick="UpdateQC('${data[i]['Question_ID']}')">Edit</button>  </td>`;
+                                    <td> <button type="button" class="btn btn-outline-primary" onclick='gatherRowData(this)' data-bs-toggle="modal"
+                                       id='${data[i]['Question_ID']}' data-bs-target="#UpdateQCModal">Edit</button>  </td>`;
                     }
                 }
-
             }
             function gatherRowData(button) {
                 const row = button.closest('tr'); // Get the parent tr using closest
@@ -333,7 +335,7 @@
                 const desc = document.getElementById("updateDescription").value;
                 const docName = document.getElementById("updatereferDocName").value;
                 const docLink = document.getElementById("updatereferDocLink").value;
-                axios.post(`/api/updateCheckListStatus/${id}`, {
+                axios.post(`/api/updateCheckList/${id}`, {
                     params: {
                         "Checklist": qc,
                         "Section": sec,
@@ -351,6 +353,7 @@
                     .catch(e => {
                         $("#UpdateQCModal").modal('hide')
                         alert(e.message);
+                        console.log(e)
                         //alert("Unable to Update the Checklist...\nPlease Contact Admin");
                     })
             })
