@@ -52,7 +52,7 @@ engineer_router.get("/QC/:QC_Name", (req, res) => {
             }
             organizedData[Section].push(row);
         });
-        res.render('../views/engineer/QCpage', { Data: organizedData, title: result[0].Checklist,Role:req.session.UserRole })
+        res.render('../views/engineer/QCPage', { Data: organizedData, title: result[0].Checklist,Role:req.session.UserRole })
     }else{
         res.send("Checklist is Not Prepared Yer, Contact Manager")
     }

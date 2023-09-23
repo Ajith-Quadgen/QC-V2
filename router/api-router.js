@@ -463,13 +463,13 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
                     })
                     filestream = await fs.createReadStream(filename)
                     filestream.pipe(res)
-
-                    fs.unlink(filename, (error) => {
-                        if (error) {
-                            throw error
-                        }
-                    })
-
+                    setTimeout(()=>{
+                        fs.unlink(filename, (error) => {
+                            if (error) {
+                                throw error
+                            }
+                        })
+                    },2000)
                 } else {
                     res.send("Data Not Found")
                 }

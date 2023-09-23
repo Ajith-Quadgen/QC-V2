@@ -107,10 +107,10 @@
                                                     <div class="d-flex flex-row align-items-stretch">
                                                         <span> <input type="radio" name="Check_<%= row.Question_ID %>"
                                                                 value="Yes" class="form-check-input"
-                                                                onchange="toggleRequired(this)" checked>Yes</span>
+                                                                onchange="toggleRequired(this)" >Yes</span>
                                                         <span> <input type="radio" name="Check_<%= row.Question_ID %>"
                                                                 value="No" class="form-check-input"
-                                                                onchange="toggleRequired(this)">No</span>
+                                                                onchange="toggleRequired(this)" checked>No</span>
                                                         <span> <input type="radio" name="Check_<%= row.Question_ID %>"
                                                                 value="N/A" class="form-check-input"
                                                                 onchange="toggleRequired(this)">N/A</span>
@@ -118,7 +118,7 @@
                                                 </td>
                                                 <td><input type="text" class="form-control"
                                                         id="Note_<%= row.Question_ID %>" placeholder="* Reviewer Note"
-                                                        >
+                                                        required>
                                                 </td>
                                             </tr>
                                             <% itemNumber++; %>

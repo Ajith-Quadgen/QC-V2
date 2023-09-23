@@ -37,6 +37,8 @@ const httpsServer=https.createServer(credentials,app);
 httpsServer.listen(port,()=>{
   console.log('server is Running under Https with port:'+port)
 })
+  
+const port = 5000;
 
 const adminRouter=require('./router/admin-router')
 const PMORouter=require('./router/PMO-router')
@@ -57,12 +59,11 @@ db.connect((error) => {
     }
   });
 
-  
-const port = 5000;
-const host = "172.17.1.22"
-const server = app.listen(port, function () {
-  console.log("QC-Portal is hosted at http://localhost:%s", port);
-});
+
+// const host = "172.17.1.22"
+// const server = app.listen(port, function () {
+//   console.log("QC-Portal is hosted at http://localhost:%s", port);
+// });
 
 
 app.get('/',(req,res)=>{
