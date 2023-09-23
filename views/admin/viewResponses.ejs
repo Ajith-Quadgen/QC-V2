@@ -46,8 +46,8 @@
             <div class="col-md-3 m-2" style="width: max-content;">
                 <% if (Checklist) { %>
                     <a href="/api/DownloadQCResponses/<%= Checklist%>" target="_self"><button
-                            class="btn btn-outline-primary m-3"><i class="bi bi-download"></i>Download
-                            Excel</button></a>
+                            class="btn btn-outline-primary m-3"><i class="bi bi-download"></i>  Download
+                            Master Excel</button></a>
                     <% } %>
             </div>
 
@@ -71,6 +71,7 @@
                         <th scope="col">Check</th>
                         <th scope="col">Reviewer Note</th>
                         <th scope="col">Score</th>
+                        <th scope="col">Submitted By</th>
                     </tr>
                 </thead>
                 <tbody id="content-area">
@@ -119,7 +120,9 @@
                                 <td>
                                     <%=Data[index]['Percentage']%>
                                 </td>
-
+                                <td>
+                                    <%=Data[index]['Submitted_By']%>
+                                </td>
                             </tr>
                             <% } %>
                                 <% } else { %>
@@ -169,13 +172,13 @@
     </footer>
     <%- include('../partials/dependencies-js') %>
         <script>
-            document.getElementById("filterbtn").addEventListener("click", (e) => {
+            document.getElementById("filterbtn").addEventListener("click",async (e) => {
                 var Job_ID, type, from, to;
                 Job_ID = document.getElementById("job_id").value.replaceAll(' ', "");
                 type = document.getElementById("qc_type").value;
                 from = document.getElementById("fromDate").value;
                 to = document.getElementById("toDate").value;
-                axios.post('/api/filterResponses', {
+               await axios.post('/api/filterResponses', {
                     params: {
                         id: Job_ID,
                         type: type,
@@ -183,10 +186,9 @@
                         to:to
                     }
                 }).then(res => {
-                    console.log(res.data)
                     if (res.status == 200) {
                         if(res.data.length>0){
-                            updateContentArea(res.data);
+                             updateContentArea(res.data);
                         }else{
                             alert("Data Not Found")
                         }
@@ -218,6 +220,7 @@
                                     <td>${data[i]["Check"]}</td>
                                     <td>${data[i]["Note"]}</td>
                                     <td>${data[i]["Percentage"]}</td>
+                                    <td>${data[i]["Submitted_By"]}</td>
                                     </tr>`;
                     }
                 }

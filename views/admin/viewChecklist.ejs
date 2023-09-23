@@ -26,9 +26,7 @@
             <input type="button" value="Add New Check" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
                 data-bs-target="#UserInputModel">
                 <% if (Checklist) { %>
-                    <a href="/admin/viewResponses/<%= Checklist%>" target="_self">View Responses</a>
-                    <a href="/api/DownloadQCResponses/<%= Checklist%>" target="_self">Download</a>
-
+                    <a href="/admin/viewResponses/<%= Checklist%>" target="_self"><button type="button" class="btn btn-outline-secondary m-2">View Responses</button>  </a>
                 <% } %>
         </form>
         <div class="d-flex w-100">

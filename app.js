@@ -30,13 +30,13 @@ app.use(session({
   store:new session.MemoryStore()
 }));
 
-// const privateKey=fs.readFileSync('qcKey.pem');
-// const certificate=fs.readFileSync('qcCertificate.pem')
-// const credentials={key:privateKey,cert:certificate,requestCertificate:false,rejectUnauthorized:false};
-// const httpsServer=https.createServer(credentials,app);
-// httpsServer.listen(port,()=>{
-//   console.log('server is Running under Https')
-// })
+const privateKey=fs.readFileSync('key.pem');
+const certificate=fs.readFileSync('cert.pem')
+const credentials={key:privateKey,cert:certificate,requestCertificate:false,rejectUnauthorized:false};
+const httpsServer=https.createServer(credentials,app);
+httpsServer.listen(port,()=>{
+  console.log('server is Running under Https with port:'+port)
+})
 
 const adminRouter=require('./router/admin-router')
 const PMORouter=require('./router/PMO-router')
@@ -125,8 +125,14 @@ app.post('/AuthenticateLogin', (req, res) => {
  app.get('/forgetPassword',async(req,res,next)=>{
 res.render('resetPassword');
  }); 
- app.post('/updatePassword',(req,res)=>{
-  res.send("Under Development")
+ app.get('/ChangePassword',(req,res)=>{
+if(req.session.UserID){
+  res.render('../views/ChangePassword',{userName:req.session.UserName})
+
+}else{
+    res.redirect('/')
+
+}
    }); 
    
 app.get('/logout', (req, res) => {

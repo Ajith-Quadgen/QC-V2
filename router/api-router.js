@@ -1,3 +1,4 @@
+
 const express = require('express');
 const api_Router = express.Router()
 const db = require('../DB-Connect')
@@ -501,6 +502,21 @@ api_Router.post('/filterResponses', (req, res) => {
             }
         })
     } else {
+        res.status(400).send("Access Denied")
+    }
+})
+api_Router.post('/UpdatePassword',(req,res)=>{
+    if(req.session.UserID){
+        db.query("update users set Password=? where Employee_ID=?",[req.body.params.newPassword,req.session.UserID],(error,result)=>{
+            if(error){
+                console.log(error)
+                res.status(400).send("Unable To Update Password")
+            }else{
+                res.status(200).send("Updated Successfully")
+            }
+        })
+
+    }else{
         res.status(400).send("Access Denied")
     }
 })
