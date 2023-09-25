@@ -49,7 +49,7 @@ admin_router.get("/", (req, res) => {
             if (error) throw error
             userData = result[0];
         })
-        db.query("select * from checklist", (error, result) => {
+        db.query("select * from customer", (error, result) => {
             if (error) throw error
             res.render('../views/admin/adminHome', { Data: result, Log: log, title: "Dashboard", User: userData, Role: req.session.UserRole })
         })

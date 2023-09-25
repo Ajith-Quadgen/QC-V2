@@ -41,7 +41,7 @@ engineer_router.get('/Customers/:Customer_Name', (req, res) => {
             }
         })
         let checklist;
-        db.query("Select * from Checklist where Customer=?", [req.params.Customer_Name], (error, result) => {
+        db.query("Select * from checklist where Customer=?", [req.params.Customer_Name], (error, result) => {
             if (error) {
                 console.log(error)
                 return res.status(400).send("Internal Server Error");

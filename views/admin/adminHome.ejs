@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Home</title>
+    <title>
+        Admin Home
+    </title>
     <%- include('../partials/dependencies') %>
 </head>
+
 <body>
     <header>
-        <%- include('../partials/admin-header') %>
+        <%- include('../partials/admin-header',{title:title,IncludeBackButton:false}) %>
     </header>
+
     <main class="d-flex flex-column mb-3 justify-content-center w-100" style="position: absolute; top: 100px; align-self: baseline;">
         <section class="d-flex justify-content-end">
             <div class="profile-card d-flex flex-row">
@@ -38,13 +43,10 @@
         <section class="d-flex justify-content-center">
             <% if (Object.values(Data).length>0) { %>
                 <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
-                    <a href="/Engineer/QC/<%= Data[index].Checklist_Name %>">
+                    <a href="/Engineer/Customers/<%= Data[index].Customer_Name %>">
                         <div class="localcard m-4 text-center">
-                            <h3 class="m-3">
-                                <%= Data[index].Checklist_Name %>
-                            </h3>
-                            <img src="../../public/uploads/Checklist-Icon/<%= Data[index].Icon%>"
-                                alt="Icon_<%= Data[index].Checklist_Name %>" class="rounded checklist-icon">
+                            <img src="../../public/uploads/Customer-Logo/<%= Data[index].Customer_Logo%>"
+                                alt="Icon_<%= Data[index].Customer_Name %>" class="rounded checklist-icon">
                         </div>
                     </a>
                     <%}%>
@@ -117,4 +119,5 @@
         </section>
     </main>
 </body>
+
 </html>
