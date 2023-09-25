@@ -65,9 +65,6 @@
                                 <td style="text-align:left">
                                     <%= Data[index]['City'] %>
                                 </td>
-                                <!-- <td>
-                                    <%= Data[index]['Workprint_Number'] %>
-                                </td> -->
                                 <td>
                                     <%= Data[index]['Number_Of_Responses'] %>
                                 </td>
@@ -171,7 +168,7 @@
                 e.preventDefault();
                 var Job_Id = document.getElementById("Job_Number").value.replaceAll(" ", '');
                 var regex = /^[0-9a-zA-Z\_\-]+$/
-                if (regex.test(Job_Id)&& Job_Id.length>3) {
+                if (regex.test(Job_Id) && Job_Id.length > 3) {
                     await axios.post('/api/AddJob', {
                         params: {
                             "Job_Number": document.getElementById("Job_Number").value,
@@ -225,7 +222,6 @@
                                     <td>${data[i]["Customer"]}</td>
                                     <td>${data[i]["State"]}</td>
                                     <td style="text-align:left">${data[i]["City"]}</td>
-                                    // <td>${data[i]["Workprint_Number"]}</td>
                                     <td>${data[i]["Number_Of_Responses"]}</td>
                                     <td>${data[i]["Created_By"]}</td>
                                     <td>${data[i]["Created_Date"]}</td>

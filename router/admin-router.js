@@ -120,29 +120,27 @@ admin_router.post('/AddChecklist', async (req, res) => {
         inputData["Created_By"] = req.session.UserID;
         inputData['Created_Date'] = getTimeStamp();
         db.query("insert ignore into checklist set?", [inputData], async (error, result) => {
-            if (error) throw error
-            const response = await addSection(req.body.sectionData);
-            if (response == true) {
-                return res.status(200).json({ message: "Checklist Added Successfully" })
+            if (error) {
+                console.log(error)
+                return res.status(400).json({ message: "Unable to add sections" })
             } else {
-                return res.status(400).json({ message: response.message })
+                req.body.sectionData.SectionList.forEach(section => {
+                    db.query('insert ignore into sections (Customer,Section_Name) values (?,?)', [req.body.params.Customer, section], (error, result) => {
+                        if (error) {
+                            console.log(error)
+                            return res.status(400).json({ message: "Unable to add sections" })
+                        }                          
+                    })
+                })
+                return res.status(200).json({ message: "Checklist Added Successfully" })
             }
-
         })
     } else {
         res.redirect('/')
     }
 })
 function addSection(Data) {
-    Data.SectionList.forEach(section => {
-        db.query('insert ignore into sections (Customer,Section_Name) values (?,?)', [Data.Customer, section], (error, result) => {
-            if (error) {
-                console.log(error)
-                return error
-            }
-            return true;
-        })
-    })
+
 }
 admin_router.get('/ListChecklist/:Customer_Name', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {

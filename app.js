@@ -54,18 +54,18 @@ db.connect((error) => {
 
   const port = 5000;
   const host = "172.17.1.22"
-  // const privateKey=fs.readFileSync('key.pem');
-  // const certificate=fs.readFileSync('cert.pem')
-  // const credentials={key:privateKey,cert:certificate,requestCertificate:false,rejectUnauthorized:false};
-  // const httpsServer=https.createServer(credentials,app);
-  // httpsServer.listen(port,()=>{
-  //   console.log('server is Running under Https with port:'+port)
-  // })
+  const privateKey=fs.readFileSync('key.pem');
+  const certificate=fs.readFileSync('cert.pem')
+  const credentials={key:privateKey,cert:certificate,requestCertificate:false,rejectUnauthorized:false};
+  const httpsServer=https.createServer(credentials,app);
+  httpsServer.listen(port,()=>{
+    console.log('server is Running under Https with port:'+port)
+  })
 
 
-const server = app.listen(port, function () {
-  console.log("QC-Portal is hosted at http://localhost:%s", port);
-});
+// const server = app.listen(port, function () {
+//   console.log("QC-Portal is hosted at http://localhost:%s", port);
+// });
 
 
 app.get('/',(req,res)=>{
