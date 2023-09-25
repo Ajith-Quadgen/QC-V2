@@ -9,58 +9,82 @@ function getTimeStamp() {
 engineer_router.get("/", (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Engineer") {
         let log;
-        db.query("select *,DATE_FORMAT(`Date`,'%b %D %y / %r') as Date from qc_log where User_ID=? order by Log_ID Desc limit 5 ",[req.session.UserID],(error,result)=>{
-            if(error){
-                res.status(400).json({Message:"Internal server Error"})
-            }else{
-                log=result
+        db.query("select *,DATE_FORMAT(`Date`,'%b %D %y / %r') as Date from qc_log where User_ID=? order by Log_ID Desc limit 5 ", [req.session.UserID], (error, result) => {
+            if (error) {
+                res.status(400).json({ Message: "Internal server Error" })
+            } else {
+                log = result
             }
         })
         var userData;
-        db.query('select * from users where Employee_ID=?',[req.session.UserID],(error,result)=>{
-            if(error) throw error
-            userData=result[0];
-        })
-        db.query("select * from checklist", (error, result) => {
+        db.query('select * from users where Employee_ID=?', [req.session.UserID], (error, result) => {
             if (error) throw error
-            res.render('../views/engineer/home', { Data: result,Log:log,title:"Dashboard",User:userData,Role:req.session.UserRole })
+            userData = result[0];
+        })
+        db.query("select * from customer", (error, result) => {
+            if (error) throw error
+            res.render('../views/engineer/home', { Data: result, Log: log, title: "Dashboard", User: userData, Role: req.session.UserRole })
         })
     } else {
         res.redirect('/')
     }
 })
-
+engineer_router.get('/Customers/:Customer_Name', (req, res) => {
+    if (req.session.UserID) {
+        let log;
+        db.query("select *,DATE_FORMAT(`Date`,'%b %D %y / %r') as Date from qc_log where User_ID=? order by Log_ID Desc limit 5 ", [req.session.UserID], (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(400).json({ Message: "Internal server Error" })
+            } else {
+                log = result
+            }
+        })
+        let checklist;
+        db.query("Select * from Checklist where Customer=?", [req.params.Customer_Name], (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(400).send("Internal Server Error");
+            }else{
+            checklist = result;
+            res.render('../views/engineer/Checklist', { Data: checklist, Log: log, title: "Dashboard", Role: req.session.UserRole })
+            }
+        })
+    }else{
+        res.redirect('/')
+    }
+})
 engineer_router.get("/QC/:QC_Name", (req, res) => {
     if (req.session.UserID) {
-    db.query("Select * from questions where checklist=? and Status='Active' ", [req.params.QC_Name], (error, result) => {
-        if(result.length>0){
-        const groupedData = result.reduce((acc, { Section, Item, Description, Reference_Document, Reference_Link }) => {
-            //console.log(Section)
-            acc[Section] = acc[Section] || [];
-            acc[Section].push(Item, Description, Reference_Document, Reference_Link);
+        db.query("Select * from questions where checklist=? and Status='Active' ", [req.params.QC_Name], (error, result) => {
+            if (result.length > 0) {
+                const groupedData = result.reduce((acc, { Section, Item, Description, Reference_Document, Reference_Link }) => {
+                    //console.log(Section)
+                    acc[Section] = acc[Section] || [];
+                    acc[Section].push(Item, Description, Reference_Document, Reference_Link);
 
-            return acc;
-        }, {});
-        //console.log(groupedData)
-        const organizedData = {};
+                    return acc;
+                }, {});
+                //console.log(groupedData)
+                const organizedData = {};
 
-        // Organize data by sections
-        result.forEach((row) => {
-            const { Section } = row;
-            if (!organizedData[Section]) {
-                organizedData[Section] = [];
+                // Organize data by sections
+                result.forEach((row) => {
+                    const { Section } = row;
+                    if (!organizedData[Section]) {
+                        organizedData[Section] = [];
+                    }
+                    organizedData[Section].push(row);
+                });
+                res.render('../views/engineer/QCPage', { Data: organizedData, title: result[0].Checklist, Role: req.session.UserRole, IncludeBackButton: false })
+            } else {
+                res.send("Checklist is Not Prepared Yer, Contact Manager")
             }
-            organizedData[Section].push(row);
-        });
-        res.render('../views/engineer/QCPage', { Data: organizedData, title: result[0].Checklist,Role:req.session.UserRole })
-    }else{
-        res.send("Checklist is Not Prepared Yer, Contact Manager")
+        })
+
+    } else {
+        res.redirect('/')
     }
-    })
-    
-}else{
-   res.redirect('/')
-}
 })
 
 module.exports = engineer_router;

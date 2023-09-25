@@ -13,23 +13,25 @@
 
 <body>
     <header>
-        <% if (Role=="Engineer") { %>
-            <%- include('../partials/engineer-header',{title:title}) %>
-        <% }else if(Role=="Admin"){ %>
-            <%- include('../partials/admin-header',{title:title}) %>
+        <% if (Role=="Engineer" ) { %>
+            <%- include('../partials/engineer-header',{title:title,IncludeBackButton:0}) %>
+                <% }else if(Role=="Admin" ){ %>
+                    <%- include('../partials/admin-header',{title:title}) %>
 
-            <% } %>
+                        <% } %>
     </header>
     <main class="main_container">
         <form action="#" method="post" enctype="multipart/form-data" id="QCFrom">
             <div class="m-3 section1">
                 <div class="row justify-content-center">
                     <div class="col-mb-3" style="width: max-content;">
-                        <input type="hidden" class="form-control" id="checklist" required value=" <%= title %>" readonly>
-                        <label for="cfas_no" class="form-label">Enter Job Number </label>
-                        <input type="text" class="form-control" id="cfas_no" onchange="getBasicData(this);" placeholder="Min 4 Character" required>
+                        <input type="hidden" class="form-control" id="checklist" required value=" <%= title %>"
+                            readonly>
+                        <label for="cfas_no" class="form-label">Enter Job ID/CFAS Number </label>
+                        <input type="text" class="form-control" id="cfas_no" onchange="getBasicData(this);"
+                            placeholder="Min 4 Character" required>
                     </div>
-                    <div class="col-md-3"  style="width: max-content;">
+                    <div class="col-md-3" style="width: max-content;">
                         <label for="qc_type" class="form-label">QC Type</label>
                         <select id="qc_type" class="form-select" onchange="getPreviousRecord(this)" required>
                             <option value="">Select</option>
@@ -37,15 +39,15 @@
                             <option value="IQC">IQC</option>
                         </select>
                     </div>
-                    <div class="col-md-3"  style="width: max-content;">
+                    <div class="col-md-3" style="width: max-content;">
                         <label for="qc_state" class="form-label">State</label>
                         <input type="text" class="form-control" id="qc_state" class="form-select" required disabled>
                     </div>
-                    <div class="col-md-3"  style="width: max-content;">
+                    <div class="col-md-3" style="width: max-content;">
                         <label for="qc_city" class="form-label">City</label>
                         <input type="text" class="form-control" id="qc_city" class="form-select" required disabled>
                     </div>
-                    <div class="col-md-3"  style="width: max-content;">
+                    <div class="col-md-3" style="width: max-content;">
                         <label for="remarks" class="form-label">Remarks
                         </label>
                         <input type="text" class="form-control" id="remarks">
@@ -96,9 +98,11 @@
                                                 </td>
                                                 <td>
                                                     <% if (row.Reference_Link) { %>
-                                                        <a href="<%= row.Reference_Link %>" target="_blank"><button 
-                                                                type="button" class="btn btn-outline-secondary btn-sm col-9"
-                                                                style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;" class>
+                                                        <a href="<%= row.Reference_Link %>" target="_blank"><button
+                                                                type="button"
+                                                                class="btn btn-outline-secondary btn-sm col-9"
+                                                                style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;"
+                                                                class>
                                                                 <%= row.Reference_Document %>
                                                             </button></a>
                                                         <% } %>
@@ -106,19 +110,24 @@
                                                 <td>
                                                     <div class="d-flex flex-row align-items-stretch">
                                                         <span> <input type="radio" name="Check_<%= row.Question_ID %>"
-                                                                value="Yes" class="form-check-input"
-                                                                onchange="toggleRequired(this)" >Yes</span>
+                                                                id="Check_<%= row.Question_ID %>_Yes" value="Yes"
+                                                                class="form-check-input" checked
+                                                                onchange="toggleRequired(this)"><label
+                                                                for="Check_<%= row.Question_ID %>_Yes">Yes</label></span>
                                                         <span> <input type="radio" name="Check_<%= row.Question_ID %>"
-                                                                value="No" class="form-check-input"
-                                                                onchange="toggleRequired(this)" checked>No</span>
+                                                                id="Check_<%= row.Question_ID %>_No" value="No"
+                                                                class="form-check-input"
+                                                                onchange="toggleRequired(this)"><label
+                                                                for="Check_<%= row.Question_ID %>_No">No</label></span>
                                                         <span> <input type="radio" name="Check_<%= row.Question_ID %>"
-                                                                value="N/A" class="form-check-input"
-                                                                onchange="toggleRequired(this)">N/A</span>
+                                                                id="Check_<%= row.Question_ID %>_N/A" value="N/A"
+                                                                class="form-check-input"
+                                                                onchange="toggleRequired(this)"><label
+                                                                for="Check_<%= row.Question_ID %>_N/A">N/A</label></span>
                                                     </div>
                                                 </td>
                                                 <td><input type="text" class="form-control"
-                                                        id="Note_<%= row.Question_ID %>" placeholder="* Reviewer Note"
-                                                        required>
+                                                        id="Note_<%= row.Question_ID %>" placeholder="* Reviewer Note">
                                                 </td>
                                             </tr>
                                             <% itemNumber++; %>
@@ -183,7 +192,7 @@
                 <button type="submit" class="btn btn-outline-success m-5">Submit</button>
             </div>
         </form>
-        <button type="button" class="scoreButton btn btn-success rounded-circle" id="ScoreButton">0.0%</button>
+        <button type="button" class="scoreButton btn btn-danger rounded-circle" id="ScoreButton">0.0%</button>
         <button onclick="topFunction()" id="myBtn" title="Go to top" style="z-index: 100;"
             class="btn btn-info btn-sm"><i class="bi bi-arrow-up-circle"></i></button>
 
@@ -195,43 +204,55 @@
     <%- include('../partials/dependencies-js') %>
         <script>
             function getBasicData(e) {
-                var job_id=e.value.trim().replaceAll(' ',"")
-                if (job_id.length > 3) {
-                    axios.post('/api/getJobData', {
-                        params: {
-                            jobID: job_id
-                        }
-                    }).then(res => {
-                        if (res.status == 200) {
-                            updateBasicData(res.data);
-                        }
-                    })
-                        .catch(er => {
-                            alert(er.response.data);
-                            e.value=null;
+                var job_id = e.value.trim().replaceAll(' ', "")
+                var fn = $("#cfas_no").val();
+                var regex = /^[0-9a-zA-Z\_\-]+$/
+
+                if (regex.test(fn)) {
+                    if (job_id.length > 3 && regex.test(fn)) {
+                        axios.post('/api/getJobData', {
+                            params: {
+                                jobID: job_id
+                            }
+                        }).then(res => {
+                            if (res.status == 200) {
+                                updateBasicData(res.data);
+                            }
                         })
+                            .catch(er => {
+                                alert(er.response.data);
+                                e.value = null;
+                                document.getElementById("qc_state").value = null;
+                                document.getElementById("qc_city").value = null;
+
+                            })
+                    }
+                } else {
+                    e.value = null;
+                    alert("Special Characters Other Than '-' and '_' are Not Allowed for Job-ID/CFAS Number.")
                 }
             }
 
             function updateBasicData(data) {
+                document.getElementById("cfas_no").setAttribute("readonly", '')
                 document.getElementById("qc_state").value = data.State;
                 document.getElementById("qc_city").value = data.City;
 
             }
-            function getPreviousRecord(e){
-                var type=e.value;
-                var job_id=document.getElementById("cfas_no").value.replaceAll(" ",'');
-                if(job_id.length>3 && type){
-                    axios.get('/api/getPreciousRecord',{
-                        params:{
-                            type:type,
-                            job_id:job_id
+            function getPreviousRecord(e) {
+                var type = e.value;
+                var job_id = document.getElementById("cfas_no").value.replaceAll(" ", '');
+                if (job_id.length > 3 && type) {
+                    axios.get('/api/getPreciousRecord', {
+                        params: {
+                            type: type,
+                            job_id: job_id
                         }
-                    }).then(res=>{
-                        if(res.status==200){
+                    }).then(res => {
+                        if (res.status == 200) {
                             updatePreviousRecord(res.data)
                         }
-                    }).catch(er=>{
+                    }).catch(er => {
                         alert(er.response.data)
                     })
                 }
@@ -281,6 +302,16 @@
                 var Percentage = ((total_yes + total_na) / (total_na + total_no + total_yes));
                 Percentage = (Percentage * 100).toFixed(1);
                 document.getElementById("ScoreButton").innerText = Percentage + '%'
+                let scoreBtn = document.getElementById("ScoreButton");
+                scoreBtn.classList.remove('btn-success', 'btn-danger', 'btn-warning');
+
+                if (Percentage >= 0 && Percentage <= 85) {
+                    scoreBtn.classList.add("btn-danger")
+                } else if (Percentage >= 86 && Percentage <= 98) {
+                    scoreBtn.classList.add("btn-warning")
+                } else if (Percentage > 98 && Percentage <= 100) {
+                    scoreBtn.classList.add("btn-success")
+                }
                 if (currentSectionData !== null) {
                     capturedData.push(currentSectionData);
                 }

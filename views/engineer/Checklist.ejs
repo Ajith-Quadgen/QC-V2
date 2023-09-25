@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        Home
+        Checklist
     </title>
     <%- include('../partials/dependencies') %>
 </head>
@@ -17,36 +17,18 @@
     </header>
 
     <main class="d-flex flex-column mb-3 justify-content-center w-100" style="position: absolute; top: 100px; align-self: baseline;">
-        <section class="d-flex justify-content-end">
-            <div class="profile-card d-flex flex-row">
-                <div class="right-side">
-                    <i class="bi bi-person-badge"></i>
-                </div>
-                <div class="left-side">
-                    <figure>
-                        <blockquote class="blockquote">
-                            <p>
-                                <%= User.Full_Name %> 
-                            </p>
-                        </blockquote>
-                        <figcaption class="blockquote-footer">
-                            <%= User.Designation %> (<%= User.Employee_ID %>) <br>
-                            <i class="bi bi-envelope-at-fill"></i> <%= User.Email_ID %><br>
-                            <i class="bi bi-geo-alt-fill"></i><%= User.Location %>
-                            <p>RM: <%= User.Reporting_Manager_Name %></p>
 
-                        </figcaption>
-                    </figure>
-                </div>
-            </div>
-        </section>
         <section class="d-flex justify-content-center">
             <% if (Object.values(Data).length>0) { %>
                 <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
-                    <a href="/Engineer/Customers/<%= Data[index].Customer_Name %>">
-                        <div class="localcard m-4 text-center">
-                            <img src="../../public/uploads/Customer-Logo/<%= Data[index].Customer_Logo%>"
-                                alt="Icon_<%= Data[index].Customer_Name %>" class="rounded checklist-icon">
+                    <a href="/Engineer/QC/<%= Data[index].Checklist_Name %>" style="text-decoration: none;">
+                        <div class="localcard m-4 p-3 d-flex align-items-end" style='background: rgb(78,78,78);background: linear-gradient(180deg, rgba(78,78,78,0.0032387955182072714) 11%, rgba(2,0,36,0.7539390756302521) 100%),url("../../public/uploads/Checklist-Icon/<%= Data[index].Icon %>");  background-size: contain;                            background-position: center;                            background-repeat: no-repeat;'>
+
+                                
+                                <h3 style="color: #f1f1f1;text-shadow: 10px 0px 19px rgba(102, 102, 102, 1);">
+                                    <%= Data[index].Checklist_Name %>
+                                </h3>
+     
                         </div>
                     </a>
                     <%}%>

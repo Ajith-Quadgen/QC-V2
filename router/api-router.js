@@ -20,8 +20,8 @@ const transporter = nodemailer.createTransport(
         port: 465,
         secure: true, // true for 465, false for other ports
         auth: {
-            user: 'ajith.venkatesh@quadgenwireless.com', // Your Gmail email address
-            pass: 'fnucwdtycntobyon'   // Your Gmail password or app-specific password
+            user: 'software.development@quadgenwireless.com ', // Your Gmail email address
+            pass: 'mrzpgphmoulavifx '   // Your Gmail password or app-specific password
         }
     })
 );
@@ -150,9 +150,20 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
                 if (error) {
                     res.status(400).send(error.message)
                 } else {
-                    db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date from jobs", function (error, Data) {
+                    const affectedRows = result.affectedRows;
+                    const DuplicateEntry = []
+                    console.log(result)
+                    if (result.warningCount > 0) {
+                        for (let i = 0; i < result.warningCount; i++) {
+                            DuplicateEntry.push(values[i][0])
+                        }
+                    }
+                    if (DuplicateEntry.length > 0) {
+                        console.warn("Warning:Duplicate Jon Number Found:", DuplicateEntry)
+                    }
+                    db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs", function (error, Data) {
                         if (error) throw error
-                        res.status(200).json({ "message": "User Data Imported Successfully", "Data": Data })
+                        res.status(200).json({ "message": "Job Data Imported Successfully", "Data": Data })
                     })
                 }
             })
@@ -168,17 +179,42 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
 api_Router.post('/AddJob', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         let inputData = req.body.params;
-        inputData["Created_By"] = req.session.UserID;
+        inputData["Created_By"] = req.session.UserName;
         inputData['Created_Date'] = getTimeStamp();
-        db.query("insert ignore into jobs set ?", [req.body.params], (error, result) => {
-            if (error) throw error
-            return res.status(200).send('Job Added Successfully');
-
+        inputData['Modified_Date'] = getTimeStamp();
+        db.query("insert into jobs set ?", [req.body.params], (error, result) => {
+            if (error) {
+                if (error.code == 'ER_DUP_ENTRY') {
+                    return res.status(400).json({Message:`The Job-ID/CFAS Number "${inputData.Job_Number}" is already exist in the DataBase`})
+                } else {
+                    return res.status(400).json({Message:"Internal Server Error"})
+                }
+            } else {
+                db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs", function (error, result) {
+                    if (error) throw error
+                    return res.status(200).json({Message:`Job "${inputData.Job_Number}" Added Successfully`,Data:result});
+                })
+            }
         })
     } else {
         res.status(400).send("Access Denied")
     }
 });
+
+api_Router.post("/GetJob", (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Admin") {
+        db.query("Select * from jobs where Job_Number=?", [req.body.params.id], (error, result) => {
+            if (error) {
+                console.log(error)
+                res.status(400).send("Internal Server Error")
+            } else {
+                res.status(200).send(result)
+            }
+        })
+    } else {
+        res.status(400).send("Access Denied")
+    }
+})
 
 api_Router.post('/uploadChecklist', Upload.single('QCFile'), (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
@@ -390,27 +426,39 @@ api_Router.post("/SubmitQC", (req, res) => {
                                 }
                             }
                             const mailOptions = {
-                                from: 'ajith.venkatesh@quadgenwireless.com',
+                                from: 'software.development@quadgenwireless.com ',
                                 to: req.session.UserMail,
+                                cc: req.session.RMail,
                                 subject: `QC Submission Confirmation Mail_${inputData[0].JobID}_${inputData[0].Checklist}_${inputData[0].type}`,
-                                text: `You have Successfully Submitted the ${inputData[0].Checklist} with Score of ${inputData[0].Percentage}\nThis is System Generated Mail, No need to reply.`,
+                                html: `<h3>Hi ${req.session.UserName}</h3><br>You have Successfully Submitted the <b>${inputData[0].Checklist}</b> with Score of <b>${inputData[0].Percentage}%.</b><br>This is System Generated Mail, no need to reply.<br>Regards`,
                                 attachments: [
                                     {
                                         path: filePath
                                     }
                                 ]
                             };
-
-                            transporter.sendMail(mailOptions, (error, info) => {
+                            db.query("UPDATE users SET No_of_Submission=No_of_Submission+1 where Employee_ID=?", [req.session.UserID], (error, result) => {
                                 if (error) {
-                                    console.error('Error sending email:', error);
+                                    console.log(error)
+                                    return res.status(400).json({ Message: "Something Went Wrong... Unable to Complete the Submission", Score: "0" })
                                 } else {
-                                    console.log('Email sent:', info.response);
+                                    db.query("UPDATE jobs SET Number_Of_Responses=Number_Of_Responses+1,Modified_Date=?  where Job_Number=?", [getTimeStamp(), inputData[0].JobID], (error, result) => {
+                                        if (error) {
+                                            console.log(error)
+                                            return res.status(400).json({ Message: "Something Went Wrong... Unable to Complete the Submission", Score: "0" })
+                                        } else {
+                                            transporter.sendMail(mailOptions, (error, info) => {
+                                                if (error) {
+                                                    console.error('Error sending email:', error);
+                                                } else {
+                                                    console.log('Email sent:', info.response);
+                                                }
+                                            });
+                                            return res.status(200).json({ Message: 'QC Submitted Successfully', Score: newData[0].Percentage });
+                                        }
+                                    })
                                 }
                             });
-
-                            return res.status(200).json({ Message: 'QC Submitted Successfully', Score: newData[0].Percentage });
-
                         })
                     }
                 })
@@ -420,6 +468,11 @@ api_Router.post("/SubmitQC", (req, res) => {
         res.status(400).send("Access Denied")
     }
 })
+
+function UpdateNoOfResponses(jobID, userId) {
+
+
+}
 
 api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
@@ -463,13 +516,13 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
                     })
                     filestream = await fs.createReadStream(filename)
                     filestream.pipe(res)
-                    setTimeout(()=>{
+                    setTimeout(() => {
                         fs.unlink(filename, (error) => {
                             if (error) {
                                 throw error
                             }
                         })
-                    },2000)
+                    }, 2000)
                 } else {
                     res.send("Data Not Found")
                 }
@@ -492,7 +545,7 @@ api_Router.post('/filterResponses', (req, res) => {
 
         if (data.from && data.to) {
             main = query1
-        } else if(data.id && data.type) { main = query3 }else{main=query2}
+        } else if (data.id && data.type) { main = query3 } else { main = query2 }
         db.query(main, (error, result) => {
             if (error) {
                 console.error(error)
@@ -505,18 +558,18 @@ api_Router.post('/filterResponses', (req, res) => {
         res.status(400).send("Access Denied")
     }
 })
-api_Router.post('/UpdatePassword',(req,res)=>{
-    if(req.session.UserID){
-        db.query("update users set Password=? where Employee_ID=?",[req.body.params.newPassword,req.session.UserID],(error,result)=>{
-            if(error){
+api_Router.post('/UpdatePassword', (req, res) => {
+    if (req.session.UserID) {
+        db.query("update users set Password=? where Employee_ID=?", [req.body.params.newPassword, req.session.UserID], (error, result) => {
+            if (error) {
                 console.log(error)
                 res.status(400).send("Unable To Update Password")
-            }else{
+            } else {
                 res.status(200).send("Updated Successfully")
             }
         })
 
-    }else{
+    } else {
         res.status(400).send("Access Denied")
     }
 })

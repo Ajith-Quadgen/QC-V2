@@ -2,11 +2,11 @@
     <input type="checkbox" id="nav-toggle">
     <div class="d-flex justify-content-between">
     <div class="logo">
+        <% if (IncludeBackButton) { %> 
         <button type="button" class="btn btn-outline-secondary" onclick="javascript:history.go(-1)"><i
                 class="bi bi-arrow-left"></i></button>
+                <% } %>
         <img src="../../static/images/Quadgen_Logo.png" alt="Quadgen_Logo" srcset="">
-        <button type="button" class="btn btn-outline-secondary" onclick="javascript:history.forward()"><i
-                class="bi bi-arrow-right"></i></button>
     </div>
     <div class="d-flex justify-content-center fs-3 align-baseline"><%= title %></div>
 

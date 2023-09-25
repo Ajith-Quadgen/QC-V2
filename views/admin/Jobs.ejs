@@ -14,14 +14,22 @@
         <%- include('../partials/admin-header') %>
     </header>
     <main class="main_container">
-            <form action="#" method="POST" enctype="multipart/form-data" id="userExcelUploadForm" class="d-flex justify-content-center align-items-center">
-                <p class="form-label">Select Only CSV File</p>
-                <label class="input-group-text" for="UserExcelFile">Select Job Data</label>
-                    <input type="file" class="form-control m-2" name="UserExcelFile" id="UserExcelFile" accept=".csv" required style="display: none;">
-                    <button type="submit" class="btn btn-primary m-2">Upload &nbsp; <i class="bi bi-cloud-arrow-up"></i></button>
-                    <input type="button" value="Add New Job" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
-                    data-bs-target="#UserInputModel">
-                </form>      
+        <form action="#" method="POST" enctype="multipart/form-data" id="userExcelUploadForm"
+            class="d-flex justify-content-center align-items-center">
+            <div class="input-group m-2" style="width: max-content;">
+                <input type="text" class="form-control" placeholder="Enter Job-Id/CFAS Number"
+                    aria-label="Recipient's username" aria-describedby="filterbtn" id="cfas_no">
+                <button class="btn btn-success" type="button" id="filterbtn"><i class="bi bi-search"></i></button>
+            </div>
+            <p class="form-label">Select Only CSV File</p>
+            <label class="input-group-text" for="UserExcelFile">Select Job Data</label>
+            <input type="file" class="form-control m-2" name="UserExcelFile" id="UserExcelFile" accept=".csv" required
+                style="display: none;">
+            <button type="submit" class="btn btn-primary m-2">Bulk Upload &nbsp; <i
+                    class="bi bi-cloud-arrow-up"></i></button>
+            <input type="button" value="Add New Job" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
+                data-bs-target="#UserInputModel">
+        </form>
         <div class="d-flex w-100">
             <table class="table table-hover m-2 AVRTable table-striped caption-top">
                 <thead class="table-dark">
@@ -31,10 +39,11 @@
                         <th scope="col">Customer</th>
                         <th scope="col">State</th>
                         <th scope="col">City</th>
-                        <th scope="col">Work Print Number</th>
+                        <!-- <th scope="col">Work Print Number</th> -->
                         <th scope="col">Number Of Responses</th>
                         <th scope="col">Created By</th>
                         <th scope="col">Created Date</th>
+                        <th scope="col">Modified Date</th>
                     </tr>
                 </thead>
                 <tbody id="content-area">
@@ -53,12 +62,12 @@
                                 <td>
                                     <%= Data[index]['State'] %>
                                 </td>
-                                <td>
+                                <td style="text-align:left">
                                     <%= Data[index]['City'] %>
                                 </td>
-                                <td>
+                                <!-- <td>
                                     <%= Data[index]['Workprint_Number'] %>
-                                </td>
+                                </td> -->
                                 <td>
                                     <%= Data[index]['Number_Of_Responses'] %>
                                 </td>
@@ -67,6 +76,9 @@
                                 </td>
                                 <td>
                                     <%= Data[index]['Created_Date'] %>
+                                </td>
+                                <td>
+                                    <%= Data[index]['Modified_Date'] %>
                                 </td>
                             </tr>
                             <% } %>
@@ -157,26 +169,34 @@
 
             document.getElementById('addJobForm').addEventListener("submit", async (e) => {
                 e.preventDefault();
-                await axios.post('/api/AddJob', {
-                    params: {
-                        "Job_Number": document.getElementById("Job_Number").value,
-                        "Customer": document.getElementById("Customer").value,
-                        "State": document.getElementById("State").value,
-                        "City": document.getElementById("City").value,
-                        "Created_Date": Date.now()
-                    }
-                }).then(res => {
-                    if (res.status == 200) {
+                var Job_Id = document.getElementById("Job_Number").value.replaceAll(" ", '');
+                var regex = /^[0-9a-zA-Z\_\-]+$/
+                if (regex.test(Job_Id)&& Job_Id.length>3) {
+                    await axios.post('/api/AddJob', {
+                        params: {
+                            "Job_Number": document.getElementById("Job_Number").value,
+                            "Customer": document.getElementById("Customer").value,
+                            "State": document.getElementById("State").value,
+                            "City": document.getElementById("City").value,
+                            "Created_Date": Date.now()
+                        }
+                    }).then(res => {
+                        if (res.status == 200) {
+                            $("#UserInputModel").modal('hide')
+                            updateContentArea(res.data.Data)
+                            alert(res.data.Message);
+                        }
+                    }).catch(e => {
                         $("#UserInputModel").modal('hide')
-                        alert(res.data);
-                    }
-                }).catch(e => {
-                    $("#UserInputModel").modal('hide')
-                    console.log(e);
-                    alert(e.response.data);
-                })
+                        console.log(e);
+                        alert(e.response.data.Message);
+                    })
+                } else {
+                    document.getElementById("addJobForm").reset();
+                    document.getElementById("Job_Number").value = null;
+                    alert("Min of 4 Characters are needed & Special Characters Other Than '-' and '_' are Not Allowed for Job-ID/CFAS Number.")
+                }
             })
-
 
             document.getElementById('userExcelUploadForm').addEventListener("submit", async (e) => {
                 e.preventDefault();
@@ -194,23 +214,6 @@
                 })
             })
 
-            function updateStatusAPI(id, newStatus) {
-                axios.post('/api/updateUserStatus', {
-                    params: {
-                        id: id,
-                        status: newStatus
-                    }
-                }).then(res => {
-                    if (res.status == 200) {
-                        updateContentArea(res.data);
-                    }
-                })
-                    .catch(e => {
-                        console.log(e);
-                        alert("Unable to Update the Status...\nPlease Contact Admin");
-                    })
-            }
-
             function updateContentArea(data) {
                 if (data.length > 0) {
                     $('#content-area').empty();
@@ -221,14 +224,39 @@
                                     <td>${data[i]["Job_Number"]}</td>
                                     <td>${data[i]["Customer"]}</td>
                                     <td>${data[i]["State"]}</td>
-                                    <td>${data[i]["City"]}</td>
-                                    <td>${data[i]["Workprint_Number"]}</td>
+                                    <td style="text-align:left">${data[i]["City"]}</td>
+                                    // <td>${data[i]["Workprint_Number"]}</td>
                                     <td>${data[i]["Number_Of_Responses"]}</td>
-                                    <td>${data[i]["Created_Date"]}</td>`;
+                                    <td>${data[i]["Created_By"]}</td>
+                                    <td>${data[i]["Created_Date"]}</td>
+                                    <td>${data[i]["Modified_Date"]}</td>`;
                     }
                 }
 
             }
+
+            document.getElementById("filterbtn").addEventListener("click", (e) => {
+                var Job_Id = document.getElementById("cfas_no").value.replaceAll(" ", '');
+                var regex = /^[0-9a-zA-Z\_\-]+$/
+                if (regex.test(Job_Id)) {
+                    axios.post('/api/GetJob', {
+                        params: {
+                            id: Job_Id
+                        }
+                    }).then(res => {
+                        if (res.status == 200) {
+                            updateContentArea(res.data);
+                        }
+                    })
+                        .catch(e => {
+                            console.log(e);
+                            alert("Unable to Get the Job...\nPlease Contact Admin");
+                        })
+                } else {
+                    document.getElementById("cfas_no").value = null;
+                    alert("Special Characters Other Than '-' and '_' are Not Allowed for Job-ID/CFAS Number.")
+                }
+            })
         </script>
 </body>
 

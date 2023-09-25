@@ -37,21 +37,21 @@ function getTimeStamp() {
 admin_router.get("/", (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         let log;
-        db.query("select *,DATE_FORMAT(`Date`,'%b %D %y / %r') as Date from qc_log where User_ID=? order by Log_ID Desc limit 5 ",[req.session.UserID],(error,result)=>{
-            if(error){
-                res.status(400).json({Message:"Internal server Error"})
-            }else{
-                log=result
+        db.query("select *,DATE_FORMAT(`Date`,'%b %D %y / %r') as Date from qc_log where User_ID=? order by Log_ID Desc limit 5 ", [req.session.UserID], (error, result) => {
+            if (error) {
+                res.status(400).json({ Message: "Internal server Error" })
+            } else {
+                log = result
             }
         })
         var userData;
-        db.query('select * from users where Employee_ID=?',[req.session.UserID],(error,result)=>{
-            if(error) throw error
-            userData=result[0];
+        db.query('select * from users where Employee_ID=?', [req.session.UserID], (error, result) => {
+            if (error) throw error
+            userData = result[0];
         })
         db.query("select * from checklist", (error, result) => {
             if (error) throw error
-            res.render('../views/admin/adminHome', { Data: result,Log:log,title:"Dashboard",User:userData,Role:req.session.UserRole })
+            res.render('../views/admin/adminHome', { Data: result, Log: log, title: "Dashboard", User: userData, Role: req.session.UserRole })
         })
     } else {
         res.redirect('/')
@@ -69,7 +69,7 @@ admin_router.get("/Users", (req, res) => {
 });
 admin_router.get("/Jobs", (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
-        db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date from jobs", function (error, result) {
+        db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Number_Of_Responses Desc limit 50", function (error, result) {
             if (error) throw error
             res.render('../views/admin/Jobs', { Data: result });
         });
@@ -134,12 +134,15 @@ admin_router.post('/AddChecklist', async (req, res) => {
     }
 })
 function addSection(Data) {
-        Data.SectionList.forEach(section => {
-            db.query('insert ignore into sections (Customer,Section_Name) values (?,?)', [Data.Customer, section], (error, result) => {
-                if (error) return error
-                return true;
-            })
+    Data.SectionList.forEach(section => {
+        db.query('insert ignore into sections (Customer,Section_Name) values (?,?)', [Data.Customer, section], (error, result) => {
+            if (error) {
+                console.log(error)
+                return error
+            }
+            return true;
         })
+    })
 }
 admin_router.get('/ListChecklist/:Customer_Name', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
@@ -166,7 +169,7 @@ admin_router.get('/viewResponses/:QC_Name', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         db.query("select *,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Checklist=? order by responses_ID limit 100", [req.params.QC_Name], (error, result) => {
             if (error) throw error
-            res.render("../views/admin/viewResponses", { Data: result, Checklist: req.params.QC_Name,title:req.params.QC_Name})
+            res.render("../views/admin/viewResponses", { Data: result, Checklist: req.params.QC_Name, title: req.params.QC_Name })
         })
     } else {
         res.redirect('/')

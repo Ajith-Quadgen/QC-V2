@@ -30,15 +30,8 @@ app.use(session({
   store:new session.MemoryStore()
 }));
 
-const privateKey=fs.readFileSync('key.pem');
-const certificate=fs.readFileSync('cert.pem')
-const credentials={key:privateKey,cert:certificate,requestCertificate:false,rejectUnauthorized:false};
-const httpsServer=https.createServer(credentials,app);
-httpsServer.listen(port,()=>{
-  console.log('server is Running under Https with port:'+port)
-})
   
-const port = 5000;
+
 
 const adminRouter=require('./router/admin-router')
 const PMORouter=require('./router/PMO-router')
@@ -59,11 +52,20 @@ db.connect((error) => {
     }
   });
 
+  const port = 5000;
+  const host = "172.17.1.22"
+  // const privateKey=fs.readFileSync('key.pem');
+  // const certificate=fs.readFileSync('cert.pem')
+  // const credentials={key:privateKey,cert:certificate,requestCertificate:false,rejectUnauthorized:false};
+  // const httpsServer=https.createServer(credentials,app);
+  // httpsServer.listen(port,()=>{
+  //   console.log('server is Running under Https with port:'+port)
+  // })
 
-// const host = "172.17.1.22"
-// const server = app.listen(port, function () {
-//   console.log("QC-Portal is hosted at http://localhost:%s", port);
-// });
+
+const server = app.listen(port, function () {
+  console.log("QC-Portal is hosted at http://localhost:%s", port);
+});
 
 
 app.get('/',(req,res)=>{
@@ -107,6 +109,7 @@ app.post('/AuthenticateLogin', (req, res) => {
         req.session.UserRole = result[0]['Role'];
         req.session.UserName=result[0]['Full_Name'];
         req.session.UserMail=result[0]['Email_ID'];
+        req.session.RMail=result[0]['Reporting_Manager_Mail'];
         if (result[0]['Role'] == "Engineer") {
           res.redirect('/engineer');
         } else if (result[0]['Role'] == "PMO") {
