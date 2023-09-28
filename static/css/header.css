@@ -44,9 +44,9 @@ nav {
     left: 0;
     right: 0;
     top: 0;
-    height: 90px;
+    height: 80px;
     background: linear-gradient(120deg, #ffffff, #eff5ff, #dfebff, #cee1ff, #bdd7ff, #abcdff, #97c3ff, #82baff);
-    padding: 0 5%;
+    padding: 0 1%;
     box-shadow: rgba(0, 0, 0, 0.45) 0px 25px 20px -20px;
 }
 
@@ -81,7 +81,7 @@ nav .links li {
 nav .links a {
     display: block;
     padding: 0.5em;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     color: #000000;
     text-decoration: none;

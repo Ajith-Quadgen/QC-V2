@@ -59,9 +59,34 @@ admin_router.get("/", (req, res) => {
 });
 admin_router.get("/Users", (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
+        let checklist;
+        db.query("select * from checklist",(error,result)=>{
+            if(error){
+                console.log(error)
+                return res.status(500).json({Message:"Internal Server Error"})
+            }else{
+                checklist=result;
+            }
+        })
+        let basicDetails={};
+        db.query("select (select group_concat(distinct Location) from users) as Location,(select group_concat(distinct Designation) from users) as Designation",(error,result)=>{
+            if(error){
+                console.log(error)
+            }else if(result.length>0){
+                let Location=result[0].Location.split(',');
+                let Designation=result[0].Designation.split(',');
+                basicDetails.Location=Location;
+                basicDetails.Designation=Designation;
+        }
+        })
+        db.query('SELECT Employee_ID,Full_Name,Email_ID FROM users where Active=1 and  Designation not in ("Developer","OSP Drafter II","GET-OSP Drafter","OSP Drafter","Fiber Design Engineer")',(error,result)=>{
+            if(error) throw error
+            basicDetails.NameMail=result
+        })
+        basicDetails.Roles=["Admin","Engineer"]
         db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users", function (error, result) {
             if (error) throw error
-            res.render('../views/admin/Users', { Data: result });
+            res.render('../views/admin/Users', { Data: result,Checklist:checklist,Basic:basicDetails});
         })
     } else {
         res.redirect('/')
@@ -139,9 +164,6 @@ admin_router.post('/AddChecklist', async (req, res) => {
         res.redirect('/')
     }
 })
-function addSection(Data) {
-
-}
 admin_router.get('/ListChecklist/:Customer_Name', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         db.query("select * from checklist where Customer=?", [req.params.Customer_Name], (error, result) => {

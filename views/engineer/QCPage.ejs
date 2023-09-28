@@ -73,12 +73,12 @@
                             <% let sectionNumber=1; %>
                                 <% for (const Section in Data) { %>
 
-                                    <tr class="table-primary section">
+                                    <tr class="table-primary section" >
                                         <td>
-                                            <%= sectionNumber%>
+                                            <b><%= sectionNumber%></b>
                                         </td>
                                         <td colspan="3" class="sectionName">
-                                            <%= Section %>
+                                           <b><%= Section %></b>
                                         </td>
                                         <td></td>
                                         <td></td>
@@ -108,26 +108,26 @@
                                                         <% } %>
                                                 </td>
                                                 <td>
-                                                    <div class="d-flex flex-row align-items-stretch">
-                                                        <span> <input type="radio" name="Check_<%= row.Question_ID %>"
+                                                    <div class="d-flex flex-row align-items-stretch justify-content-evenly">
+                                                         <input type="radio" name="Check_<%= row.Question_ID %>"
                                                                 id="Check_<%= row.Question_ID %>_Yes" value="Yes"
-                                                                class="form-check-input" 
-                                                                onchange="toggleRequired(this)"><label
-                                                                for="Check_<%= row.Question_ID %>_Yes">Yes</label></span>
-                                                        <span> <input type="radio" name="Check_<%= row.Question_ID %>"
-                                                                id="Check_<%= row.Question_ID %>_No" value="No"
                                                                 class="form-check-input" checked
                                                                 onchange="toggleRequired(this)"><label
-                                                                for="Check_<%= row.Question_ID %>_No">No</label></span>
-                                                        <span> <input type="radio" name="Check_<%= row.Question_ID %>"
+                                                                for="Check_<%= row.Question_ID %>_Yes">Yes</label>
+                                                         <input type="radio" name="Check_<%= row.Question_ID %>"
+                                                                id="Check_<%= row.Question_ID %>_No" value="No"
+                                                                class="form-check-input" 
+                                                                onchange="toggleRequired(this)"><label
+                                                                for="Check_<%= row.Question_ID %>_No">No</label>
+                                                         <input type="radio" name="Check_<%= row.Question_ID %>"
                                                                 id="Check_<%= row.Question_ID %>_N/A" value="N/A"
                                                                 class="form-check-input"
                                                                 onchange="toggleRequired(this)"><label
-                                                                for="Check_<%= row.Question_ID %>_N/A">N/A</label></span>
+                                                                for="Check_<%= row.Question_ID %>_N/A">N/A</label>
                                                     </div>
                                                 </td>
                                                 <td><input type="text" class="form-control"
-                                                        id="Note_<%= row.Question_ID %>" placeholder="* Reviewer Note" required>
+                                                        id="Note_<%= row.Question_ID %>" placeholder="* Reviewer Note" >
                                                 </td>
                                             </tr>
                                             <% itemNumber++; %>
@@ -234,7 +234,7 @@
             }
 
             function updateBasicData(data) {
-                document.getElementById("cfas_no").setAttribute("readonly", '')
+                //document.getElementById("cfas_no").setAttribute("readonly", '')
                 document.getElementById("qc_state").value = data.State;
                 document.getElementById("qc_city").value = data.City;
 
@@ -299,17 +299,19 @@
                         currentSectionData.items.push(item);
                     }
                 });
-                var Percentage = ((total_yes + total_na) / (total_na + total_no + total_yes));
+
+                var Percentage = ((total_yes) / ((total_na + total_no + total_yes)-total_na));
+
                 Percentage = (Percentage * 100).toFixed(1);
                 document.getElementById("ScoreButton").innerText = Percentage + '%'
                 let scoreBtn = document.getElementById("ScoreButton");
                 scoreBtn.classList.remove('btn-success', 'btn-danger', 'btn-warning');
 
-                if (Percentage >= 0 && Percentage <= 85) {
+                if (Percentage >= 0.0 && Percentage <= 85.0) {
                     scoreBtn.classList.add("btn-danger")
-                } else if (Percentage >= 86 && Percentage <= 98) {
+                } else if (Percentage > 85.0 && Percentage <= 98.0) {
                     scoreBtn.classList.add("btn-warning")
-                } else if (Percentage > 98 && Percentage <= 100) {
+                } else if (Percentage > 98.0 && Percentage <= 100.0) {
                     scoreBtn.classList.add("btn-success")
                 }
                 if (currentSectionData !== null) {

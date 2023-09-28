@@ -184,8 +184,8 @@
                             alert(res.data.Message);
                         }
                     }).catch(e => {
-                        $("#UserInputModel").modal('hide')
                         console.log(e);
+                        $("#UserInputModel").modal('hide')
                         alert(e.response.data.Message);
                     })
                 } else {

@@ -69,7 +69,7 @@ const server = app.listen(port, function () {
 
 
 app.get('/',(req,res)=>{
-    res.render('../views/login')
+  res.render('login',{Message:false,type:"Info"});
 })
 app.get('/login', (req, res) => {
   if (req.session.UserID) {
@@ -87,11 +87,11 @@ app.get('/login', (req, res) => {
           res.redirect('/manager');
           break;
       default:
-        res.render('login');
+        res.redirect('/logout')
         break;
     }
   } else {
-    res.render('login');
+    res.render('login',{Message:"Login Required",type:"Info"});
   }
 });
 let dt = dateTime.create();
@@ -112,17 +112,13 @@ app.post('/AuthenticateLogin', (req, res) => {
         req.session.RMail=result[0]['Reporting_Manager_Mail'];
         if (result[0]['Role'] == "Engineer") {
           res.redirect('/engineer');
-        } else if (result[0]['Role'] == "PMO") {
-          res.redirect('/PMO');
-        } else if (result[0]['Role'] == "Manager") {
-          res.redirect('/Manager');
         }else if (result[0]['Role'] == "Admin") {
             res.redirect('/Admin');
           } else {
           return res.send("Internal Server Error");
         }
       } else {
-        return res.redirect('/login');
+         res.redirect('/?Message=Invalid UserName or Password');
       }
     })
   });
@@ -143,6 +139,6 @@ app.get('/logout', (req, res) => {
   req.session.destroy();
   res.redirect('/');
 });
-app.get("*",(req,res)=>{
-    res.render('Not Found')
+app.get('*',(req,res)=>{
+  res.redirect('/')
 })

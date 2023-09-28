@@ -16,15 +16,25 @@ engineer_router.get("/", (req, res) => {
                 log = result
             }
         })
-        var userData;
+        let userData;
         db.query('select * from users where Employee_ID=?', [req.session.UserID], (error, result) => {
             if (error) throw error
             userData = result[0];
+            if (userData.Access != null) {
+                const check = userData.Access.split(',')
+                db.query("select * from customer where Customer_Name in (?)", [...check], (error, result) => {
+                    if (error) throw error
+                    res.render('../views/engineer/home', { Data: result, Log: log, title: "Dashboard", User: userData, Role: req.session.UserRole })
+                })
+            } else {
+                db.query("select * from customer limit 0", (error, result) => {
+                    if (error) throw error
+                    res.render('../views/engineer/home', { Data: result, Log: log, title: "Dashboard", User: userData, Role: req.session.UserRole })
+                })
+            }
         })
-        db.query("select * from customer", (error, result) => {
-            if (error) throw error
-            res.render('../views/engineer/home', { Data: result, Log: log, title: "Dashboard", User: userData, Role: req.session.UserRole })
-        })
+
+
     } else {
         res.redirect('/')
     }
@@ -40,17 +50,40 @@ engineer_router.get('/Customers/:Customer_Name', (req, res) => {
                 log = result
             }
         })
-        let checklist;
-        db.query("Select * from checklist where Customer=?", [req.params.Customer_Name], (error, result) => {
-            if (error) {
-                console.log(error)
-                return res.status(400).send("Internal Server Error");
+        var userData;
+        db.query('select * from users where Employee_ID=?', [req.session.UserID], (error, result) => {
+            if (error) throw error
+            let sql_query;
+            if(result[0].Role!='Admin'){
+            userData = result[0];
+            const check = userData.Access.split(',')
+            console.log(check);
+            let checklist;
+             sql_query='Select * from checklist where Customer=? and Checklist_Name in (?)';
+             db.query(sql_query, [req.params.Customer_Name,check], (error, result) => {
+                if (error) {
+                    console.log(error)
+                    return res.status(400).send("Internal Server Error");
+                } else {
+                    checklist = result;
+                    res.render('../views/engineer/Checklist', { Data: checklist, Log: log, title: "Dashboard", Role: req.session.UserRole })
+                }
+            })
             }else{
-            checklist = result;
-            res.render('../views/engineer/Checklist', { Data: checklist, Log: log, title: "Dashboard", Role: req.session.UserRole })
+                 sql_query='Select * from checklist where Customer=?';
+                 db.query(sql_query, [req.params.Customer_Name], (error, result) => {
+                    if (error) {
+                        console.log(error)
+                        return res.status(400).send("Internal Server Error");
+                    } else {
+                        checklist = result;
+                        res.render('../views/engineer/Checklist', { Data: checklist, Log: log, title: "Dashboard", Role: req.session.UserRole })
+                    }
+                })
             }
+    
         })
-    }else{
+    } else {
         res.redirect('/')
     }
 })
@@ -86,5 +119,7 @@ engineer_router.get("/QC/:QC_Name", (req, res) => {
         res.redirect('/')
     }
 })
-
+engineer_router.get('*',(req,res)=>{
+    res.redirect('/')
+})
 module.exports = engineer_router;

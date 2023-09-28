@@ -10,9 +10,11 @@ var dateTime = require('node-datetime');
 let dt = dateTime.create();
 let CurrentDate = dt.format('Y-m-d H:M:S');
 const fs = require('fs');
-const { error } = require('console');
+const { error, log } = require('console');
 const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
+const { join } = require('path');
+const { resume } = require('pdfkit');
 
 const transporter = nodemailer.createTransport(
     smtpTransport({
@@ -44,13 +46,24 @@ const Upload = multer({ storage: multer.memoryStorage() })
 api_Router.post('/AddUser', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         let inputData = req.body.params;
-        inputData["Added_By"] = req.session.UserID;
-        db.query("insert into users set?", [req.body.params], (error, result) => {
-            if (error) {
-                return res.status(400).send(error.message)
-            }
-
-            return res.status(200).send('User Added Successfully');
+        inputData["Added_By"] = req.session.UserName;
+        db.query("select Full_Name,Email_ID from users where Employee_ID=?", [req.body.params.Reporting_Manager_ID], (error, result) => {
+            if (error) throw error
+            inputData["Reporting_Manager_Name"] = result[0].Full_Name;
+            inputData['Reporting_Manager_Mail'] = result[0].Email_ID;
+            delete inputData.Reporting_Manager_ID
+            db.query("insert into users set?", [req.body.params], (error, result) => {
+                if (error) {
+                    if (error.code == 'ER_DUP_ENTRY') {
+                        return res.status(400).json({ Message: "Employee-ID/Email is Already Present in the DataBase." })
+                    } else {
+                        return res.status(400).json({ Message: "Internal Server Error" })
+                    }
+                } db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users", function (error, result) {
+                    if (error) throw error
+                    return res.status(200).json({ Message: 'User Added Successfully...', Data: result });
+                })
+            })
         })
     } else {
         res.status(400).send("Access Denied")
@@ -185,14 +198,15 @@ api_Router.post('/AddJob', (req, res) => {
         db.query("insert into jobs set ?", [req.body.params], (error, result) => {
             if (error) {
                 if (error.code == 'ER_DUP_ENTRY') {
-                    return res.status(400).json({Message:`The Job-ID/CFAS Number "${inputData.Job_Number}" is already exist in the DataBase`})
+                    return res.status(400).json({ Message: `The Job-ID/CFAS Number "${inputData.Job_Number}" is already exist in the DataBase` })
                 } else {
-                    return res.status(400).json({Message:"Internal Server Error"})
+                    console.log(error)
+                    return res.status(400).json({ Message: "Internal Server Error" })
                 }
             } else {
-                db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs", function (error, result) {
+                db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs limit 100", function (error, result) {
                     if (error) throw error
-                    return res.status(200).json({Message:`Job "${inputData.Job_Number}" Added Successfully`,Data:result});
+                    return res.status(200).json({ Message: `Job "${inputData.Job_Number}" Added Successfully`, Data: result });
                 })
             }
         })
@@ -430,7 +444,7 @@ api_Router.post("/SubmitQC", (req, res) => {
                                 to: req.session.UserMail,
                                 cc: req.session.RMail,
                                 subject: `QC Submission Confirmation Mail_${inputData[0].JobID}_${inputData[0].Checklist}_${inputData[0].type}`,
-                                html: `<h3>Hi ${req.session.UserName}</h3><br>You have Successfully Submitted the <b>${inputData[0].Checklist}</b> with Score of <b>${inputData[0].Percentage}%.</b><br>This is System Generated Mail, no need to reply.<br>Regards`,
+                                html: `<h3>Hi ${req.session.UserName}</h3><br>You have Successfully Submitted the <b>${inputData[0].Checklist}</b> with Score of <b>${inputData[0].Percentage}%.</b><br>This is System Generated Mail, no need to reply.<br><br><br>Regards`,
                                 attachments: [
                                     {
                                         path: filePath
@@ -539,13 +553,18 @@ api_Router.post('/filterResponses', (req, res) => {
     if (req.session.UserID) {
         var data = req.body.params;
         let main;
-        let query1 = `select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where Job_ID='${data.id}' or Type='${data.type}' or Submitted_Date between '${data.from}' and '${data.to}' order by responses_ID desc`
-        let query2 = `select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where Job_ID='${data.id}' or Type='${data.type}' order by responses_ID desc`
-        let query3 = `select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where Job_ID='${data.id}' and Type='${data.type}' order by responses_ID desc`
+        let query1 = `select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where Job_ID='${data.id}' and Type='${data.type}' and Submitted_Date between '${data.from}' and '${data.to}' order by responses_ID desc`
+        let query2 = `select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where Job_ID='${data.id}' and Type='${data.type}' order by responses_ID desc`
+        let query3 = `select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where Submitted_Date between '${data.from}' and '${data.to}' order by responses_ID desc`
 
-        if (data.from && data.to) {
+        if (data.from && data.to && data.id && data.type) {
             main = query1
-        } else if (data.id && data.type) { main = query3 } else { main = query2 }
+        } else if (!(data.from && data.to) && data.id && data.type) {
+            main = query2
+        } else if (data.from && data.to && !(data.id || data.type)){
+            main = query3
+        }
+
         db.query(main, (error, result) => {
             if (error) {
                 console.error(error)
@@ -569,6 +588,62 @@ api_Router.post('/UpdatePassword', (req, res) => {
             }
         })
 
+    } else {
+        res.status(400).send("Access Denied")
+    }
+})
+api_Router.get('/getUserDetails', (req, res) => {
+    if (req.session.UserID) {
+        let checklist;
+        db.query("select * from checklist", (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(500).json({ Message: "Internal Server Error" })
+            } else {
+                checklist = result;
+            }
+        })
+        db.query("Select * from users where Employee_ID=?", [req.query.UserID], (error, result) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).json({ Message: "Internal Server Error" })
+            } else {
+                return res.status(200).json({ UserData: result[0], Checklist: checklist })
+            }
+        })
+    } else {
+        res.status(500).json({ Message: "Access Denied" })
+    }
+})
+api_Router.post('/UpdateUser', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Admin") {
+        let inputData = req.body.params;
+        inputData["Added_By"] = req.session.UserName;
+        db.query("update users set ? where Employee_ID=?", [req.body.params, req.body.params.Employee_ID], (error, result) => {
+            if (error) {
+                return res.status(400).send(error.message)
+            }
+
+            return res.status(200).send('User Update Successfully\nRefresh the page.');
+        })
+    } else {
+        res.status(400).send("Access Denied")
+    }
+});
+
+
+api_Router.get('/GetUser', (req, res) => {
+    if (req.session.UserID) {
+        db.query("select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users where Employee_ID=? or Full_Name like '%" + req.query.key + "%'", [req.query.key], (error, result) => {
+            if (error) {
+                console.log(error)
+                res.status(400).send("Internal Server Error")
+            } else if (result.length > 0) {
+                res.status(200).send(result)
+            } else {
+                res.status(400).send("Data Not Found")
+            }
+        })
     } else {
         res.status(400).send("Access Denied")
     }

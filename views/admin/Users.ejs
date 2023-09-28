@@ -16,6 +16,11 @@
     <main class="main_container">
         <form action="#" method="POST" enctype="multipart/form-data" id="userExcelUploadForm"
             class="d-flex justify-content-center align-items-center">
+            <div class="input-group m-2" style="width: max-content;">
+                <input type="text" class="form-control" placeholder="Enter Name/Employee-ID"
+                    aria-label="Recipient's username" aria-describedby="FilterBtn" id="SearchBox">
+                <button class="btn btn-success" type="button" id="FilterBtn"><i class="bi bi-search"></i></button>
+            </div>
             <p class="form-label">Select Only CSV File</p>
             <label class="input-group-text" for="UserExcelFile">Select User Data</label>
             <input type="file" class="form-control m-2" name="UserExcelFile" id="UserExcelFile" accept=".csv" required
@@ -38,7 +43,7 @@
                         <th scope="col">Role</th>
                         <th scope="col">No of Submission</th>
                         <th scope="col">Reporting Manager</th>
-                        <!-- <th scope="col">Added By</th> -->
+                        <th scope="col">Added By</th>
                         <th scope="col">Status</th>
                         <th scope="col">Last Seen</th>
                         <th></th>
@@ -47,37 +52,38 @@
                 <tbody id="content-area">
                     <% if (Object.values(Data).length>0) { %>
                         <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
-                            <tr>
+                            <tr ondblclick="getUserDetails('<%= Data[index]['Employee_ID'] %>')"
+                                style="cursor:pointer;">
                                 <td>
                                     <%= index+1%>
                                 </td>
                                 <td>
                                     <%= Data[index]["Employee_ID"] %>
                                 </td>
-                                <td>
+                                <td class="text-start">
                                     <%= Data[index]['Full_Name'] %>
                                 </td>
-                                <td>
+                                <td class="text-start">
                                     <%= Data[index]['Email_ID'] %>
                                 </td>
-                                <td>
+                                <td class="text-start">
                                     <%= Data[index]['Designation'] %>
                                 </td>
-                                <td>
+                                <td class="text-start">
                                     <%= Data[index]['Location'] %>
                                 </td>
-                                <td>
+                                <td class="text-start">
                                     <%= Data[index]['Role'] %>
                                 </td>
                                 <td>
                                     <%= Data[index]['No_of_Submission'] %>
                                 </td>
-                                <td>
+                                <td class="text-start">
                                     <%= Data[index]['Reporting_Manager_Name'] %>
                                 </td>
-                                <!-- <td>
+                                <td class="text-start">
                                     <%= Data[index]['Added_By'] %>
-                                </td> -->
+                                </td>
                                 <td>
                                     <% if (Data[index]['Active']) { %>
                                         Active
@@ -94,9 +100,9 @@
                                             onclick="updateStatusAPI('<%= Data[index]['Employee_ID'] %>','1')"><i
                                                 class="bi bi-check-circle-fill"></i></button>
                                         <% }else{%> <button type="button" class="btn btn-danger btn-sm ms-2"
-                                            onclick="updateStatusAPI('<%= Data[index]['Employee_ID'] %>','0')"><i
-                                                class="bi bi-x-circle"></i></button>
-                                           <% } %>
+                                                onclick="updateStatusAPI('<%= Data[index]['Employee_ID'] %>','0')"><i
+                                                    class="bi bi-x-circle"></i></button>
+                                            <% } %>
 
                                 </td>
 
@@ -144,6 +150,7 @@
             </table>
         </div>
     </main>
+    <!-- Add New User Model -->
     <div class="modal fade" id="UserInputModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -156,37 +163,130 @@
                 <form action="/api/AddUser" method="post" id="addUserForm">
                     <div class="modal-body">
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="empId" placeholder="key">
+                            <input type="text" class="form-control" id="empId" placeholder="key" required>
                             <label for="empId">Employee ID</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="empName" placeholder="key">
+                            <input type="text" class="form-control" id="empName" placeholder="key" required>
                             <label for="empName">Employee Name</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <input type="email" class="form-control" id="empEmail" placeholder="key">
+                            <input type="email" class="form-control" id="empEmail" placeholder="key" required>
                             <label for="empEmail">Email ID</label>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="empDesignation" placeholder="key">
-                            <label for="empDesignation">Designation</label>
+                        <div class="mb-3">
+                            <label for="empDesignation" class="mb-3">Designation</label>
+                            <select name="empDesignation" id="empDesignation" class="from-select form-control"
+                                aria-label="Select" required>
+                                <option selected>Select the Designation</option>
+                                <% Basic.Designation.forEach(element=> { %>
+                                    <option value="<%= element %>">
+                                        <%= element %>
+                                    </option>
+                                    <% }) %>
+                            </select>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="empLocation" placeholder="key">
-                            <label for="empLocation">Location</label>
+                        <div class="mb-3">
+                            <label for="empLocation" class="mb-2">Location</label>
+                            <select name="empLocation" id="empLocation" class="from-select form-control"
+                                aria-label="Select" required>
+                                <option selected>Select the Location</option>
+                                <% Basic.Location.forEach(element=> { %>
+                                    <option value="<%= element %>">
+                                        <%= element %>
+                                    </option>
+                                    <% }) %>
+                            </select>
+
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="empRole" placeholder="key">
-                            <label for="empRole">Role</label>
+                        <div class="mb-3">
+                            <label for="empRole" class="mb-2">Role</label>
+                            <select name="empRole" id="empRole" class="from-select form-control" aria-label="Select"
+                                required>
+                                <option selected>Select the Role</option>
+                                <% Basic.Roles.forEach(element=> { %>
+                                    <option value="<%= element %>">
+                                        <%= element %>
+                                    </option>
+                                    <% }) %>
+                            </select>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="empReportingManager" placeholder="key">
-                            <label for="empReportingManager">Reporting Manager</label>
+                        <div class="mb-3">
+                            <label for="empReportingManager" class="mb-2">Reporting Manager</label>
+                            <select name="empReportingManager" id="empReportingManager" class="from-select form-control"
+                                aria-label="Select" required>
+                                <option selected>Select the Reporting Manager</option>
+                                <% Basic.NameMail.forEach(record=> { %>
+                                    <option value="<%= record.Employee_ID %>">
+                                        <%= record.Full_Name %>
+                                    </option>
+                                    <% }) %>
+                            </select>
                         </div>
                     </div>
+                    <div class="ChecklistArea1" id="ChecklistArea1">
 
+                    </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary" id="AddEmployeebtn">Add &nbsp;<i
+                                class="bi bi-send-fill"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Update User Model -->
+    <div class="modal fade" id="UserUpdateModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content ">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5" id="staticBackdropLabel">Update User Details
+                    </h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/api/UpdateUserDetails" method="post" id="UpdateUserForm">
+                    <div class="modal-body">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="u-empId" placeholder="key">
+                            <label for="u-empId">Employee ID</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="u-empName" placeholder="key">
+                            <label for="u-empName">Employee Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="u-empEmail" placeholder="key">
+                            <label for="u-empEmail">Email ID</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="u-empDesignation" placeholder="key">
+                            <label for="u-empDesignation">Designation</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input list="u-empLocation" class="form-control" id="u-empLocation" placeholder="key">
+                            <label for="u-empLocation">Location</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="u-empRole" placeholder="key">
+                            <label for="u-empRole">Role</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="u-empReportingManager" placeholder="key">
+                            <label for="u-empReportingManager">Reporting Manager</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="u-empReportingManagerMail" placeholder="key">
+                            <label for="u-empReportingManagerMail">Reporting Manager Mail</label>
+                        </div>
+                    </div>
+                    <div class="ChecklistArea" id="ChecklistArea">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="UpdateEmployeebtn">Update &nbsp;<i
                                 class="bi bi-send-fill"></i></button>
                     </div>
                 </form>
@@ -198,7 +298,6 @@
     </footer>
     <%- include('../partials/dependencies-js') %>
         <script>
-
             document.getElementById('addUserForm').addEventListener("submit", async (e) => {
                 e.preventDefault();
                 await axios.post('/api/AddUser', {
@@ -209,17 +308,20 @@
                         "Designation": document.getElementById("empDesignation").value,
                         "Location": document.getElementById("empLocation").value,
                         "Role": document.getElementById("empRole").value,
-                        "Reporting_Manager_Name": document.getElementById("empReportingManager").value,
+                        "Reporting_Manager_ID": document.getElementById("empReportingManager").value,
+                        
                     }
                 }).then(res => {
                     if (res.status == 200) {
                         $("#UserInputModel").modal('hide')
-                        alert(res.data);
+                        updateContentArea(res.data.Data);
+                        alert(res.data.Message);
+                        
                     }
                 }).catch(e => {
                     $("#UserInputModel").modal('hide')
                     console.log(e);
-                    alert(e.response.data);
+                    alert(e.response.data.Message);
                 })
             })
             document.getElementById('userExcelUploadForm').addEventListener("submit", async (e) => {
@@ -256,26 +358,204 @@
                     })
             }
 
+            function getUserDetails(userId) {
+                $("#UserUpdateModel").modal("show")
+                axios.get('/api/getUserDetails', {
+                    params: {
+                        UserID: userId
+                    }
+                }).then(res => {
+                    if (res.status == 200) {
+
+                        let groupedData = groupBy(res.data.Checklist, "Customer");
+                        $('#ChecklistArea').empty();
+                        let area = document.getElementById("ChecklistArea");
+                        area.classList.add("form-check", "form-switch", "form-check-inline", "m-1")
+                        const title = document.createElement("h5");
+                        title.textContent = "Checklist Accessibility";
+                        area.appendChild(title)
+                        if (Object.values(groupedData).length > 0) {
+                            for (const key in groupedData) {
+                                if (groupedData.hasOwnProperty(key)) {
+                                    const coverDiv = document.createElement('div');
+                                    const flexDiv = document.createElement('div');
+                                    flexDiv.classList.add("m-2")
+                                    coverDiv.classList.add("d-flex", "justify-content-center")
+                                    const checkbox = document.createElement('input');
+                                    checkbox.classList.add("form-check-input")
+                                    checkbox.type = 'checkbox';
+                                    checkbox.name = 'checklist';
+                                    checkbox.value = key;
+                                    checkbox.id = key;
+                                    checkbox.addEventListener('change', handleParentCheckboxChange);
+                                    const label = document.createElement('label');
+                                    label.textContent = key;
+                                    label.setAttribute('for', key);
+                                    label.classList.add("form-check-label")
+                                    const hr = document.createElement('hr');
+                                    flexDiv.appendChild(label);
+                                    flexDiv.appendChild(checkbox);
+                                    coverDiv.appendChild(hr)
+                                    coverDiv.appendChild(flexDiv)
+                                    area.appendChild(coverDiv);
+                                    area.appendChild(hr);
+                                    const outerDiv = document.createElement('div');
+                                    groupedData[key].forEach(item => {
+                                        const innerDiv = document.createElement('div');
+                                        innerDiv.classList.add("form-check", "form-switch", "form-check-inline", "m-2")
+                                        const checkbox = document.createElement('input');
+                                        checkbox.classList.add("form-check-input")
+                                        checkbox.type = 'checkbox';
+                                        checkbox.name = key;
+                                        checkbox.value = item.Checklist_Name;
+                                        checkbox.id = `CheckList_${item.Checklist_Name}`;
+                                        const label = document.createElement('label');
+                                        label.textContent = item.Checklist_Name;
+                                        label.setAttribute('for', item.Checklist_Name);
+                                        label.classList.add("form-check-label")
+                                        innerDiv.appendChild(checkbox);
+                                        innerDiv.appendChild(label);
+                                        outerDiv.appendChild(innerDiv)
+                                    });
+
+                                    area.appendChild(outerDiv);
+
+                                }
+                            }
+                        } else {
+                            console.log("No Checklist")
+                        }
+                        document.getElementById("u-empId").value = res.data.UserData.Employee_ID;
+                        document.getElementById("u-empName").value = res.data.UserData.Full_Name;
+                        document.getElementById("u-empEmail").value = res.data.UserData.Email_ID;
+                        document.getElementById("u-empDesignation").value = res.data.UserData.Designation;
+                        document.getElementById("u-empLocation").value = res.data.UserData.Location;
+                        document.getElementById("u-empRole").value = res.data.UserData.Role;
+                        document.getElementById("u-empReportingManager").value = res.data.UserData.Reporting_Manager_Name;
+                        document.getElementById("u-empReportingManagerMail").value = res.data.UserData.Reporting_Manager_Mail;
+                        const allCheckboxes = document.querySelectorAll('input[id^="CheckList_"]');
+                        if (res.data.UserData.Access) {
+                            const valuesToCheck = res.data.UserData.Access.split(",")
+                            allCheckboxes.forEach(checkbox => {
+                                const isChild = valuesToCheck.includes(checkbox.value);
+                                if (isChild) {
+                                    checkbox.checked = true; // Mark child checkbox as checked
+                                    // Mark the parent checkbox as checked
+                                    const parentCheckbox = document.getElementById(checkbox.name);
+                                    if (parentCheckbox) {
+                                        parentCheckbox.checked = true;
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }).catch(e => {
+                    console.log(e);
+                    alert(e.message)
+                })
+            }
+
+            function groupBy(array, key) {
+                return array.reduce((result, obj) => {
+                    const keyValue = obj[key];
+                    if (!result[keyValue]) {
+                        result[keyValue] = [];
+                    }
+                    result[keyValue].push(obj);
+                    return result;
+                }, {});
+            }
+            // Function to handle parent checkbox state change
+            function handleParentCheckboxChange(event) {
+                const parentCheckbox = event.target;
+                const childCheckboxes = document.querySelectorAll(`input[name="${parentCheckbox.value}"]`);
+
+                childCheckboxes.forEach(childCheckbox => {
+                    childCheckbox.checked = parentCheckbox.checked;
+                });
+            }
+
+            document.getElementById("UpdateUserForm").addEventListener('submit', async (e) => {
+                e.preventDefault()
+                const allCheckboxes = document.getElementById("UpdateUserForm").querySelectorAll('input[type="checkbox"]');
+                const checkedValues = [];
+                allCheckboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        checkedValues.push(checkbox.value);
+                    }
+                });
+
+                // const allCheckboxes = document.querySelectorAll('input[id^="CheckList_"]');
+                // const checkedValues = Array.from(allCheckboxes)
+                //     .filter(checkbox => checkbox.checked || (checkbox.type === 'checkbox' && checkbox.parentElement.querySelector('input:checked')))
+                //     .map(checkbox => checkbox.value);
+
+                await axios.post('/api/UpdateUser', {
+                    params: {
+                        "Employee_ID": document.getElementById("u-empId").value,
+                        "Full_Name": document.getElementById("u-empName").value,
+                        "Email_ID": document.getElementById("u-empEmail").value,
+                        "Designation": document.getElementById("u-empDesignation").value,
+                        "Location": document.getElementById("u-empLocation").value,
+                        "Role": document.getElementById("u-empRole").value,
+                        "Reporting_Manager_Name": document.getElementById("u-empReportingManager").value,
+                        "Reporting_Manager_Mail": document.getElementById("u-empReportingManagerMail").value,
+                        "Access": checkedValues.toString(),
+                    }
+                }).then(res => {
+                    if (res.status == 200) {
+                        $("#UserUpdateModel").modal('hide')
+                        alert(res.data);
+                    }
+                }).catch(e => {
+                    $("#UserUpdateModel").modal('hide')
+                    console.log(e);
+                    alert(e.response.data);
+                })
+            })
+            document.getElementById("FilterBtn").addEventListener('click', async (e) => {
+                const Key = document.getElementById("SearchBox").value.replaceAll(" ", "");
+                var regex = /^[0-9a-zA-Z]+$/
+                if (regex.test(Key)) {
+                    axios.get('/api/GetUser', {
+                        params: {
+                            key: Key
+                        }
+                    }).then(res => {
+                        if (res.status == 200) {
+                            updateContentArea(res.data);
+                        }
+                    })
+                        .catch(e => {
+                            console.log(e);
+                            alert("Unable to Find the User...\nPlease Check the Details or Contact Admin");
+                        })
+                } else {
+                    document.getElementById("SearchBox").value = null;
+                    alert("Special Characters are Not Allowed for");
+                }
+            })
             function updateContentArea(data) {
                 if (data.length > 0) {
                     $('#content-area').empty();
                     const table = document.getElementById("content-area");
                     for (let i = 0; i < data.length; i++) {
-                        table.innerHTML += `<tr>
+                        table.innerHTML += `<tr ondblclick="getUserDetails('${data[i]['Employee_ID']}')" style="cursor:pointer;">
                                     <td>${i + 1}</td>
                                     <td>${data[i]["Employee_ID"]}</td>
-                                    <td>${data[i]["Full_Name"]}</td>
-                                    <td>${data[i]["Email_ID"]}</td>
-                                    <td>${data[i]["Designation"]}</td>
-                                    <td>${data[i]["Location"]}</td>
-                                    <td>${data[i]["Role"]}</td>
-                                    <td>${data[i]["No_of_Submission"]}</td>
-                                    <td>${data[i]["Reporting_Manager_Name"]}</td>
+                                    <td class="text-start">${data[i]["Full_Name"]}</td>
+                                    <td class="text-start">${data[i]["Email_ID"]}</td>
+                                    <td class="text-start">${data[i]["Designation"]}</td>
+                                    <td class="text-start">${data[i]["Location"]}</td>
+                                    <td class="text-start">${data[i]["Role"]}</td>
+                                     <td>${data[i]["No_of_Submission"]}</td>
+                                    <td class="text-start">${data[i]["Reporting_Manager_Name"]}</td>
+                                    <td class="text-start">${data[i]["Added_By"]}</td>     
                                     <td>${data[i]["Active"] ? "Active" : "Inactive"}</td>
                                     <td>${data[i]["lastSeen"]}</td>
-                                    <td>${data[i]['Active']=='0'?
-                                        `<button type="button" class="btn btn-success btn-sm ms-2 me-2" onclick="updateStatusAPI('${data[i]['Employee_ID']}','1')"><i class="bi bi-check-circle-fill"></i></button></td>`:
-                                        `<button type="button" class="btn btn-danger btn-sm ms-2" onclick="updateStatusAPI('${data[i]['Employee_ID']}','0')"> <i class="bi bi-x-circle"></i></button></td></tr>`}</tr>`
+                                    <td>${data[i]['Active'] == '0' ?
+                                `<button type="button" class="btn btn-success btn-sm ms-2 me-2" onclick="updateStatusAPI('${data[i]['Employee_ID']}','1')"><i class="bi bi-check-circle-fill"></i></button></td>` :
+                                `<button type="button" class="btn btn-danger btn-sm ms-2" onclick="updateStatusAPI('${data[i]['Employee_ID']}','0')"> <i class="bi bi-x-circle"></i></button></td></tr>`}</tr>`
                     }
                 }
 

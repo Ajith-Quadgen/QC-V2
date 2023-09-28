@@ -188,9 +188,11 @@
                 }).then(res => {
                     if (res.status == 200) {
                         if(res.data.length>0){
+                           
                              updateContentArea(res.data);
                         }else{
-                            alert("Data Not Found")
+                            alert("Responses Not Found\n Please Provide Valid Data")
+                            window.location.reload()
                         }
                     }
                 })

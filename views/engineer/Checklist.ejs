@@ -13,22 +13,29 @@
 
 <body>
     <header>
-        <%- include('../partials/engineer-header',{title:title,IncludeBackButton:false}) %>
+        <% if (Role=="Engineer" ) { %>
+            <%- include('../partials/engineer-header',{title:title,IncludeBackButton:0}) %>
+                <% }else if(Role=="Admin" ){ %>
+                    <%- include('../partials/admin-header',{title:title}) %>
+
+                        <% } %>
     </header>
 
-    <main class="d-flex flex-column mb-3 justify-content-center w-100" style="position: absolute; top: 100px; align-self: baseline;">
+    <main class="d-flex flex-column mb-3 justify-content-center w-100"
+        style="position: absolute; top: 100px; align-self: baseline;">
 
         <section class="d-flex justify-content-center">
             <% if (Object.values(Data).length>0) { %>
                 <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
                     <a href="/Engineer/QC/<%= Data[index].Checklist_Name %>" style="text-decoration: none;">
-                        <div class="localcard m-4 p-3 d-flex align-items-end" style='background: rgb(78,78,78);background: linear-gradient(180deg, rgba(78,78,78,0.0032387955182072714) 11%, rgba(2,0,36,0.7539390756302521) 100%),url("../../public/uploads/Checklist-Icon/<%= Data[index].Icon %>");  background-size: contain;                            background-position: center;                            background-repeat: no-repeat;'>
+                        <div class="localcard m-4 p-3 d-flex align-items-end"
+                            style='background: rgb(78,78,78);background: linear-gradient(180deg, rgba(78,78,78,0.0032387955182072714) 11%, rgba(2,0,36,0.7539390756302521) 100%),url("../../public/uploads/Checklist-Icon/<%= Data[index].Icon %>");  background-size: contain;                            background-position: center;                            background-repeat: no-repeat;'>
 
-                                
-                                <h3 style="color: #f1f1f1;text-shadow: 10px 0px 19px rgba(102, 102, 102, 1);">
-                                    <%= Data[index].Checklist_Name %>
-                                </h3>
-     
+
+                            <h3 style="color: #f1f1f1;text-shadow: 10px 0px 19px rgba(102, 102, 102, 1);">
+                                <%= Data[index].Checklist_Name %>
+                            </h3>
+
                         </div>
                     </a>
                     <%}%>
