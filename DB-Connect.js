@@ -4,8 +4,8 @@ const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '@Renu001',
-    // password:'@Quadgen23',
-    database: 'qc-portal',
+    password:'@Quadgen23',
+    // database: 'qc-portal',
     multipleStatements: true
   });
 
