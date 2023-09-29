@@ -551,18 +551,19 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
 })
 api_Router.post('/filterResponses', (req, res) => {
     if (req.session.UserID) {
-        var data = req.body.params;
-        let main;
-        let query1 = `select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where Job_ID='${data.id}' and Type='${data.type}' and Submitted_Date between '${data.from}' and '${data.to}' order by responses_ID desc`
-        let query2 = `select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where Job_ID='${data.id}' and Type='${data.type}' order by responses_ID desc`
-        let query3 = `select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where Submitted_Date between '${data.from}' and '${data.to}' order by responses_ID desc`
-
-        if (data.from && data.to && data.id && data.type) {
-            main = query1
-        } else if (!(data.from && data.to) && data.id && data.type) {
-            main = query2
-        } else if (data.from && data.to && !(data.id || data.type)){
-            main = query3
+        const{from,to,id,type} = req.body.params;
+        let main="Select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where 1 ";
+        if(from){
+            main+= `AND Submitted_Date>='${from}'`
+        }
+        if(to){
+            main+= `AND Submitted_Date<='${to}'`
+        }
+        if(id){
+            main+= `AND Job_ID='${id}'`
+        }
+        if(type){
+            main+= `AND Type='${type}'`
         }
 
         db.query(main, (error, result) => {
