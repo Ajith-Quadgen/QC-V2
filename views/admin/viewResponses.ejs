@@ -32,22 +32,24 @@
 
             <div class="col-md-3 m-2" style="width: max-content;">
                 <label for="fromDate">Select starting date</label>
-                <input type="date" class="form-control" name="" id="fromDate" onchange="alert(this.value)">
+                <input type="date" class="form-control" name="" id="fromDate">
             </div>
             <div class="col-md-3 m-2" style="width: max-content;">
                 <label for="toDate">Select end date</label>
                 <input type="date" class="form-control" name="" id="toDate">
             </div>
             <div class="col-md-3 m-2" style="width: max-content;">
-                <label for="filterbtn"></label>
-                <button type="button" id="filterbtn" class="btn btn-outline-success">Filter &nbsp; <i
+                <label for="FilterBtn"></label>
+                <button type="button" id="FilterBtn" class="btn btn-outline-success">Filter &nbsp; <i
                         class="bi bi-funnel"></i></button>
             </div>
             <div class="col-md-3 m-2" style="width: max-content;">
                 <% if (Checklist) { %>
+                    <button type="button" class="btn btn-outline-info m-3" id="FilterDownloadBtn">Download the Filtered
+                        Data <i class="bi bi-cloud-download"></i></button>
                     <a href="/api/DownloadQCResponses/<%= Checklist%>" target="_self"><button
-                            class="btn btn-outline-primary m-3"><i class="bi bi-download"></i>  Download
-                            Master Excel</button></a>
+                            class="btn btn-outline-primary m-3"> Download
+                            Master Excel <i class="bi bi-download"></i> </button></a>
                     <% } %>
             </div>
 
@@ -172,27 +174,27 @@
     </footer>
     <%- include('../partials/dependencies-js') %>
         <script>
-            document.getElementById("filterbtn").addEventListener("click",async (e) => {
+            document.getElementById("FilterBtn").addEventListener("click", async (e) => {
                 var Job_ID, type, from, to;
                 Job_ID = document.getElementById("job_id").value.replaceAll(' ', "");
                 type = document.getElementById("qc_type").value;
                 from = document.getElementById("fromDate").value;
                 to = document.getElementById("toDate").value;
-               await axios.post('/api/filterResponses', {
+                await axios.post('/api/filterResponses', {
                     params: {
                         id: Job_ID,
                         type: type,
                         from: from,
-                        to:to
+                        to: to
                     }
-                }).then(res => {
+                }).then(async res => {
                     if (res.status == 200) {
-                        if(res.data.length>0){
-                           
-                             updateContentArea(res.data);
-                        }else{
+                        if (res.data.length > 0) {
+
+                            await updateContentArea(res.data);
+                        } else {
                             alert("Responses Not Found\nPlease Provide Valid Data")
-                            window.location.reload()
+                            //window.location.reload()
                         }
                     }
                 })
@@ -202,6 +204,44 @@
                     })
 
             })
+            document.getElementById("FilterDownloadBtn").addEventListener('click', async (e) => {
+                var Job_ID, type, from, to;
+                Job_ID = document.getElementById("job_id").value.replaceAll(' ', "");
+                type = document.getElementById("qc_type").value;
+                from = document.getElementById("fromDate").value;
+                to = document.getElementById("toDate").value;
+                await axios.post('/api/downloadFilteredContent', {
+                    params: {
+                        id: Job_ID,
+                        type: type,
+                        from: from,
+                        to: to
+                    }, responseType: 'blob'
+                }).then(async res => {
+                    var data = new Blob([res.data]);
+                    console.log(data)
+                    if (typeof window.navigator.msSaveBlob === 'function') {
+                        // If it is IE that support download blob directly.
+                        window.navigator.msSaveBlob(data, defaultFilename);
+                    } else {
+                        var blob = data;
+                        var link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = "Responses.xlsx";
+
+                        document.body.appendChild(link);
+
+                        link.click();
+                    }
+
+                })
+                    .catch(e => {
+                        console.log(e);
+                        alert("Unable to Download the Filtered Data...\nPlease Contact Admin");
+                    })
+
+            })
+
             function updateContentArea(data) {
                 if (data.length > 0) {
                     $('#content-area').empty();

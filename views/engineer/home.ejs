@@ -40,13 +40,13 @@
                 </div>
             </div>
         </section>
-        <section class="d-flex justify-content-center">
+        <section class="d-flex justify-content-center flex-wrap">
             <% if (Object.values(Data).length>0) { %>
                 <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
                     <a href="/Engineer/Customers/<%= Data[index].Customer_Name %>">
                         <div class="localcard m-4 text-center">
                             <img src="../../public/uploads/Customer-Logo/<%= Data[index].Customer_Logo%>"
-                                alt="Icon_<%= Data[index].Customer_Name %>" class="rounded checklist-icon">
+                                alt="Icon_<%= Data[index].Customer_Name %>" class="checklist-icon">
                         </div>
                     </a>
                     <%}%>

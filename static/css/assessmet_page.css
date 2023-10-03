@@ -239,13 +239,16 @@ th{
   z-index: 99;
   border: none;
   outline: none;
-  color: white;
   cursor: pointer;
   padding: 10px;
   border-radius: 10px;
   font-size: 18px;
+  background-image: linear-gradient(to right bottom, #e6ee22, #e6eb5b, #e5e781, #e3e4a3, #e0e0c3);  
 }
-
+#myBtn:hover{
+  transition: all 0.5 ease;
+  transform: scale(1.2);
+}
 .scoreButton{
   position: fixed;
   bottom: 85px;

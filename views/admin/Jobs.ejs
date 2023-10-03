@@ -18,8 +18,8 @@
             class="d-flex justify-content-center align-items-center">
             <div class="input-group m-2" style="width: max-content;">
                 <input type="text" class="form-control" placeholder="Enter Job-Id/CFAS Number"
-                    aria-label="Recipient's username" aria-describedby="filterbtn" id="cfas_no">
-                <button class="btn btn-success" type="button" id="filterbtn"><i class="bi bi-search"></i></button>
+                    aria-label="Recipient's username" aria-describedby="FilterBtn" id="cfas_no">
+                <button class="btn btn-success" type="button" id="FilterBtn"><i class="bi bi-search"></i></button>
             </div>
             <p class="form-label">Select Only CSV File</p>
             <label class="input-group-text" for="UserExcelFile">Select Job Data</label>
@@ -179,13 +179,13 @@
                         }
                     }).then(res => {
                         if (res.status == 200) {
-                            $("#UserInputModel").modal('hide')
+                            // $("#UserInputModel").modal('hide')
                             updateContentArea(res.data.Data)
                             alert(res.data.Message);
                         }
                     }).catch(e => {
                         console.log(e);
-                        $("#UserInputModel").modal('hide')
+                        // $("#UserInputModel").modal('hide')
                         alert(e.response.data.Message);
                     })
                 } else {
@@ -231,7 +231,7 @@
 
             }
 
-            document.getElementById("filterbtn").addEventListener("click", (e) => {
+            document.getElementById("FilterBtn").addEventListener("click", (e) => {
                 var Job_Id = document.getElementById("cfas_no").value.replaceAll(" ", '');
                 var regex = /^[0-9a-zA-Z\_\-]+$/
                 if (regex.test(Job_Id)) {

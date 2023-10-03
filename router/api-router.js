@@ -13,7 +13,7 @@ const fs = require('fs');
 const { error, log } = require('console');
 const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
-const { join } = require('path');
+const path = require('path');
 const { resume } = require('pdfkit');
 
 const transporter = nodemailer.createTransport(
@@ -520,8 +520,8 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
                         sheet.addRow(row)
                     });
                     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-                    res.setHeader('Content-Disposition', 'attachment; filename=QC_sResponse_Report.xlsx');
-                    const filename = req.params.QC.replace(" ", "_") + req.session.UserID + ".xlsx"
+                    res.setHeader('Content-Disposition', 'attachment; filename=Master_QC_Response_Report.xlsx');
+                    const filename = path.join(__dirname,"../public/Generated/"+req.params.QC.replace(" ", "_") + req.session.UserID + ".xlsx")
                     let filestream
                     await workbook.xlsx.writeFile(filename).then(async () => {
                         filestream = await fs.createReadStream(filename)
@@ -551,19 +551,19 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
 })
 api_Router.post('/filterResponses', (req, res) => {
     if (req.session.UserID) {
-        const{from,to,id,type} = req.body.params;
-        let main="Select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where 1 ";
-        if(from){
-            main+= `AND Submitted_Date>='${from}'`
+        const { from, to, id, type } = req.body.params;
+        let main = "Select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where 1 ";
+        if (from) {
+            main += `AND date_format(Submitted_Date,'%Y-%m-%d')>='${from}'`
         }
-        if(to){
-            main+= `AND Submitted_Date<='${to}'`
+        if (to) {
+            main += `AND date_format(Submitted_Date,'%Y-%m-%d')<='${to}'`
         }
-        if(id){
-            main+= `AND Job_ID='${id}'`
+        if (id) {
+            main += `AND Job_ID='${id}'`
         }
-        if(type){
-            main+= `AND Type='${type}'`
+        if (type) {
+            main += `AND Type='${type}'`
         }
 
         db.query(main, (error, result) => {
@@ -578,6 +578,64 @@ api_Router.post('/filterResponses', (req, res) => {
         res.status(400).send("Access Denied")
     }
 })
+
+api_Router.post('/downloadFilteredContent', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Admin") {
+        const { from, to, id, type } = req.body.params;
+        let workbook = new excel_js.Workbook();
+        let sheet = workbook.addWorksheet("Responses");
+
+        let main = "Select * from responses where 1 ";
+        if (from) {
+            main += `AND date_format(Submitted_Date,'%Y-%m-%d')>='${from}'`
+        }
+        if (to) {
+            main += `AND date_format(Submitted_Date,'%Y-%m-%d')<='${to}'`
+        }
+        if (id) {
+            main += `AND Job_ID='${id}'`
+        }
+        if (type) {
+            main += `AND Type='${type}'`
+        }
+        db.query(main, async function (error, result){
+            if (error) {
+                console.log(error)
+                return res.status(400)
+            }
+            var mycolumns = [
+                { header: "Checklist", key: "Checklist", width: 20 },
+                { header: "Date", key: "Submitted_Date", width: 20 },
+                { header: "Job-ID/CFAS", key: "Job_ID", width: 20 },
+                { header: "State", key: "State", width: 20 },
+                { header: "City", key: "City", width: 20 },
+                { header: "Type", key: "Type", width: 20 },
+                { header: "Remarks", key: "Remarks", width: 20 },
+                { header: "Section", key: "Section", width: 20 },
+                { header: "Item", key: "Item", width: 20 },
+                { header: "Description", key: "Description", width: 40 },
+                { header: "Check", key: "Check", width: 20 },
+                { header: "Reviewer-Note", key: "Note", width: 20 },
+                { header: "Score-(%)", key: "Percentage", width: 20 },
+                { header: "Submitted-By", key: "Submitted_By", width: 20 }
+            ]
+            sheet.columns = mycolumns
+            result.forEach(row => {
+                sheet.addRow(row)
+            });
+            try {
+                res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                res.setHeader('Content-Disposition', 'attachment; filename=QC-Filtered-Data.xlsx');
+                await workbook.xlsx.write(res);
+
+            } catch (error) {
+                console.log(error)
+                res.status(400).send(error.message)
+            }
+        })
+    }
+})
+
 api_Router.post('/UpdatePassword', (req, res) => {
     if (req.session.UserID) {
         db.query("update users set Password=? where Employee_ID=?", [req.body.params.newPassword, req.session.UserID], (error, result) => {

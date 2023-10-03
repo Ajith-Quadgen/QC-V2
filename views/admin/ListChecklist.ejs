@@ -18,17 +18,18 @@
             <% if (Object.values(Data).length>0) { %>
                 <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
                     <a href="/admin/ViewChecklist/<%= Data[index]['Checklist_Name']%>">
-                    <div class="card m-2 localCard">
-                        <div class="card-body">
-                            <img src="../../public/uploads/Checklist-Icon/<%= Data[index]['Icon']%> " alt="<%= Data[index]['Checklist_Name']%> Icon" class="Checklist-Icon">
+                        <div class="localcard m-4 text-center d-flex flex-column">
+
+                            <img src="../../public/uploads/Checklist-Icon/<%= Data[index]['Icon']%> "
+                                alt="<%= Data[index]['Checklist_Name']%> Icon" class="Checklist-Icon">
                             <h5 class="card-title">
-                                <%= Data[index]['Checklist_Name']%> 
+                                <%= Data[index]['Checklist_Name']%>
                             </h5>
                             <p class="card-text">
-                                <%= Data[index]['Customer']%> 
+                                <%= Data[index]['Customer']%>
                             </p>
+
                         </div>
-                    </div>
                     </a>
                     <% } %>
                         <% } else { %>

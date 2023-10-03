@@ -294,13 +294,13 @@
                             updateContentArea(res.data.Data)
                         }
                         ).catch(e => {
-                            $("#UserInputModel").modal('hide')
+                            // $("#UserInputModel").modal('hide')
                             console.log(e);
                             alert(e.response.data);
                         })
                     }
                 }).catch(e => {
-                    $("#UserInputModel").modal('hide')
+                    // $("#UserInputModel").modal('hide')
                     console.log(e);
                     alert(e.response.data);
                 })
@@ -399,13 +399,13 @@
                             alert(res.data.message)
                         }
                         ).catch(e => {
-                            $("#ChecklistModel").modal('hide')
+                            // $("#ChecklistModel").modal('hide')
                             console.log(e);
                             alert(e.response.data);
                         })
                     }
                 }).catch(e => {
-                    $("#ChecklistModel").modal('hide')
+                    // $("#ChecklistModel").modal('hide')
                     console.log(e);
                     alert(e.message);
                 })
