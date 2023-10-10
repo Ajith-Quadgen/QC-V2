@@ -261,25 +261,57 @@
                             <input type="email" class="form-control" id="u-empEmail" placeholder="key">
                             <label for="u-empEmail">Email ID</label>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="u-empDesignation" placeholder="key">
+                        <div class="mb-3">
                             <label for="u-empDesignation">Designation</label>
+                            <select name="u-empDesignation" id="u-empDesignation" class="from-select form-control"
+                                aria-label="Select" required>
+                                <option selected>Select the Designation</option>
+                                <% Basic.Designation.forEach(element=> { %>
+                                    <option value="<%= element %>">
+                                        <%= element %>
+                                    </option>
+                                    <% }) %>
+                            </select>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input list="u-empLocation" class="form-control" id="u-empLocation" placeholder="key">
+                        <div class="mb-3">
                             <label for="u-empLocation">Location</label>
+                            <select name="u-empLocation" id="u-empLocation" class="from-select form-control"
+                                aria-label="Select" required>
+                                <option selected>Select the Location</option>
+                                <% Basic.Location.forEach(element=> { %>
+                                    <option value="<%= element %>">
+                                        <%= element %>
+                                    </option>
+                                    <% }) %>
+                            </select>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="u-empRole" placeholder="key">
+                        <div class="mb-3">
                             <label for="u-empRole">Role</label>
+                            <select name="u-empRole" id="u-empRole" class="from-select form-control" aria-label="Select"
+                                required>
+                                <option selected>Select the Role</option>
+                                <% Basic.Roles.forEach(element=> { %>
+                                    <option value="<%= element %>">
+                                        <%= element %>
+                                    </option>
+                                    <% }) %>
+                            </select>
                         </div>
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="u-empReportingManager" placeholder="key">
-                            <label for="u-empReportingManager">Reporting Manager</label>
+                            <input type="text" id="u-empReportingManager" class="form-control" placeholder="key" readonly required>
+                            <label for="u-empReportingManager">Reporting Manager: </label>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="email" class="form-control" id="u-empReportingManagerMail" placeholder="key">
-                            <label for="u-empReportingManagerMail">Reporting Manager Mail</label>
+                        <div class="mb-3">
+                            <input type="hidden" name="" id="u-empReportingManagerID" placeholder="key" required value="">
+                            <select name="u-empReportingManager" class="from-select form-control"
+                                id="ReportingMangerSelect" aria-label="Select">
+                                <option selected>Select the new Reporting Manager</option>
+                                <% Basic.NameMail.forEach(record=> { %>
+                                    <option value="<%= record.Email_ID %>">
+                                        <%= record.Full_Name %>
+                                    </option>
+                                    <% }) %>
+                            </select>
                         </div>
                     </div>
                     <div class="ChecklistArea" id="ChecklistArea">
@@ -298,6 +330,11 @@
     </footer>
     <%- include('../partials/dependencies-js') %>
         <script>
+            document.getElementById("ReportingMangerSelect").addEventListener("change", (e) => {
+                const select = e.target;
+                document.getElementById('u-empReportingManager').value = select.options[select.selectedIndex].text;
+                document.getElementById('u-empReportingManagerID').value = select.value;
+            })
             document.getElementById('addUserForm').addEventListener("submit", async (e) => {
                 e.preventDefault();
                 await axios.post('/api/AddUser', {
@@ -309,14 +346,14 @@
                         "Location": document.getElementById("empLocation").value,
                         "Role": document.getElementById("empRole").value,
                         "Reporting_Manager_ID": document.getElementById("empReportingManager").value,
-                        
+
                     }
                 }).then(res => {
                     if (res.status == 200) {
                         $("#UserInputModel").modal('hide')
                         updateContentArea(res.data.Data);
                         alert(res.data.Message);
-                        
+
                     }
                 }).catch(e => {
                     // $("#UserInputModel").modal('hide')
@@ -431,16 +468,16 @@
                         document.getElementById("u-empDesignation").value = res.data.UserData.Designation;
                         document.getElementById("u-empLocation").value = res.data.UserData.Location;
                         document.getElementById("u-empRole").value = res.data.UserData.Role;
+                        document.getElementById("u-empReportingManagerID").value = res.data.UserData.Reporting_Manager_Mail;
                         document.getElementById("u-empReportingManager").value = res.data.UserData.Reporting_Manager_Name;
-                        document.getElementById("u-empReportingManagerMail").value = res.data.UserData.Reporting_Manager_Mail;
+
                         const allCheckboxes = document.querySelectorAll('input[id^="CheckList_"]');
                         if (res.data.UserData.Access) {
                             const valuesToCheck = res.data.UserData.Access.split(",")
                             allCheckboxes.forEach(checkbox => {
                                 const isChild = valuesToCheck.includes(checkbox.value);
                                 if (isChild) {
-                                    checkbox.checked = true; // Mark child checkbox as checked
-                                    // Mark the parent checkbox as checked
+                                    checkbox.checked = true;
                                     const parentCheckbox = document.getElementById(checkbox.name);
                                     if (parentCheckbox) {
                                         parentCheckbox.checked = true;
@@ -499,13 +536,14 @@
                         "Location": document.getElementById("u-empLocation").value,
                         "Role": document.getElementById("u-empRole").value,
                         "Reporting_Manager_Name": document.getElementById("u-empReportingManager").value,
-                        "Reporting_Manager_Mail": document.getElementById("u-empReportingManagerMail").value,
+                        "Reporting_Manager_Mail": document.getElementById("u-empReportingManagerID").value,
                         "Access": checkedValues.toString(),
                     }
                 }).then(res => {
                     if (res.status == 200) {
+                        updateContentArea(res.data.Data);
                         $("#UserUpdateModel").modal('hide')
-                        alert(res.data);
+                        alert(res.data.Message);
                     }
                 }).catch(e => {
                     // $("#UserUpdateModel").modal('hide')

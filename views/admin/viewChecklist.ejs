@@ -25,11 +25,13 @@
                     class="bi bi-cloud-arrow-up"></i></button>
             <input type="button" value="Add New Check" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
                 data-bs-target="#UserInputModel">
-                <% if (Checklist) { %>
-                    <a href="/admin/viewResponses/<%= Checklist%>" target="_self"><button type="button" class="btn btn-outline-secondary m-2">View Responses</button>  </a>
+            <% if (Checklist) { %>
+                <a href="/admin/viewResponses/<%= Checklist%>" target="_self"><button type="button"
+                        class="btn btn-outline-secondary m-2">View Responses</button> </a>
                 <% } %>
         </form>
-        <div class="d-flex w-100">
+        
+        <div class="d-flex w-100 flex-column-reverse" >
             <table class="table table-hover m-2  table-striped caption-top">
                 <thead class="table-dark sticky-top">
                     <tr>
@@ -43,7 +45,9 @@
                         <th scope="col" colspan="2">Status</th>
                         <th></th>
                     </tr>
+                    <div id="loading-spinner"></div>
                 </thead>
+                
                 <tbody id="content-area">
                     <% if (Object.values(Data).length>0) { %>
                         <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
@@ -51,19 +55,19 @@
                                 <td>
                                     <%= index+1%>
                                 </td>
-                                <td>
+                                <td style="text-align: start; align-items:start;">
                                     <%= Data[index]["Checklist"] %>
                                 </td>
-                                <td>
+                                <td style="text-align: start; align-items:start;">
                                     <%= Data[index]['Section'] %>
                                 </td>
-                                <td>
+                                <td style="text-align: start; align-items:start;">
                                     <%= Data[index]['Item'] %>
                                 </td>
-                                <td>
+                                <td style="text-align: start; align-items:start;">
                                     <%- Data[index]['Description'] %>
                                 </td>
-                                <td>
+                                <td style="text-align: start; align-items:start;">
                                     <%= Data[index]['Reference_Document'] %>
                                 </td>
                                 <td style="width: 300px; word-wrap: break-word;">
@@ -139,22 +143,35 @@
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content ">
                 <div class="modal-header">
-                    <h3 class="modal-title fs-5" id="staticBackdropLabel">Add New User
+                    <h3 class="modal-title fs-5" id="staticBackdropLabel">Add New Check Point
                     </h3>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="#" method="post" id="addQCCheckForm">
                     <div class="modal-body">
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="qc" placeholder="key" readonly>
+                            <input type="text" class="form-control" id="qc" placeholder="key" value="<%=Checklist%>"
+                                readonly required>
                             <label for="qc">QC</label>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="section" placeholder="key">
+                        <div class="mb-3">
                             <label for="section">Select Section</label>
+                            <select name="section" class="from-select form-control"
+                                id="section" aria-label="Select" required>
+                                <option value="" selected>Select the Section</option>
+                                <% Sections.forEach(record=> { %>
+                                    <option value="<%= record.Section %>">
+                                        <%= record.Section %>
+                                    </option>
+                                    <% }) %>
+                            </select>
                         </div>
                         <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="Description" placeholder="key">
+                            <input type="text" class="form-control" id="item" placeholder="key" required>
+                            <label for="item">Enter the Item</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="Description" placeholder="key" required>
                             <label for="Description">Description</label>
                         </div>
                         <div class="form-floating mb-3">
@@ -168,7 +185,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary" id="addQCCheckbtn">Add &nbsp;<i
+                        <button type="submit" class="btn btn-primary" id="addQCCheckbtn">Add Check Point&nbsp;<i
                                 class="bi bi-send-fill"></i></button>
                     </div>
                 </form>
@@ -193,9 +210,17 @@
                             <input type="hidden" name="" readonly value="" id="updateID">
                             <label for="updateqc">QC</label>
                         </div>
-                        <div class="form-floating mb-3">
-                            <input type="text" class="form-control" id="updatesection" placeholder="key" required>
-                            <label for="updatesection">Section</label>
+                        <div class="mb-3">
+                            <label for="updatesection">Select Section</label>
+                            <select name="updatesection" class="from-select form-control"
+                                id="updatesection" aria-label="Select" required>
+                                <option value="" selected>Select the Section</option>
+                                <% Sections.forEach(record=> { %>
+                                    <option value="<%= record.Section %>">
+                                        <%= record.Section %>
+                                    </option>
+                                    <% }) %>
+                            </select>
                         </div>
                         <div class="form-floating mb-3">
                             <input type="text" class="form-control" id="updateitem" placeholder="key">
@@ -233,25 +258,29 @@
 
             document.getElementById('addQCCheckForm').addEventListener("submit", async (e) => {
                 e.preventDefault();
-                await axios.post('/api/AddQCCheck', {
+                showLoadingSpinner()
+                await axios.post('/admin/AddNewCheckPoint', {
                     params: {
-                        "Employee_ID": document.getElementById("empId").value,
-                        "Full_Name": document.getElementById("empName").value,
-                        "Email_ID": document.getElementById("empEmail").value,
-                        "Designation": document.getElementById("empDesignation").value,
-                        "Location": document.getElementById("empLocation").value,
-                        "Role": document.getElementById("empRole").value,
-                        "Reporting_Manager_Name": document.getElementById("empReportingManager").value,
+                        "Checklist": document.getElementById("qc").value,
+                        "Section": document.getElementById("section").value,
+                        "Item": document.getElementById("item").value,
+                        "Description": document.getElementById("Description").value,
+                        "Reference_Document": document.getElementById("referDocName").value,
+                        "Reference_Link": document.getElementById("referDocLink").value,
                     }
                 }).then(res => {
                     if (res.status == 200) {
                         $("#UserInputModel").modal('hide')
-                        alert(res.data);
+                        
+                        updateContentArea(res.data.Data)
+                        alert(res.data.Message);
+                        hideLoadingSpinner()
                     }
                 }).catch(e => {
                     $("#UserInputModel").modal('hide')
+                    hideLoadingSpinner()
                     console.log(e);
-                    alert(e.response.data);
+                    alert(e.response.data.Message);
                 })
             })
             document.getElementById('QC-Excel-UploadForm').addEventListener("submit", async (e) => {
@@ -291,16 +320,17 @@
             function updateContentArea(data) {
                 if (data.length > 0) {
                     $('#content-area').empty();
+                    showLoadingSpinner();
                     const table = document.getElementById("content-area");
                     for (let i = 0; i < data.length; i++) {
                         table.innerHTML += `<tr>
                                     <td>${i + 1}</td>
-                                    <td>${data[i]["Checklist"]}</td>
-                                    <td>${data[i]["Section"]}</td>
-                                    <td>${data[i]["Item"]}</td>
-                                    <td>${data[i]["Description"]}</td>
-                                    <td>${data[i]["Reference_Document"]}</td>
-                                    <td>${data[i]["Reference_Link"]}</td>
+                                    <td style="text-align: start; align-items:start;">${data[i]["Checklist"]}</td>
+                                    <td style="text-align: start; align-items:start;">${data[i]["Section"]}</td>
+                                    <td style="text-align: start; align-items:start;">${data[i]["Item"]}</td>
+                                    <td style="text-align: start; align-items:start;">${data[i]["Description"]}</td>
+                                    <td style="text-align: start; align-items:start;">${data[i]["Reference_Document"]!==null?data[i]["Reference_Document"]:""}</td>
+                                    <td style="text-align: start; align-items:start;">${data[i]["Reference_Link"]!==null?data[i]["Reference_Link"]:""}</td>
                                     <td>${data[i]["Status"]}</td>
                                     <td>${data[i]["Status"] === "Inactive" ?
                                 `<button type="button" class="btn btn-success ms-2 me-2" onclick="updateStatusAPI('${data[i]['Question_ID']}','Active')"><i class="bi bi-check-circle-fill"></i></button>` :
@@ -309,6 +339,7 @@
                                     <td> <button type="button" class="btn btn-outline-primary" onclick='gatherRowData(this)' data-bs-toggle="modal"
                                        id='${data[i]['Question_ID']}' data-bs-target="#UpdateQCModal">Edit</button>  </td>`;
                     }
+                    hideLoadingSpinner();
                 }
             }
             function gatherRowData(button) {
@@ -316,11 +347,12 @@
                 const cells = Array.from(row.cells); // Convert HTMLCollection to array
                 var rowData = cells.map((cell) => cell.innerHTML.trim());
                 rowData = rowData.slice(1, -3)
+                console.log(rowData)
                 document.getElementById("updateID").value = button.id;
                 document.getElementById("updateqc").value = rowData[0];
                 document.getElementById("updatesection").value = rowData[1];
                 document.getElementById("updateitem").value = rowData[2];
-                document.getElementById("updateDescription").textContent = rowData[3];
+                document.getElementById("updateDescription").value = rowData[3];
                 document.getElementById("updatereferDocName").value = rowData[4];
                 document.getElementById("updatereferDocLink").value = rowData[5];
             }
@@ -384,7 +416,7 @@
             //             alert("An Error Occurred while generating Excel File");
             //         })
             // });
-            
+
         </script>
 </body>
 

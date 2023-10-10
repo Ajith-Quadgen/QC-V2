@@ -67,9 +67,12 @@ const server = app.listen(port, function () {
   console.log("QC-Portal is hosted at http://localhost:%s", port);
 });
 
-
+function getTimeStamp() {
+  return (new Date().toISOString().slice(0, 10) + " " + new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata' }));
+}
 app.get('/',(req,res)=>{
-  res.render('login',{Message:false,type:"Info"});
+  res.redirect('/login')
+  //res.render('login',{Message:false,type:"Info"});
 })
 app.get('/login', (req, res) => {
   if (req.session.UserID) {
@@ -77,15 +80,9 @@ app.get('/login', (req, res) => {
       case "Engineer":
         res.redirect('/engineer');
         break;
-      case "PMO":
-        res.redirect('/PMO');
-        break;
       case "Admin":
         res.redirect('/admin');
         break;
-        case "Manager":
-          res.redirect('/manager');
-          break;
       default:
         res.redirect('/logout')
         break;
@@ -94,15 +91,13 @@ app.get('/login', (req, res) => {
     res.render('login',{Message:"Login Required",type:"Info"});
   }
 });
-let dt = dateTime.create();
-let CurrentDate = dt.format('Y-m-d H:M:S');
 
 app.post('/AuthenticateLogin', (req, res) => {
     var UserInfo = req.body;
     db.query("select * from users where `Employee_ID`=? and `Password`=? and Active='1'", [UserInfo.email, UserInfo.password], function (error, result) {
       if (error) throw error;
       if (result.length > 0) {
-        db.query("update users set `Lastseen`=? where `Employee_ID`=?", [CurrentDate, result[0]['Employee ID']], function (error, result) {
+        db.query("update users set `Lastseen`=? where `Employee_ID`=?", [getTimeStamp(), result[0]['Employee_ID']], function (error, result) {
           if (error) throw error;
         });
         req.session.UserID = result[0]['Employee_ID'];
@@ -140,5 +135,6 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 app.get('*',(req,res)=>{
+  var link=req.protocol+'://'+req.hostname+req.originalUrl;
   res.redirect('/')
 })

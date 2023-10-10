@@ -38,7 +38,6 @@
                 <thead class="table-dark">
                     <tr>
                         <th scope="col">Sl.No</th>
-                        <th scope="col">Logo</th>
                         <th scope="col">Customer Name</th>
                         <th scope="col">Description</th>
                         <th scope="col">Created By</th>
@@ -52,10 +51,6 @@
                             <tr>
                                 <td>
                                     <%= index+1%>
-                                </td>
-                                <td><img src="/public/uploads/Customer-Logo/<%= Data[index]['Customer_Logo'] %>"
-                                        alt="<%= Data[index]['Customer_Name'] %>+_Logo" width="100" height="80">
-
                                 </td>
                                 <td>
                                     <%= Data[index]['Customer_Name'] %>
@@ -139,12 +134,13 @@
                         </div>
 
                         <div class="form-floating mb-3">
-                            <input type="file" class="form-control" id="Customer_Logo" placeholder="key"
+                            <input type="file" class="form-control" id="Customer_Logo" placeholder="key" alt="Customer-Logo"
                                 accept="image/png" required onchange="showLogo(this,'Customer_logo_Area')">
-                            <label for="Customer_Logo">Logo</label>
+                            <label for="Customer_Logo">Logo <em style="color: red;">Max: 400 KB</em> </label>
                         </div>
-                        <div class="form-control mb-3" style="width: 300; height: 300;">
-                            <img src="" alt="" srcset="" id="Customer_logo_Area"  style="  width: -webkit-fill-available; height: -webkit-fill-available;  object-fit: contain;">
+                        <div class="mb-3" style="width: 300; height: 300;">
+                            <img src="" alt="" srcset="" id="Customer_logo_Area"
+                                style="  width: -webkit-fill-available; height: -webkit-fill-available;  object-fit: contain;">
                         </div>
                     </div>
 
@@ -180,12 +176,13 @@
                         </div>
 
                         <div class="form-floating mb-3">
-                            <input type="file" class="form-control" id="Checklist_Icon" placeholder="key"
+                            <input type="file" class="form-control" id="Checklist_Icon" placeholder="key" 
                                 accept="image/png" required onchange="showLogo(this,'Customer_Icon_Area')">
-                            <label for="Checklist_Icon">Logo</label>
+                            <label for="Checklist_Icon">Logo <em style="color: red;">Max: 400 KB</em> </label>
                         </div>
                         <div class="form-control mb-3" style="width: 300; height: 300;">
-                            <img src="" alt="Customer_Icon" srcset="" id="Customer_Icon_Area" style="  width: -webkit-fill-available; height: -webkit-fill-available;  object-fit: contain;">
+                            <img src="" alt="Customer_Icon" srcset="" id="Customer_Icon_Area"
+                                style="  width: -webkit-fill-available; height: -webkit-fill-available;  object-fit: contain;">
                         </div>
                         <div id="textbox-container">
                             <!-- Initial text input fields -->
@@ -322,24 +319,6 @@
                     alert(e.response.data);
                 })
             })
-
-            // function updateStatusAPI(id, newStatus) {
-            //     axios.post('/api/updateUserStatus', {
-            //         params: {
-            //             id: id,
-            //             status: newStatus
-            //         }
-            //     }).then(res => {
-            //         if (res.status == 200) {
-            //             updateContentArea(res.data);
-            //         }
-            //     })
-            //         .catch(e => {
-            //             console.log(e);
-            //             alert("Unable to Update the Status...\nPlease Contact Admin");
-            //         })
-            // }
-
             function updateContentArea(data) {
                 if (data.length > 0) {
                     $('#content-area').empty();
@@ -348,7 +327,6 @@
                     for (let i = 0; i < data.length; i++) {
                         table.innerHTML += `<tr>
                                     <td>${i + 1}</td>
-                                    <td> <img src="/public/uploads/Customer-Logo/${data[i]["Customer_Logo"]}" alt="${data[i]["Customer_Name"]}+_Logo" width="100" height="80"></td>
                                     <td>${data[i]["Customer_Name"]}</td>
                                     <td>${data[i]["Description"]}</td>
                                     <td>${data[i]["Created_By"]}</td>
@@ -391,9 +369,9 @@
                                 "Customer": document.getElementById("Customer").value,
                             },
                             sectionData: {
-                                "Customer":document.getElementById("Customer").value,
-                                "SectionList":Sections
-                        }
+                                "Customer": document.getElementById("Customer").value,
+                                "SectionList": Sections
+                            }
                         }).then(res => {
                             $("#ChecklistModel").modal('hide')
                             alert(res.data.message)
@@ -401,7 +379,7 @@
                         ).catch(e => {
                             // $("#ChecklistModel").modal('hide')
                             console.log(e);
-                            alert(e.response.data);
+                            alert(e.response.data.message);
                         })
                     }
                 }).catch(e => {

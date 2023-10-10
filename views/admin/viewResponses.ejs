@@ -55,7 +55,7 @@
 
 
         </div>
-        <div class="d-flex w-100">
+        <div class="d-flex w-100 flex-column-reverse">
             <table class="table table-hover m-2  table-striped caption-top">
                 <thead class="table-dark sticky-top">
                     <tr>
@@ -66,15 +66,10 @@
                         <th scope="col">City</th>
                         <th scope="col">Type</th>
                         <th scope="col">Iteration</th>
-                        <th scope="col">Remark</th>
-                        <th scope="col">Section</th>
-                        <th scope="col">Item</th>
-                        <th scope="col">Description</th>
-                        <th scope="col">Check</th>
-                        <th scope="col">Reviewer Note</th>
                         <th scope="col">Score</th>
                         <th scope="col">Submitted By</th>
                     </tr>
+                    <div id="loading-spinner"></div>
                 </thead>
                 <tbody id="content-area">
                     <% if (Object.values(Data).length>0) { %>
@@ -83,16 +78,16 @@
                                 <td>
                                     <%= index+1%>
                                 </td>
-                                <td>
+                                <td >
                                     <%= Data[index]["Submitted_Date"] %>
                                 </td>
-                                <td>
+                                <td >
                                     <%= Data[index]['Job_ID'] %>
                                 </td>
-                                <td>
+                                <td >
                                     <%= Data[index]['State'] %>
                                 </td>
-                                <td>
+                                <td >
                                     <%- Data[index]['City'] %>
                                 </td>
                                 <td>
@@ -102,27 +97,9 @@
                                     <%= Data[index]['Iteration'] %>
                                 </td>
                                 <td>
-                                    <%= Data[index]['Remarks'] %>
-                                </td>
-                                <td>
-                                    <%= Data[index]['Section'] %>
-                                </td>
-                                <td>
-                                    <%= Data[index]['Item'] %>
-                                </td>
-                                <td>
-                                    <%- Data[index]['Description'] %>
-                                </td>
-                                <td>
-                                    <%=Data[index]['Check']%>
-                                </td>
-                                <td>
-                                    <%=Data[index]['Note']%>
-                                </td>
-                                <td>
                                     <%=Data[index]['Percentage']%>
                                 </td>
-                                <td>
+                                <td style="text-align: start; align-items:start;">
                                     <%=Data[index]['Submitted_By']%>
                                 </td>
                             </tr>
@@ -180,19 +157,22 @@
                 type = document.getElementById("qc_type").value;
                 from = document.getElementById("fromDate").value;
                 to = document.getElementById("toDate").value;
+                showLoadingSpinner();
                 await axios.post('/api/filterResponses', {
                     params: {
                         id: Job_ID,
                         type: type,
                         from: from,
-                        to: to
+                        to: to,
+                        Checklist:'<%=Checklist%>'
                     }
                 }).then(async res => {
                     if (res.status == 200) {
                         if (res.data.length > 0) {
-
                             await updateContentArea(res.data);
+                            hideLoadingSpinner();
                         } else {
+                            hideLoadingSpinner();
                             alert("Responses Not Found\nPlease Provide Valid Data")
                             //window.location.reload()
                         }
@@ -204,42 +184,18 @@
                     })
 
             })
-            document.getElementById("FilterDownloadBtn").addEventListener('click', async (e) => {
+            document.getElementById("FilterDownloadBtn").addEventListener('click', (e) => {
                 var Job_ID, type, from, to;
-                Job_ID = document.getElementById("job_id").value.replaceAll(' ', "");
-                type = document.getElementById("qc_type").value;
-                from = document.getElementById("fromDate").value;
-                to = document.getElementById("toDate").value;
-                await axios.post('/api/downloadFilteredContent', {
-                    params: {
-                        id: Job_ID,
-                        type: type,
-                        from: from,
-                        to: to
-                    }, responseType: 'blob'
-                }).then(async res => {
-                    var data = new Blob([res.data]);
-                    console.log(data)
-                    if (typeof window.navigator.msSaveBlob === 'function') {
-                        // If it is IE that support download blob directly.
-                        window.navigator.msSaveBlob(data, defaultFilename);
-                    } else {
-                        var blob = data;
-                        var link = document.createElement('a');
-                        link.href = window.URL.createObjectURL(blob);
-                        link.download = "Responses.xlsx";
-
-                        document.body.appendChild(link);
-
-                        link.click();
-                    }
-
-                })
-                    .catch(e => {
-                        console.log(e);
-                        alert("Unable to Download the Filtered Data...\nPlease Contact Admin");
-                    })
-
+                Job_ID = encodeURIComponent(document.getElementById("job_id").value.replaceAll(' ', ""));
+                type = encodeURIComponent(document.getElementById("qc_type").value);
+                from = encodeURIComponent(document.getElementById("fromDate").value);
+                to = encodeURIComponent(document.getElementById("toDate").value);
+                const url = `/api/downloadFilteredContent?id=${Job_ID}&type=${type}&from=${from}&to=${to}&Checklist=${'<%=title%>'}`;
+                let filterlink=document.createElement("a");
+                filterlink.href=url;
+                filterlink.target="_self"
+                filterlink.click()
+                //window.location.href=url
             })
 
             function updateContentArea(data) {
@@ -255,14 +211,8 @@
                                     <td>${data[i]["City"]}</td>
                                     <td>${data[i]["Type"]}</td>
                                     <td>${data[i]["Iteration"]}</td>
-                                    <td>${data[i]["Remarks"]}</td>
-                                    <td>${data[i]["Section"]}</td>
-                                    <td>${data[i]["Item"]}</td>
-                                    <td>${data[i]["Description"]}</td>
-                                    <td>${data[i]["Check"]}</td>
-                                    <td>${data[i]["Note"]}</td>
                                     <td>${data[i]["Percentage"]}</td>
-                                    <td>${data[i]["Submitted_By"]}</td>
+                                    <td style="text-align: start; align-items:start;">${data[i]["Submitted_By"]}</td>
                                     </tr>`;
                     }
                 }

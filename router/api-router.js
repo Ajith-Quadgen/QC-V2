@@ -52,7 +52,7 @@ api_Router.post('/AddUser', (req, res) => {
             inputData["Reporting_Manager_Name"] = result[0].Full_Name;
             inputData['Reporting_Manager_Mail'] = result[0].Email_ID;
             delete inputData.Reporting_Manager_ID
-            db.query("insert into users set?", [req.body.params], (error, result) => {
+            db.query("insert into users set?", [inputData], (error, result) => {
                 if (error) {
                     if (error.code == 'ER_DUP_ENTRY') {
                         return res.status(400).json({ Message: "Employee-ID/Email is Already Present in the DataBase." })
@@ -163,18 +163,7 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
                 if (error) {
                     res.status(400).send(error.message)
                 } else {
-                    const affectedRows = result.affectedRows;
-                    const DuplicateEntry = []
-                    console.log(result)
-                    if (result.warningCount > 0) {
-                        for (let i = 0; i < result.warningCount; i++) {
-                            DuplicateEntry.push(values[i][0])
-                        }
-                    }
-                    if (DuplicateEntry.length > 0) {
-                        console.warn("Warning:Duplicate Jon Number Found:", DuplicateEntry)
-                    }
-                    db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs", function (error, Data) {
+                    db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs limit 100 order by Created_Date", function (error, Data) {
                         if (error) throw error
                         res.status(200).json({ "message": "Job Data Imported Successfully", "Data": Data })
                     })
@@ -233,7 +222,6 @@ api_Router.post("/GetJob", (req, res) => {
 api_Router.post('/uploadChecklist', Upload.single('QCFile'), (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         try {
-            console.log("ok")
             const workbook = xlsx.read(req.file.buffer);
             const sheetName = workbook.SheetNames[0]; // Assuming there's only one sheet
             const sheet = workbook.Sheets[sheetName];
@@ -322,15 +310,6 @@ api_Router.post('/getJobData', (req, res) => {
         res.status(400).send("Access Denied")
     }
 })
-api_Router.get("/getPreciousRecord", (req, res) => {
-    // if(req.session.UserID){
-
-    // }else{
-    //     res.status(400).send("Access Denied")
-    // }
-
-    db.query("select * from responses")
-})
 api_Router.post("/SubmitQC", (req, res) => {
     if (req.session.UserID && req.session.UserMail) {
         //console.log(req.body.params.inputData)
@@ -356,14 +335,18 @@ api_Router.post("/SubmitQC", (req, res) => {
                     item.Iteration,
                     item.Remarks,
                     item.Section,
+                    item.SlNo,
                     item.Item,
                     item.Description,
                     item.Check,
                     item.Note,
                     item.Percentage,
                     item.Submitted_By]);
+
+                console.log(values)
                 db.query("insert into responses VALUES ?", [values], (error, result) => {
                     if (error) {
+                        console.error(error)
                         return res.status(400).json({ Message: "Internal Server Error" })
                     } else {
                         db.query("insert into qc_log (User_ID,Date,Project,QC,Job_ID,State,City,Type,Workprint_No,Iteration,Score) values (?,?,(select Customer from checklist where Checklist_Name=? ),?,?,?,?,?,?,?,?) ", [req.session.UserID, time, inputData[0].Checklist, inputData[0].Checklist, inputData[0].JobID, inputData[0].state, inputData[0].city, inputData[0].type, null, Iter, inputData[0].Percentage], async (error, result) => {
@@ -379,14 +362,15 @@ api_Router.post("/SubmitQC", (req, res) => {
                                 { header: "City", key: "city", width: 20 },
                                 { header: "Type", key: "type", width: 20 },
                                 { header: "Iteration", key: "Iteration", width: 20 },
-                                { header: "Remarks", key: "Remarks", width: 20 },
                                 { header: "Section", key: "Section", width: 20 },
+                                { header: "Sl.No", key: "SlNo", width: 20 },
                                 { header: "Item", key: "Item", width: 20 },
                                 { header: "Description", key: "Description", width: 40 },
                                 { header: "Check", key: "Check", width: 20 },
                                 { header: "Reviewer-Note", key: "Note", width: 20 },
                                 { header: "Score-(%)", key: "Percentage", width: 20 },
-                                { header: "Submitted-By", key: "Submitted_By", width: 20 }
+                                { header: "Submitted-By", key: "Submitted_By", width: 20 },
+                                { header: "Remarks", key: "Remarks", width: 20 }
                             ]
 
                             const filePath = `./public/Repository/${inputData[0].JobID}_${inputData[0].Checklist}_${inputData[0].type}.xlsx`;
@@ -482,18 +466,12 @@ api_Router.post("/SubmitQC", (req, res) => {
         res.status(400).send("Access Denied")
     }
 })
-
-function UpdateNoOfResponses(jobID, userId) {
-
-
-}
-
 api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         let workbook = new excel_js.Workbook();
         let sheet = workbook.addWorksheet("Master-DB");
         try {
-            db.query("Select * from responses where Checklist=? order by Submitted_Date", [req.params.QC], async (error, result) => {
+            db.query("Select *,DATE_FORMAT(`Submitted_Date`,'%d-%m-%Y') as SubmittedDate from responses where Checklist=? order by Submitted_Date", [req.params.QC], async (error, result) => {
                 if (error) {
                     console.log(error)
                     res.status(400).send("Unable To fetch the Report");
@@ -501,19 +479,21 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
                 if (result.length > 0) {
                     var mycolumns = [
                         { header: "Checklist", key: "Checklist", width: 20 },
-                        { header: "Date", key: "Submitted_Date", width: 20 },
+                        { header: "Date", key: "SubmittedDate", width: 20 },
                         { header: "Job-ID/CFAS", key: "Job_ID", width: 20 },
                         { header: "State", key: "State", width: 20 },
                         { header: "City", key: "City", width: 20 },
                         { header: "Type", key: "Type", width: 20 },
-                        { header: "Remarks", key: "Remarks", width: 20 },
+                        { header: "Iteration", key: "Iteration", width: 20 },
                         { header: "Section", key: "Section", width: 20 },
+                        { header: "Sl.No", key: "SlNo", width: 20 },
                         { header: "Item", key: "Item", width: 20 },
                         { header: "Description", key: "Description", width: 40 },
                         { header: "Check", key: "Check", width: 20 },
                         { header: "Reviewer-Note", key: "Note", width: 20 },
                         { header: "Score-(%)", key: "Percentage", width: 20 },
-                        { header: "Submitted-By", key: "Submitted_By", width: 20 }
+                        { header: "Submitted-By", key: "Submitted_By", width: 20 },
+                        { header: "Remarks", key: "Remarks", width: 20 },
                     ]
                     sheet.columns = mycolumns
                     result.forEach(row => {
@@ -521,7 +501,7 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
                     });
                     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                     res.setHeader('Content-Disposition', 'attachment; filename=Master_QC_Response_Report.xlsx');
-                    const filename = path.join(__dirname,"../public/Generated/"+req.params.QC.replace(" ", "_") + req.session.UserID + ".xlsx")
+                    const filename = path.join(__dirname, "../public/Generated/" + req.params.QC.replace(" ", "_") + req.session.UserID + ".xlsx")
                     let filestream
                     await workbook.xlsx.writeFile(filename).then(async () => {
                         filestream = await fs.createReadStream(filename)
@@ -551,8 +531,8 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
 })
 api_Router.post('/filterResponses', (req, res) => {
     if (req.session.UserID) {
-        const { from, to, id, type } = req.body.params;
-        let main = "Select *,DATE_FORMAT(Submitted_Date,'%b %D %y %r') as Submitted_Date from responses where 1 ";
+        const { Checklist,from, to, id, type } = req.body.params;
+        let main = "select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Checklist='"+Checklist+"'";
         if (from) {
             main += `AND date_format(Submitted_Date,'%Y-%m-%d')>='${from}'`
         }
@@ -565,7 +545,7 @@ api_Router.post('/filterResponses', (req, res) => {
         if (type) {
             main += `AND Type='${type}'`
         }
-
+        main+="group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc ";
         db.query(main, (error, result) => {
             if (error) {
                 console.error(error)
@@ -579,13 +559,13 @@ api_Router.post('/filterResponses', (req, res) => {
     }
 })
 
-api_Router.post('/downloadFilteredContent', (req, res) => {
+api_Router.get('/downloadFilteredContent', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
-        const { from, to, id, type } = req.body.params;
+        const { Checklist,from, to, id, type } = req.query;
         let workbook = new excel_js.Workbook();
         let sheet = workbook.addWorksheet("Responses");
 
-        let main = "Select * from responses where 1 ";
+        let main = "Select *,DATE_FORMAT(`Submitted_Date`,'%d-%m-%Y') as SubmittedDate from responses where Checklist='"+Checklist+"'";
         if (from) {
             main += `AND date_format(Submitted_Date,'%Y-%m-%d')>='${from}'`
         }
@@ -598,26 +578,28 @@ api_Router.post('/downloadFilteredContent', (req, res) => {
         if (type) {
             main += `AND Type='${type}'`
         }
-        db.query(main, async function (error, result){
+        db.query(main, async function (error, result) {
             if (error) {
                 console.log(error)
                 return res.status(400)
             }
             var mycolumns = [
                 { header: "Checklist", key: "Checklist", width: 20 },
-                { header: "Date", key: "Submitted_Date", width: 20 },
+                { header: "Date", key: "SubmittedDate", width: 20 },
                 { header: "Job-ID/CFAS", key: "Job_ID", width: 20 },
                 { header: "State", key: "State", width: 20 },
                 { header: "City", key: "City", width: 20 },
                 { header: "Type", key: "Type", width: 20 },
-                { header: "Remarks", key: "Remarks", width: 20 },
+                { header: "Iteration", key: "Iteration", width: 20 },
                 { header: "Section", key: "Section", width: 20 },
+                { header: "Sl.No", key: "SlNo", width: 20 },
                 { header: "Item", key: "Item", width: 20 },
                 { header: "Description", key: "Description", width: 40 },
                 { header: "Check", key: "Check", width: 20 },
                 { header: "Reviewer-Note", key: "Note", width: 20 },
                 { header: "Score-(%)", key: "Percentage", width: 20 },
-                { header: "Submitted-By", key: "Submitted_By", width: 20 }
+                { header: "Submitted-By", key: "Submitted_By", width: 20 },
+                { header: "Remarks", key: "Remarks", width: 20 },
             ]
             sheet.columns = mycolumns
             result.forEach(row => {
@@ -678,12 +660,14 @@ api_Router.post('/UpdateUser', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         let inputData = req.body.params;
         inputData["Added_By"] = req.session.UserName;
-        db.query("update users set ? where Employee_ID=?", [req.body.params, req.body.params.Employee_ID], (error, result) => {
+        db.query("update users set ? where Employee_ID=?", [inputData, req.body.params.Employee_ID], (error, result) => {
             if (error) {
                 return res.status(400).send(error.message)
             }
-
-            return res.status(200).send('User Update Successfully\nRefresh the page.');
+            db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users", function (error, result) {
+                if (error) throw error
+                return res.status(200).json({ Message: 'User Details Updated Successfully...', Data: result });
+            })
         })
     } else {
         res.status(400).send("Access Denied")
@@ -704,6 +688,41 @@ api_Router.get('/GetUser', (req, res) => {
             }
         })
     } else {
+        res.status(400).send("Access Denied")
+    }
+})
+api_Router.get('/downloadJob',async (req,res)=>{
+    if (req.session.UserID) {
+        let workbook = new excel_js.Workbook();
+        let sheet = workbook.addWorksheet("Job Data");
+        db.query("SELECT * FROM jobs",async (error,result)=>{
+            var mycolumns = [
+                { header: "Job-ID/CFAS Number", key: "Job_Number", width: 20 },
+                { header: "Customer", key: "Customer", width: 20 },
+                { header: "State", key: "State", width: 20 },
+                { header: "City", key: "City", width: 20 },
+                { header: "Workprint Number", key: "Workprint_Number", width: 20 },
+                { header: "Number Of Responses", key: "Number_Of_Responses", width: 20 },
+                { header: "Created Date", key: "Created_Date", width: 20 },
+                { header: "Created By", key: "Created_By", width: 20 },
+                { header: "Modified Date", key: "Modified_Date", width: 20 }
+            ]
+            sheet.columns=mycolumns
+            result.forEach(row=>{
+                sheet.addRow(row)
+            })
+       
+        try {
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename=Jobs-Data.xlsx');
+            await workbook.xlsx.write(res);
+
+        } catch (error) {
+            console.log(error)
+            res.status(400).send(error.message)
+        }
+    });
+    }else{
         res.status(400).send("Access Denied")
     }
 })

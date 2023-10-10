@@ -22,7 +22,7 @@ engineer_router.get("/", (req, res) => {
             userData = result[0];
             if (userData.Access != null) {
                 const check = userData.Access.split(',')
-                db.query("select * from customer where Customer_Name in (?)", [...check], (error, result) => {
+                db.query("select * from customer where Customer_Name in (?)", [check], (error, result) => {
                     if (error) throw error
                     res.render('../views/engineer/home', { Data: result, Log: log, title: "Dashboard", User: userData, Role: req.session.UserRole })
                 })
@@ -111,7 +111,7 @@ engineer_router.get("/QC/:QC_Name", (req, res) => {
                 });
                 res.render('../views/engineer/QCPage', { Data: organizedData, title: result[0].Checklist, Role: req.session.UserRole, IncludeBackButton: false })
             } else {
-                res.send("Checklist is Not Prepared Yer, Contact Manager")
+                res.send("Checklist is Not Prepared Yet, Contact Manager")
             }
         })
 

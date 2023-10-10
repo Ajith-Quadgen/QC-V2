@@ -21,3 +21,14 @@ function topFunction() {
   document.body.scrollTop = 0; // For Safari
   document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
 }
+
+function showLoadingSpinner() {
+  $('#content-area').empty();
+  const spinner = document.getElementById('loading-spinner');
+  spinner.style.display = 'block';
+}
+
+function hideLoadingSpinner() {
+  const spinner = document.getElementById('loading-spinner');
+  spinner.style.display = 'none';
+}
