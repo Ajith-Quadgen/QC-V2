@@ -342,8 +342,6 @@ api_Router.post("/SubmitQC", (req, res) => {
                     item.Note,
                     item.Percentage,
                     item.Submitted_By]);
-
-                console.log(values)
                 db.query("insert into responses VALUES ?", [values], (error, result) => {
                     if (error) {
                         console.error(error)
@@ -379,7 +377,6 @@ api_Router.post("/SubmitQC", (req, res) => {
                                 await workbook.xlsx.readFile(filePath)
                                 let version = workbook.worksheets.length + 1;
                                 let sheetName = `V${version}_${new Date().toISOString().slice(0, 10)}`;
-                                console.log(sheetName)
                                 try {
                                     let sheet = workbook.addWorksheet(sheetName);
                                     sheet.columns = mycolumns;
@@ -387,16 +384,16 @@ api_Router.post("/SubmitQC", (req, res) => {
                                         sheet.addRow(record)
                                     })
                                 } catch (error) {
-                                    console.log("Check one")
                                     console.error(error)
+                                    return res.status(400).json({ Message: "Internal Server Error" });
                                 }
                                 try {
                                     await workbook.xlsx.writeFile(filePath).then(() => {
                                         console.log("done")
                                     });
                                 } catch (error) {
-                                    console.log("Check two")
                                     console.error(error)
+                                    return res.status(400).json({ Message: "Internal Server Error" });
                                 }
 
                             } else {
@@ -411,16 +408,16 @@ api_Router.post("/SubmitQC", (req, res) => {
                                         sheet.addRow(record)
                                     })
                                 } catch (error) {
-                                    console.log("Check one")
                                     console.error(error)
+                                    return res.status(400).json({ Message: "Internal Server Error" });
                                 }
                                 try {
                                     await workbook.xlsx.writeFile(filePath).then(() => {
                                         console.log("done")
                                     });
                                 } catch (error) {
-                                    console.log("Check two")
                                     console.error(error)
+                                    return res.status(400).json({ Message: "Internal Server Error" });
                                 }
                             }
                             const mailOptions = {
@@ -447,7 +444,9 @@ api_Router.post("/SubmitQC", (req, res) => {
                                         } else {
                                             transporter.sendMail(mailOptions, (error, info) => {
                                                 if (error) {
-                                                    console.error('Error sending email:', error);
+                                                    console.error('Error on sending email:', error);
+                                                    return res.status(400).json({ Message: "QQ Submitted Successfully....Unable to sent the Confirmation E-Mail\nPlease Contact the Manager" })
+
                                                 } else {
                                                     console.log('Email sent:', info.response);
                                                 }
@@ -463,7 +462,7 @@ api_Router.post("/SubmitQC", (req, res) => {
             }
         })
     } else {
-        res.status(400).send("Access Denied")
+        return res.status(400).json({Message:"Unfortunately Your Session Got Closed,Please Try Again...!"});
     }
 })
 api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
@@ -531,8 +530,8 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
 })
 api_Router.post('/filterResponses', (req, res) => {
     if (req.session.UserID) {
-        const { Checklist,from, to, id, type } = req.body.params;
-        let main = "select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Checklist='"+Checklist+"'";
+        const { Checklist, from, to, id, type } = req.body.params;
+        let main = "select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Checklist='" + Checklist + "'";
         if (from) {
             main += `AND date_format(Submitted_Date,'%Y-%m-%d')>='${from}'`
         }
@@ -545,7 +544,7 @@ api_Router.post('/filterResponses', (req, res) => {
         if (type) {
             main += `AND Type='${type}'`
         }
-        main+="group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc ";
+        main += "group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc ";
         db.query(main, (error, result) => {
             if (error) {
                 console.error(error)
@@ -561,11 +560,11 @@ api_Router.post('/filterResponses', (req, res) => {
 
 api_Router.get('/downloadFilteredContent', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
-        const { Checklist,from, to, id, type } = req.query;
+        const { Checklist, from, to, id, type } = req.query;
         let workbook = new excel_js.Workbook();
         let sheet = workbook.addWorksheet("Responses");
 
-        let main = "Select *,DATE_FORMAT(`Submitted_Date`,'%d-%m-%Y') as SubmittedDate from responses where Checklist='"+Checklist+"'";
+        let main = "Select *,DATE_FORMAT(`Submitted_Date`,'%d-%m-%Y') as SubmittedDate from responses where Checklist='" + Checklist + "'";
         if (from) {
             main += `AND date_format(Submitted_Date,'%Y-%m-%d')>='${from}'`
         }
@@ -691,11 +690,11 @@ api_Router.get('/GetUser', (req, res) => {
         res.status(400).send("Access Denied")
     }
 })
-api_Router.get('/downloadJob',async (req,res)=>{
+api_Router.get('/downloadJob', async (req, res) => {
     if (req.session.UserID) {
         let workbook = new excel_js.Workbook();
         let sheet = workbook.addWorksheet("Job Data");
-        db.query("SELECT * FROM jobs",async (error,result)=>{
+        db.query("SELECT * FROM jobs", async (error, result) => {
             var mycolumns = [
                 { header: "Job-ID/CFAS Number", key: "Job_Number", width: 20 },
                 { header: "Customer", key: "Customer", width: 20 },
@@ -707,22 +706,22 @@ api_Router.get('/downloadJob',async (req,res)=>{
                 { header: "Created By", key: "Created_By", width: 20 },
                 { header: "Modified Date", key: "Modified_Date", width: 20 }
             ]
-            sheet.columns=mycolumns
-            result.forEach(row=>{
+            sheet.columns = mycolumns
+            result.forEach(row => {
                 sheet.addRow(row)
             })
-       
-        try {
-            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', 'attachment; filename=Jobs-Data.xlsx');
-            await workbook.xlsx.write(res);
 
-        } catch (error) {
-            console.log(error)
-            res.status(400).send(error.message)
-        }
-    });
-    }else{
+            try {
+                res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                res.setHeader('Content-Disposition', 'attachment; filename=Jobs-Data.xlsx');
+                await workbook.xlsx.write(res);
+
+            } catch (error) {
+                console.log(error)
+                res.status(400).send(error.message)
+            }
+        });
+    } else {
         res.status(400).send("Access Denied")
     }
 })

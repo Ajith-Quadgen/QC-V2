@@ -71,8 +71,13 @@ function getTimeStamp() {
   return (new Date().toISOString().slice(0, 10) + " " + new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata' }));
 }
 app.get('/',(req,res)=>{
-  res.redirect('/login')
-  //res.render('login',{Message:false,type:"Info"});
+  if(req.query.Message){
+    res.render('login',{Message:req.query.Message,type:"Info"});
+
+  }else{
+    res.render('login',{Message:false,type:"Info"});
+
+  }
 })
 app.get('/login', (req, res) => {
   if (req.session.UserID) {

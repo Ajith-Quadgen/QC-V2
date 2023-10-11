@@ -18,7 +18,7 @@
 
     <main class="d-flex flex-column mb-3 justify-content-center w-100" style="position: absolute; top: 100px; align-self: baseline;">
         <section class="d-flex justify-content-end flex-wrap">
-            <div class="profile-card d-flex flex-row">
+            <div class="profile-card d-flex flex-row ">
                 <div class="right-side">
                     <i class="bi bi-person-badge"></i>
                 </div>
@@ -40,7 +40,7 @@
                 </div>
             </div>
         </section>
-        <section class="d-flex justify-content-center">
+        <section class="d-flex justify-content-center flex-wrap">
             <% if (Object.values(Data).length>0) { %>
                 <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
                     <a href="/Engineer/Customers/<%= Data[index].Customer_Name %>">
