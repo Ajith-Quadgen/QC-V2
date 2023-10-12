@@ -21,10 +21,10 @@
                         <% } %>
     </header>
 
-    <main class="d-flex flex-column mb-3 justify-content-center w-75"
+    <main class="d-flex flex-column mb-3 justify-content-center"
         style="position: absolute; top: 100px; align-self: baseline; align-items: center;">
 
-        <section class="d-flex justify-content-center flex-wrap">
+        <section class="d-flex justify-content-center flex-wrap w-50">
             <% if (Object.values(Data).length>0) { %>
                 <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
                     <a href="/Engineer/QC/<%= Data[index].Checklist_Name %>" style="text-decoration: none;">
