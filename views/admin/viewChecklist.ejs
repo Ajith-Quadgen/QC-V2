@@ -38,6 +38,7 @@
                         <th scope="col">Sl.No</th>
                         <th scope="col">Checklist</th>
                         <th scope="col">Section</th>
+                        <th scope="col">Weight</th>
                         <th scope="col">Item</th>
                         <th scope="col">Description</th>
                         <th scope="col">Reference Document</th>
@@ -60,6 +61,9 @@
                                 </td>
                                 <td style="text-align: start; align-items:start;">
                                     <%= Data[index]['Section'] %>
+                                </td>
+                                <td>
+                                    <%= Data[index]['Weight'] %>
                                 </td>
                                 <td style="text-align: start; align-items:start;">
                                     <%= Data[index]['Item'] %>
@@ -175,6 +179,10 @@
                             <label for="Description">Description</label>
                         </div>
                         <div class="form-floating mb-3">
+                            <input type="number" class="form-control" id="Weight" placeholder="key" value="1" min="1" required>
+                            <label for="Weight">Weight</label>
+                        </div>
+                        <div class="form-floating mb-3">
                             <input type="text" class="form-control" id="referDocName" placeholder="key">
                             <label for="referDocName">Reference Document Name</label>
                         </div>
@@ -222,15 +230,20 @@
                                     <% }) %>
                             </select>
                         </div>
+                        
                         <div class="form-floating mb-3">
                             <input type="text" class="form-control" id="updateitem" placeholder="key">
                             <label for="updateitem">Item</label>
                         </div>
                         <div class="form-floating mb-3">
                             <textarea name="" class="form-control" style="height: 100px;" id="updateDescription"
-                                placeholder="key"></textarea>
+                                placeholder="key" required></textarea>
                             <!-- <input type="text" class="form-control" id="updateDescription" placeholder="key" required> -->
                             <label for="updateDescription">Description</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" id="updateweight" placeholder="key" value="1" min="1" required>
+                            <label for="updateweight">Weight</label>
                         </div>
                         <div class="form-floating mb-3">
                             <input type="text" class="form-control" id="updatereferDocName" placeholder="key">
@@ -273,6 +286,7 @@
                         $("#UserInputModel").modal('hide')
                         
                         updateContentArea(res.data.Data)
+                        document.getElementById("addQCCheckForm").reset();
                         alert(res.data.Message);
                         hideLoadingSpinner()
                     }
@@ -327,7 +341,8 @@
                                     <td>${i + 1}</td>
                                     <td style="text-align: start; align-items:start;">${data[i]["Checklist"]}</td>
                                     <td style="text-align: start; align-items:start;">${data[i]["Section"]}</td>
-                                    <td style="text-align: start; align-items:start;">${data[i]["Item"]}</td>
+                                    <td>${data[i]["Weight"]}</td>
+                                    <td style="text-align: start; align-items:start;">${data[i]["Item"]!==null?data[i]["Item"]:""}</td>
                                     <td style="text-align: start; align-items:start;">${data[i]["Description"]}</td>
                                     <td style="text-align: start; align-items:start;">${data[i]["Reference_Document"]!==null?data[i]["Reference_Document"]:""}</td>
                                     <td style="text-align: start; align-items:start;">${data[i]["Reference_Link"]!==null?data[i]["Reference_Link"]:""}</td>
@@ -345,16 +360,17 @@
             function gatherRowData(button) {
                 const row = button.closest('tr'); // Get the parent tr using closest
                 const cells = Array.from(row.cells); // Convert HTMLCollection to array
-                var rowData = cells.map((cell) => cell.innerHTML.trim());
+                var rowData = cells.map((cell) => cell.innerText.trim());
                 rowData = rowData.slice(1, -3)
                 console.log(rowData)
                 document.getElementById("updateID").value = button.id;
                 document.getElementById("updateqc").value = rowData[0];
                 document.getElementById("updatesection").value = rowData[1];
-                document.getElementById("updateitem").value = rowData[2];
-                document.getElementById("updateDescription").value = rowData[3];
-                document.getElementById("updatereferDocName").value = rowData[4];
-                document.getElementById("updatereferDocLink").value = rowData[5];
+                document.getElementById("updateweight").value = rowData[2];
+                document.getElementById("updateitem").value = rowData[3];
+                document.getElementById("updateDescription").value = rowData[4];
+                document.getElementById("updatereferDocName").value = rowData[5];
+                document.getElementById("updatereferDocLink").value = rowData[6];
             }
             document.getElementById("UpdateQC").addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -365,6 +381,7 @@
                 const desc = document.getElementById("updateDescription").value;
                 const docName = document.getElementById("updatereferDocName").value;
                 const docLink = document.getElementById("updatereferDocLink").value;
+                const weight=document.getElementById("updateweight").value;
                 axios.post(`/api/updateCheckList/${id}`, {
                     params: {
                         "Checklist": qc,
@@ -372,12 +389,14 @@
                         "Item": item,
                         "Description": desc,
                         "Reference_Document": docName,
-                        "Reference_Link": docLink
+                        "Reference_Link": docLink,
+                        "Weight":weight
                     }
                 }).then(res => {
                     if (res.status == 200) {
                         $("#UpdateQCModal").modal('hide')
                         updateContentArea(res.data);
+                        document.getElementById("")
                     }
                 })
                     .catch(e => {
@@ -387,36 +406,6 @@
                         //alert("Unable to Update the Checklist...\nPlease Contact Admin");
                     })
             })
-
-            // document.getElementById("QCResDownload").addEventListener('click', () => {
-            //     var qc_name='<%= Checklist %>'
-            //   axios.post('/api/DownloadQCResponses', {
-            //         params: {
-            //             QC: qc_name.trim()
-            //         },
-            //         responseType: 'blob'
-            //     }).then(res => {
-            //         var data = new Blob([res.data]);
-            //         if (typeof window.navigator.msSaveBlob === 'function') {
-            //             // If it is IE that support download blob directly.
-            //             window.navigator.msSaveBlob(data, defaultFilename);
-            //         } else {
-            //             var blob = data;
-            //             var link = document.createElement('a');
-            //             link.href = window.URL.createObjectURL(blob);
-            //             link.download ="QC-Responses.xlsx";
-
-            //             document.body.appendChild(link);
-
-            //             link.click(); // create an <a> element and simulate the click operation.
-            //         }
-            //     })
-            //         .catch(e => {
-            //             console.log(e);
-            //             alert("An Error Occurred while generating Excel File");
-            //         })
-            // });
-
         </script>
 </body>
 

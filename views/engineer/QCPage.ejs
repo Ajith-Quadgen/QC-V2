@@ -100,7 +100,7 @@
                                                     <%- row.Description %>
                                                 </td>
                                                 <td>
-                                                    <% if (row.Reference_Link!=null && row.Reference_Link!="" ) { %>
+                                                    <% if (row.Reference_Link!=null && row.Reference_Link!="" &&row.Reference_Document!=null && row.Reference_Document!="" ) { %>
                                                         <a href="<%= row.Reference_Link %>" target="_blank"><button
                                                                 type="button"
                                                                 class="btn btn-outline-secondary btn-sm col-9"
@@ -137,7 +137,12 @@
                                                     </div>
                                                 </td>
                                                 <td><input type="text" class="form-control"
+<<<<<<< HEAD
                                                         id="Note_<%= row.Question_ID %>" placeholder="* Reviewer Note" required>
+=======
+                                                        id="Note_<%= row.Question_ID %>" placeholder="* Reviewer Note" >
+                                                        <input type="hidden" name="" value="<%= row.Weight%>" id="Weight_<%= row.Question_ID %>">
+>>>>>>> 59c15f8 (v3 push)
                                                 </td>
                                             </tr>
                                             <% itemNumber++; %>
@@ -287,19 +292,20 @@
                         const item = {
                             SlNo: row.querySelector('.slno').textContent.trim(),
                             Item: row.querySelector('.item').textContent.trim(),
+                            Weight:row.querySelector(`input[id*="Weight_"]`).value.trim(),
                             Description: row.querySelector('.Description').textContent.trim(),
                             Check: row.querySelector(`input[name*="Check_"]:checked`).value,
                             Note: row.querySelector(`input[id*="Note_"]`).value.trim()
                         };
                         switch (row.querySelector(`input[name*="Check_"]:checked`).value) {
                             case 'Yes':
-                                total_yes++;
+                                total_yes+= parseInt( row.querySelector(`input[id*="Weight_"]`).value.trim());
                                 break;
                             case 'No':
-                                total_no++;
+                                total_no+= parseInt( row.querySelector(`input[id*="Weight_"]`).value.trim());
                                 break;
                             case 'N/A':
-                                total_na++
+                                total_na+= parseInt( row.querySelector(`input[id*="Weight_"]`).value.trim());
                                 break
                         }
 

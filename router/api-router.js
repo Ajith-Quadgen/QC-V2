@@ -163,7 +163,7 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
                 if (error) {
                     res.status(400).send(error.message)
                 } else {
-                    db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs limit 100 order by Created_Date", function (error, Data) {
+                    db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Created_Date Desc limit 100", function (error, Data) {
                         if (error) throw error
                         res.status(200).json({ "message": "Job Data Imported Successfully", "Data": Data })
                     })
@@ -234,21 +234,33 @@ api_Router.post('/uploadChecklist', Upload.single('QCFile'), (req, res) => {
                     .join(', ')
                     .split(",")
             );
+            const insertionPromises = [];
             data.forEach(row => {
-                db.query('INSERT INTO questions set ?', [row], (error, result) => {
-                    if (error) {
-                        console.log(error)
-                    }
-                })
+                const insertionPromise = new Promise((resolve, reject) => {
+                    db.query('INSERT INTO questions set ?', [row], (error, result) => {
+                        if (error) {
+                            console.log(error)
+                            reject(error)
+                        } else {
+                            resolve(result);
+                        }
+                    });
+                });
+                insertionPromises.push(insertionPromise);
+            });
+            Promise.all(insertionPromises).then(() => {
+                res.status(200).send("QC Imported Successfully.\nPlease Refresh the Page.")
+
+            }).catch(() => {
+                return res.status(500).send("Something Went Wrong While Importing the QC... \nTry Again..!");
             })
-            res.status(200).send("QC Imported Successfully.\nPlease Refresh the Page.")
 
         } catch (e) {
             console.error(e)
-            res.status(400).send(e.message)
+            return res.status(400).send(e.message)
         }
     } else {
-        res.status(400).send("Access Denied")
+        return res.status(400).send("Access Denied")
     }
 })
 
@@ -462,7 +474,7 @@ api_Router.post("/SubmitQC", (req, res) => {
             }
         })
     } else {
-        return res.status(400).json({Message:"Unfortunately Your Session Got Closed,Please Try Again...!"});
+        return res.status(400).json({ Message: "Unfortunately Your Session Got Closed,Please Try Again...!" });
     }
 })
 api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
