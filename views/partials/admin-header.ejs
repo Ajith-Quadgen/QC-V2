@@ -1,9 +1,11 @@
 <nav>
     <input type="checkbox" id="nav-toggle">
+    <div class="d-flex justify-content-between align-items-center">
     <div class="logo">
         <img src="../../static/images/Quadgen_Logo.png" alt="Quadgen_Logo" srcset="">
     </div>
-    <ul class="links">
+    <div class="d-flex fs-3 "><%= title %></div>
+    <ul class="links d-flex align-items-end">
         <li><a href="/admin">&nbsp; Home &nbsp;<span></span></a></li>
         <li><a href="/admin/Users">&nbsp;Users &nbsp;<span></span></a></li>
         <li><a href="/admin/Customers">&nbsp;Customers &nbsp;<span></span></a></li>
@@ -11,6 +13,7 @@
         <li><a href="/ChangePassword">&nbsp;Change Password &nbsp;<span></i></span></a></li>
         <li><a href="/logout" id="logoutbtn">&nbsp;Log out &nbsp;<span></span></a></li>
     </ul>
+    </div>
     <label for="nav-toggle" class="icon-burger">
         <div class="line"></div>
         <div class="line"></div>

@@ -51,7 +51,7 @@ admin_router.get("/", (req, res) => {
         })
         db.query("select * from customer", (error, result) => {
             if (error) throw error
-            res.render('../views/admin/adminHome', { Data: result, Log: log, title: "Dashboard", User: userData, Role: req.session.UserRole })
+            res.render('../views/admin/adminHome', { Data: result, Log: log, title: "Admin-Dashboard", User: userData, Role: req.session.UserRole })
         })
     } else {
         res.redirect('/')
@@ -83,10 +83,10 @@ admin_router.get("/Users", (req, res) => {
             if (error) throw error
             basicDetails.NameMail = result
         })
-        basicDetails.Roles = ["Admin", "Engineer"]
+        basicDetails.Roles = ["Admin","PMO", "Engineer"]
         db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users", function (error, result) {
             if (error) throw error
-            res.render('../views/admin/Users', { Data: result, Checklist: checklist, Basic: basicDetails });
+            res.render('../views/admin/Users', { Data: result, Checklist: checklist, Basic: basicDetails,title:"Users",Role: req.session.UserRole });
         })
     } else {
         res.redirect('/')
@@ -101,7 +101,7 @@ admin_router.get("/Jobs", (req, res) => {
         })
         db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Number_Of_Responses Desc limit 50", function (error, result) {
             if (error) throw error
-            res.render('../views/admin/Jobs', { Data: result, CustomerList: Customer });
+            res.render('../views/admin/Jobs', { Data: result, CustomerList: Customer,title:"Jobs",Role: req.session.UserRole });
         });
     } else {
         res.redirect('/')
@@ -113,7 +113,7 @@ admin_router.get("/Customers", (req, res) => {
             if (error) throw error
             db.query("select Customer_Name from customer", function (error, Customer_result) {
                 if (error) throw error
-                res.render('../views/admin/Customers', { Data: result, Customer_Data: Customer_result });
+                res.render('../views/admin/Customers', { Data: result, Customer_Data: Customer_result,title:"Customers",Role: req.session.UserRole });
             })
         });
     } else {
@@ -126,7 +126,6 @@ admin_router.post('/UploadCustomerLogo', CustomerLogoUpload.single("Customer_Log
 admin_router.post('/AddCustomer', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         let inputData = req.body.params;
-        console.log(req.body);
         inputData["Created_By"] = req.session.UserName;
         inputData['Created_Date'] = getTimeStamp();
         db.query("insert ignore into customer set?", [inputData], (error, result) => {
@@ -180,7 +179,7 @@ admin_router.get('/ListChecklist/:Customer_Name', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         db.query("select * from checklist where Customer=?", [req.params.Customer_Name], (error, result) => {
             if (error) throw error
-            res.render("../views/admin/ListChecklist", { Data: result })
+            res.render("../views/admin/ListChecklist", { Data: result,title:`${req.params.Customer_Name}-Checklist`,Role: req.session.UserRole })
         })
     } else {
         res.redirect('/')
@@ -194,7 +193,7 @@ admin_router.get('/ViewChecklist/:QC_Name', (req, res) => {
             db.query("select Section from questions where Checklist=? group by Section;", [req.params.QC_Name], (error, result1) => {
                 if (error) throw error
                 sections = result1;
-                res.render("../views/admin/viewChecklist", { Data: result, Checklist: req.params.QC_Name, Sections: sections })
+                res.render("../views/admin/viewChecklist", { Data: result, Checklist: req.params.QC_Name, Sections: sections,title:`${req.params.QC_Name}`, Role: req.session.UserRole })
             })
         })
     } else {

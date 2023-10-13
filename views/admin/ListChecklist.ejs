@@ -11,15 +11,21 @@
 
 <body>
     <header>
-        <%- include('../partials/admin-header') %>
+        <% if (Role=="Engineer" ) { %>
+            <%- include('../partials/engineer-header',{title:title,IncludeBackButton:0}) %>
+                <% }else if(Role=="Admin" ){ %>
+                    <%- include('../partials/admin-header',{title:title}) %>
+                        <% }else if(Role=="PMO" ){ %>
+                            <%- include('../partials/PMO-header',{title:title}) %>
+                                <%}%>
     </header>
     <main class="main_container justify-content-md-center">
         <div class="d-flex justify-content-md-center flex-wrap">
             <% if (Object.values(Data).length>0) { %>
                 <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
-                    <a href="/admin/ViewChecklist/<%= Data[index]['Checklist_Name']%>">
-                        <div class="localcard m-4 text-center d-flex flex-column">
-
+ 
+                        <div class="localcard m-4 text-center d-flex flex-column" onclick="location.href='/<%=Role%>/ViewChecklist/<%= Data[index][`Checklist_Name`]%>'">
+                            
                             <img src="../../public/uploads/Checklist-Icon/<%= Data[index]['Icon']%> "
                                 alt="<%= Data[index]['Checklist_Name']%> Icon" class="Checklist-Icon">
                             <h5 class="card-title">
@@ -28,9 +34,11 @@
                             <p class="card-text">
                                 <%= Data[index]['Customer']%>
                             </p>
+                            <a href="/<%=Role%>/viewResponses/<%= Data[index]['Checklist_Name']%>"><button type="button" class="btn btn-primary rounded-pill">View Responses <i class="bi bi-arrow-right-circle-fill"></i></button></a>
 
                         </div>
-                    </a>
+             
+
                     <% } %>
                         <% } else { %>
                             <tr>
@@ -123,9 +131,6 @@
             </div>
         </div>
     </div>
-    <footer>
-        <%- include('../partials/footer') %>
-    </footer>
     <%- include('../partials/dependencies-js') %>
         <script>
 

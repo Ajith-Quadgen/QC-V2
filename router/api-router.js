@@ -44,7 +44,7 @@ const myStorage = multer.diskStorage({
 const Upload = multer({ storage: multer.memoryStorage() })
 
 api_Router.post('/AddUser', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
         let inputData = req.body.params;
         inputData["Added_By"] = req.session.UserName;
         db.query("select Full_Name,Email_ID from users where Employee_ID=?", [req.body.params.Reporting_Manager_ID], (error, result) => {
@@ -71,7 +71,7 @@ api_Router.post('/AddUser', (req, res) => {
 });
 
 api_Router.post('/updateUserStatus', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
         db.query("update users set Active=? where `Employee_ID`=?", [parseInt(req.body.params.status), req.body.params.id], (error, result) => {
             if (error) {
                 console.log(error)
@@ -93,7 +93,7 @@ api_Router.post('/updateUserStatus', (req, res) => {
 })
 
 api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
         try {
             const data = [];
             req.file.buffer
@@ -138,7 +138,7 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
 })
 
 api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
         try {
             const data = [];
             req.file.buffer
@@ -179,7 +179,7 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
 })
 
 api_Router.post('/AddJob', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
         let inputData = req.body.params;
         inputData["Created_By"] = req.session.UserName;
         inputData['Created_Date'] = getTimeStamp();
@@ -205,7 +205,7 @@ api_Router.post('/AddJob', (req, res) => {
 });
 
 api_Router.post("/GetJob", (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
         db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs where Job_Number=?", [req.body.params.id], (error, result) => {
             if (error) {
                 console.log(error)
@@ -271,7 +271,6 @@ api_Router.post('/updateCheckList/:id', (req, res) => {
                 console.error(error)
                 return res.status(400).send(error)
             } else {
-                console.log(result)
                 db.query("Select * from questions where Checklist=?", [req.body.params.Checklist], function (error, Data) {
                     if (error) {
                         console.log(error)
@@ -308,7 +307,7 @@ api_Router.post('/updateCheckListStatus', (req, res) => {
 
 api_Router.post('/getJobData', (req, res) => {
     if (req.session.UserID) {
-        db.query("select * from jobs where Job_Number=?", [req.body.params.jobID], (error, result) => {
+        db.query("SELECT * FROM `qc-portal`.jobs where Job_Number=? and Customer in (select Customer from checklist where Checklist_Name=?);", [req.body.params.jobID,req.body.params.Checklist], (error, result) => {
             if (error) {
                 res.status(400).send("Internal Server Error")
             }
@@ -401,7 +400,6 @@ api_Router.post("/SubmitQC", (req, res) => {
                                 }
                                 try {
                                     await workbook.xlsx.writeFile(filePath).then(() => {
-                                        console.log("done")
                                     });
                                 } catch (error) {
                                     console.error(error)
@@ -413,7 +411,6 @@ api_Router.post("/SubmitQC", (req, res) => {
                                 let version = 1;
                                 let sheetName = `V${version}_${new Date().toISOString().slice(0, 10)}`;
                                 let sheet = workbook.addWorksheet(sheetName);
-                                console.log(sheetName)
                                 try {
                                     sheet.columns = mycolumns;
                                     newData.forEach(record => {
@@ -425,7 +422,6 @@ api_Router.post("/SubmitQC", (req, res) => {
                                 }
                                 try {
                                     await workbook.xlsx.writeFile(filePath).then(() => {
-                                        console.log("done")
                                     });
                                 } catch (error) {
                                     console.error(error)
@@ -458,10 +454,7 @@ api_Router.post("/SubmitQC", (req, res) => {
                                                 if (error) {
                                                     console.error('Error on sending email:', error);
                                                     return res.status(400).json({ Message: "QQ Submitted Successfully....Unable to sent the Confirmation E-Mail\nPlease Contact the Manager" })
-
-                                                } else {
-                                                    console.log('Email sent:', info.response);
-                                                }
+                                                } 
                                             });
                                             return res.status(200).json({ Message: 'QC Submitted Successfully', Score: newData[0].Percentage });
                                         }
@@ -478,7 +471,7 @@ api_Router.post("/SubmitQC", (req, res) => {
     }
 })
 api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
         let workbook = new excel_js.Workbook();
         let sheet = workbook.addWorksheet("Master-DB");
         try {
@@ -571,7 +564,7 @@ api_Router.post('/filterResponses', (req, res) => {
 })
 
 api_Router.get('/downloadFilteredContent', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
         const { Checklist, from, to, id, type } = req.query;
         let workbook = new excel_js.Workbook();
         let sheet = workbook.addWorksheet("Responses");
@@ -668,7 +661,7 @@ api_Router.get('/getUserDetails', (req, res) => {
     }
 })
 api_Router.post('/UpdateUser', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
         let inputData = req.body.params;
         inputData["Added_By"] = req.session.UserName;
         db.query("update users set ? where Employee_ID=?", [inputData, req.body.params.Employee_ID], (error, result) => {

@@ -13,7 +13,13 @@
 
 <body>
     <header>
-        <%- include('../partials/admin-header') %>
+        <% if (Role=="Engineer" ) { %>
+            <%- include('../partials/engineer-header',{title:title,IncludeBackButton:0}) %>
+                <% }else if(Role=="Admin" ){ %>
+                    <%- include('../partials/admin-header',{title:title}) %>
+                        <% }else if(Role=="PMO"){ %>
+                            <%- include('../partials/PMO-header',{title:title}) %>
+                            <%}%>
     </header>
     <main class="main_container">
         <div class="d-flex justify-content-center align-items-center">
@@ -146,9 +152,6 @@
             </table>
         </div>
     </main>
-    <footer>
-        <%- include('../partials/footer') %>
-    </footer>
     <%- include('../partials/dependencies-js') %>
         <script>
             document.getElementById("FilterBtn").addEventListener("click", async (e) => {

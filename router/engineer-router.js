@@ -39,6 +39,7 @@ engineer_router.get("/", (req, res) => {
         res.redirect('/')
     }
 })
+
 engineer_router.get('/Customers/:Customer_Name', (req, res) => {
     if (req.session.UserID) {
         let log;
@@ -57,7 +58,6 @@ engineer_router.get('/Customers/:Customer_Name', (req, res) => {
             if(result[0].Role!='Admin'){
             userData = result[0];
             const check = userData.Access.split(',')
-            console.log(check);
             let checklist;
              sql_query='Select * from checklist where Customer=? and Checklist_Name in (?)';
              db.query(sql_query, [req.params.Customer_Name,check], (error, result) => {
@@ -87,6 +87,7 @@ engineer_router.get('/Customers/:Customer_Name', (req, res) => {
         res.redirect('/')
     }
 })
+
 engineer_router.get("/QC/:QC_Name", (req, res) => {
     if (req.session.UserID) {
         db.query("Select * from questions where checklist=? and Status='Active' ", [req.params.QC_Name], (error, result) => {

@@ -13,10 +13,17 @@
 
 <body>
     <header>
-        <%- include('../partials/admin-header',{title:title,IncludeBackButton:false}) %>
+        <% if (Role=="Engineer" ) { %>
+            <%- include('../partials/engineer-header',{title:title,IncludeBackButton:0}) %>
+                <% }else if(Role=="Admin" ){ %>
+                    <%- include('../partials/admin-header',{title:title}) %>
+                        <% }else if(Role=="PMO" ){ %>
+                            <%- include('../partials/PMO-header',{title:title}) %>
+                                <%}%>
     </header>
 
-    <main class="d-flex flex-column mb-3 justify-content-center w-100" style="position: absolute; top: 100px; align-self: baseline;">
+    <main class="d-flex flex-column mb-3 justify-content-center w-100"
+        style="position: absolute; top: 100px; align-self: baseline;">
         <section class="d-flex justify-content-end flex-wrap">
             <div class="profile-card d-flex flex-row ">
                 <div class="right-side">
@@ -26,14 +33,17 @@
                     <figure>
                         <blockquote class="blockquote">
                             <p>
-                                <%= User.Full_Name %> 
+                                <%= User.Full_Name %>
                             </p>
                         </blockquote>
                         <figcaption class="blockquote-footer">
                             <%= User.Designation %> (<%= User.Employee_ID %>) <br>
-                            <i class="bi bi-envelope-at-fill"></i> <%= User.Email_ID %><br>
-                            <i class="bi bi-geo-alt-fill"></i><%= User.Location %>
-                            <p>RM: <%= User.Reporting_Manager_Name %></p>
+                                    <i class="bi bi-envelope-at-fill"></i>
+                                    <%= User.Email_ID %><br>
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                        <%= User.Location %>
+                                            <p>RM: <%= User.Reporting_Manager_Name %>
+                                            </p>
 
                         </figcaption>
                     </figure>

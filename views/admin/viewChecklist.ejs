@@ -11,135 +11,148 @@
 
 <body>
     <header>
-        <%- include('../partials/admin-header') %>
+        <% if (Role=="Engineer" ) { %>
+            <%- include('../partials/engineer-header',{title:title,IncludeBackButton:0}) %>
+                <% }else if(Role=="Admin" ){ %>
+                    <%- include('../partials/admin-header',{title:title}) %>
+                        <% }else if(Role=="PMO" ){ %>
+                            <%- include('../partials/PMO-header',{title:title}) %>
+                                <%}%>
     </header>
     <main class="main_container">
-        <form action="#" method="POST" enctype="multipart/form-data" id="QC-Excel-UploadForm"
-            class="d-flex justify-content-center align-items-center">
-            <p class="form-label">Select Only Excel File</p>
-            <label class="input-group-text" for="QCFile">Select Checklist File</label>
-            <input type="file" class="form-control m-2" name="QCFile" id="QCFile"
-                accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                required style="display: none;">
-            <button type="submit" class="btn btn-primary m-2">Upload &nbsp; <i
-                    class="bi bi-cloud-arrow-up"></i></button>
-            <input type="button" value="Add New Check" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
-                data-bs-target="#UserInputModel">
-            <% if (Checklist) { %>
-                <a href="/admin/viewResponses/<%= Checklist%>" target="_self"><button type="button"
-                        class="btn btn-outline-secondary m-2">View Responses</button> </a>
-                <% } %>
-        </form>
-        
-        <div class="d-flex w-100 flex-column-reverse" >
-            <table class="table table-hover m-2  table-striped caption-top">
-                <thead class="table-dark sticky-top">
-                    <tr>
-                        <th scope="col">Sl.No</th>
-                        <th scope="col">Checklist</th>
-                        <th scope="col">Section</th>
-                        <th scope="col">Weight</th>
-                        <th scope="col">Item</th>
-                        <th scope="col">Description</th>
-                        <th scope="col">Reference Document</th>
-                        <th scope="col" style="width: 300px; word-wrap: break-word;">Reference Link(URL)</th>
-                        <th scope="col" colspan="2">Status</th>
-                        <th></th>
-                    </tr>
-                    <div id="loading-spinner"></div>
-                </thead>
-                
-                <tbody id="content-area">
-                    <% if (Object.values(Data).length>0) { %>
-                        <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
+        <% if (Role=="Admin" ) { %>
+            <form action="#" method="POST" enctype="multipart/form-data" id="QC-Excel-UploadForm"
+                class="d-flex justify-content-center align-items-center">
+                <p class="form-label">Select Only Excel File</p>
+                <label class="input-group-text" for="QCFile">Select Checklist File</label>
+                <input type="file" class="form-control m-2" name="QCFile" id="QCFile"
+                    accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                    required style="display: none;">
+                <button type="submit" class="btn btn-primary m-2">Upload &nbsp; <i
+                        class="bi bi-cloud-arrow-up"></i></button>
+                <input type="button" value="Add New Check" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
+                    data-bs-target="#UserInputModel">
+                <% if (Checklist) { %>
+                    <a href="/<%=Role%>/viewResponses/<%= Checklist%>" target="_self"><button type="button"
+                            class="btn btn-outline-secondary m-2">View Responses</button> </a>
+                    <% } %>
+            </form>
+            <%}%>
+                <div class="d-flex w-100 flex-column-reverse">
+                    <table class="table table-hover p-2 table-sm table-striped caption-top">
+                        <thead class="table-dark sticky-top">
                             <tr>
-                                <td>
-                                    <%= index+1%>
-                                </td>
-                                <td style="text-align: start; align-items:start;">
-                                    <%= Data[index]["Checklist"] %>
-                                </td>
-                                <td style="text-align: start; align-items:start;">
-                                    <%= Data[index]['Section'] %>
-                                </td>
-                                <td>
-                                    <%= Data[index]['Weight'] %>
-                                </td>
-                                <td style="text-align: start; align-items:start;">
-                                    <%= Data[index]['Item'] %>
-                                </td>
-                                <td style="text-align: start; align-items:start;">
-                                    <%- Data[index]['Description'] %>
-                                </td>
-                                <td style="text-align: start; align-items:start;">
-                                    <%= Data[index]['Reference_Document'] %>
-                                </td>
-                                <td style="width: 300px; word-wrap: break-word;">
-                                    <%= Data[index]['Reference_Link'] %>
-                                </td>
-                                <td>
-                                    <%=Data[index]['Status']%>
-                                </td>
-                                <td>
-                                    <% if (Data[index]['Status']=="Active" ) { %>
-                                        <button type="button" class="btn btn-danger  ms-2"
-                                            onclick="updateStatusAPI('<%= Data[index]['Question_ID'] %>','Inactive')"><i
-                                                class="bi bi-x-circle"></i></button>
-                                        <% }else{ %>
-                                            <button type="button" class="btn btn-success  ms-2 me-2"
-                                                onclick="updateStatusAPI('<%= Data[index]['Question_ID'] %>','Active')"><i
-                                                    class="bi bi-check-circle-fill"></i></button>
-                                            <% } %>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-outline-primary" onclick='gatherRowData(this)'
-                                        id="<%= Data[index]['Question_ID'] %>" data-bs-toggle="modal"
-                                        data-bs-target="#UpdateQCModal">Edit</button>
-                                </td>
-
+                                <th scope="col">Sl.No</th>
+                                <th scope="col">Checklist</th>
+                                <th scope="col">Section</th>
+                                <th scope="col">Weight</th>
+                                <th scope="col">Item</th>
+                                <th scope="col">Description</th>
+                                <th scope="col">Reference Document</th>
+                                <th scope="col" style="width: 300px; word-wrap: break-word;">Reference Link(URL)</th>
+                                <% if (Role=="Admin" ) { %>
+                                <th scope="col" colspan="2">Status</th>
+                                <%}%>
+                                <th></th>
                             </tr>
-                            <% } %>
-                                <% } else { %>
+                            <div id="loading-spinner"></div>
+                        </thead>
+
+                        <tbody id="content-area">
+                            <% if (Object.values(Data).length>0) { %>
+                                <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
                                     <tr>
-                                        <td colspan="11">
-                                            <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-                                                <symbol id="check-circle-fill" viewBox="0 0 16 16">
-                                                    <path
-                                                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-                                                </symbol>
-                                                <symbol id="info-fill" viewBox="0 0 16 16">
-                                                    <path
-                                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
-                                                </symbol>
-                                                <symbol id="exclamation-triangle-fill" viewBox="0 0 16 16">
-                                                    <path
-                                                        d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-                                                </symbol>
-                                            </svg>
-                                            <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center"
-                                                role="alert">
-                                                <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Info:">
-                                                    <use xlink:href="#info-fill" />
-                                                </svg>
-
-                                                <strong>Sorry...!😕</strong> Data not found.
-                                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close"></button>
-                                            </div>
+                                        <td>
+                                            <%= index+1%>
                                         </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="9" class="text-center">
-
-                                            <a href="/login" class="btn btn-outline-primary rounded-pill"><i
-                                                    class="bi bi-arrow-left-circle-fill"></i> Go Back To Home</a>
-
+                                        <td style="text-align: start; align-items:start;">
+                                            <%= Data[index]["Checklist"] %>
                                         </td>
+                                        <td style="text-align: start; align-items:start;">
+                                            <%= Data[index]['Section'] %>
+                                        </td>
+                                        <td>
+                                            <%= Data[index]['Weight'] %>
+                                        </td>
+                                        <td style="text-align: start; align-items:start;">
+                                            <%= Data[index]['Item'] %>
+                                        </td>
+                                        <td style="text-align: start; align-items:start;">
+                                            <%- Data[index]['Description'] %>
+                                        </td>
+                                        <td style="text-align: start; align-items:start;">
+                                            <%= Data[index]['Reference_Document'] %>
+                                        </td>
+                                        <td style="width: 300px; word-wrap: break-word;">
+                                            <%= Data[index]['Reference_Link'] %>
+                                        </td>
+
+                                        <% if (Role=="Admin" ) { %>
+                                            <td>
+                                                <%=Data[index]['Status']%>
+                                            </td>
+                                        <td>
+                                            <% if (Data[index]['Status']=="Active" ) { %>
+                                                <button type="button" class="btn btn-danger  ms-2"
+                                                    onclick="updateStatusAPI('<%= Data[index][`Question_ID`] %>','Inactive')"><i
+                                                        class="bi bi-x-circle"></i></button>
+                                                <% }else{ %>
+                                                    <button type="button" class="btn btn-success  ms-2 me-2"
+                                                        onclick="updateStatusAPI('<%= Data[index][`Question_ID`] %>','Active')"><i
+                                                            class="bi bi-check-circle-fill"></i></button>
+                                                    <% } %>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-outline-primary"
+                                                onclick='gatherRowData(this)' id="<%= Data[index]['Question_ID'] %>"
+                                                data-bs-toggle="modal" data-bs-target="#UpdateQCModal">Edit</button>
+                                        </td>
+                                        <%}%>
                                     </tr>
                                     <% } %>
-                </tbody>
-            </table>
-        </div>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="11">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                                                        <symbol id="check-circle-fill" viewBox="0 0 16 16">
+                                                            <path
+                                                                d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                                                        </symbol>
+                                                        <symbol id="info-fill" viewBox="0 0 16 16">
+                                                            <path
+                                                                d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                        </symbol>
+                                                        <symbol id="exclamation-triangle-fill" viewBox="0 0 16 16">
+                                                            <path
+                                                                d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                                                        </symbol>
+                                                    </svg>
+                                                    <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center"
+                                                        role="alert">
+                                                        <svg class="bi flex-shrink-0 me-2" role="img"
+                                                            aria-label="Info:">
+                                                            <use xlink:href="#info-fill" />
+                                                        </svg>
+
+                                                        <strong>Sorry...!😕</strong> Data not found.
+                                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                            aria-label="Close"></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="9" class="text-center">
+
+                                                    <a href="/login" class="btn btn-outline-primary rounded-pill"><i
+                                                            class="bi bi-arrow-left-circle-fill"></i> Go Back To
+                                                        Home</a>
+
+                                                </td>
+                                            </tr>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
     </main>
     <!-- Add QC Modal -->
     <div class="modal fade" id="UserInputModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -160,8 +173,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="section">Select Section</label>
-                            <select name="section" class="from-select form-control"
-                                id="section" aria-label="Select" required>
+                            <select name="section" class="from-select form-control" id="section" aria-label="Select"
+                                required>
                                 <option value="" selected>Select the Section</option>
                                 <% Sections.forEach(record=> { %>
                                     <option value="<%= record.Section %>">
@@ -179,7 +192,8 @@
                             <label for="Description">Description</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <input type="number" class="form-control" id="Weight" placeholder="key" value="1" min="1" required>
+                            <input type="number" class="form-control" id="Weight" placeholder="key" value="1" min="1"
+                                required>
                             <label for="Weight">Weight</label>
                         </div>
                         <div class="form-floating mb-3">
@@ -220,8 +234,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="updatesection">Select Section</label>
-                            <select name="updatesection" class="from-select form-control"
-                                id="updatesection" aria-label="Select" required>
+                            <select name="updatesection" class="from-select form-control" id="updatesection"
+                                aria-label="Select" required>
                                 <option value="" selected>Select the Section</option>
                                 <% Sections.forEach(record=> { %>
                                     <option value="<%= record.Section %>">
@@ -230,7 +244,7 @@
                                     <% }) %>
                             </select>
                         </div>
-                        
+
                         <div class="form-floating mb-3">
                             <input type="text" class="form-control" id="updateitem" placeholder="key">
                             <label for="updateitem">Item</label>
@@ -242,7 +256,8 @@
                             <label for="updateDescription">Description</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <input type="number" class="form-control" id="updateweight" placeholder="key" value="1" min="1" required>
+                            <input type="number" class="form-control" id="updateweight" placeholder="key" value="1"
+                                min="1" required>
                             <label for="updateweight">Weight</label>
                         </div>
                         <div class="form-floating mb-3">
@@ -263,9 +278,6 @@
             </div>
         </div>
     </div>
-    <footer>
-        <%- include('../partials/footer') %>
-    </footer>
     <%- include('../partials/dependencies-js') %>
         <script>
 
@@ -284,7 +296,7 @@
                 }).then(res => {
                     if (res.status == 200) {
                         $("#UserInputModel").modal('hide')
-                        
+
                         updateContentArea(res.data.Data)
                         document.getElementById("addQCCheckForm").reset();
                         alert(res.data.Message);
@@ -342,10 +354,10 @@
                                     <td style="text-align: start; align-items:start;">${data[i]["Checklist"]}</td>
                                     <td style="text-align: start; align-items:start;">${data[i]["Section"]}</td>
                                     <td>${data[i]["Weight"]}</td>
-                                    <td style="text-align: start; align-items:start;">${data[i]["Item"]!==null?data[i]["Item"]:""}</td>
+                                    <td style="text-align: start; align-items:start;">${data[i]["Item"] !== null ? data[i]["Item"] : ""}</td>
                                     <td style="text-align: start; align-items:start;">${data[i]["Description"]}</td>
-                                    <td style="text-align: start; align-items:start;">${data[i]["Reference_Document"]!==null?data[i]["Reference_Document"]:""}</td>
-                                    <td style="text-align: start; align-items:start;">${data[i]["Reference_Link"]!==null?data[i]["Reference_Link"]:""}</td>
+                                    <td style="text-align: start; align-items:start;">${data[i]["Reference_Document"] !== null ? data[i]["Reference_Document"] : ""}</td>
+                                    <td style="text-align: start; align-items:start;">${data[i]["Reference_Link"] !== null ? data[i]["Reference_Link"] : ""}</td>
                                     <td>${data[i]["Status"]}</td>
                                     <td>${data[i]["Status"] === "Inactive" ?
                                 `<button type="button" class="btn btn-success ms-2 me-2" onclick="updateStatusAPI('${data[i]['Question_ID']}','Active')"><i class="bi bi-check-circle-fill"></i></button>` :
@@ -381,7 +393,7 @@
                 const desc = document.getElementById("updateDescription").value;
                 const docName = document.getElementById("updatereferDocName").value;
                 const docLink = document.getElementById("updatereferDocLink").value;
-                const weight=document.getElementById("updateweight").value;
+                const weight = document.getElementById("updateweight").value;
                 axios.post(`/api/updateCheckList/${id}`, {
                     params: {
                         "Checklist": qc,
@@ -390,7 +402,7 @@
                         "Description": desc,
                         "Reference_Document": docName,
                         "Reference_Link": docLink,
-                        "Weight":weight
+                        "Weight": weight
                     }
                 }).then(res => {
                     if (res.status == 200) {

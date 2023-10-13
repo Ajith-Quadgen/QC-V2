@@ -17,14 +17,15 @@
             <%- include('../partials/engineer-header',{title:title,IncludeBackButton:0}) %>
                 <% }else if(Role=="Admin" ){ %>
                     <%- include('../partials/admin-header',{title:title}) %>
-
-                        <% } %>
+                        <% }else if(Role=="PMO"){ %>
+                            <%- include('../partials/PMO-header',{title:title}) %>
+                            <%}%>
     </header>
 
     <main class="d-flex flex-column mb-3 justify-content-center w-100"
         style="position: absolute; top: 100px; align-self: baseline; align-items: center;">
 
-        <section class="d-flex justify-content-center flex-wrap w-50">
+        <section class="d-flex justify-content-center flex-wrap w-75">
             <% if (Object.values(Data).length>0) { %>
                 <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
                     <a href="/Engineer/QC/<%= Data[index].Checklist_Name %>" style="text-decoration: none;">

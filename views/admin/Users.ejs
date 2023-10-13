@@ -11,7 +11,13 @@
 
 <body>
     <header>
-        <%- include('../partials/admin-header') %>
+        <% if (Role=="Engineer" ) { %>
+            <%- include('../partials/engineer-header',{title:title,IncludeBackButton:0}) %>
+                <% }else if(Role=="Admin" ){ %>
+                    <%- include('../partials/admin-header',{title:title}) %>
+                        <% }else if(Role=="PMO" ){ %>
+                            <%- include('../partials/PMO-header',{title:title}) %>
+                                <%}%>
     </header>
     <main class="main_container">
         <form action="#" method="POST" enctype="multipart/form-data" id="userExcelUploadForm"
@@ -43,7 +49,7 @@
                         <th scope="col">Role</th>
                         <th scope="col">No of Submission</th>
                         <th scope="col">Reporting Manager</th>
-                        <th scope="col">Added By</th>
+                        <th scope="col">Added/Updated By</th>
                         <th scope="col">Status</th>
                         <th scope="col">Last Seen</th>
                         <th></th>
@@ -52,7 +58,7 @@
                 <tbody id="content-area">
                     <% if (Object.values(Data).length>0) { %>
                         <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
-                            <tr ondblclick="getUserDetails('<%= Data[index]['Employee_ID'] %>')"
+                            <tr ondblclick="getUserDetails('<%= Data[index][`Employee_ID`] %>')"
                                 style="cursor:pointer;">
                                 <td>
                                     <%= index+1%>
@@ -97,10 +103,10 @@
                                 <td>
                                     <% if (Data[index]['Active']=='0' ) { %>
                                         <button type="button" class="btn btn-success btn-sm ms-2 me-2"
-                                            onclick="updateStatusAPI('<%= Data[index]['Employee_ID'] %>','1')"><i
+                                            onclick="updateStatusAPI('<%= Data[index][`Employee_ID`] %>','1')"><i
                                                 class="bi bi-check-circle-fill"></i></button>
                                         <% }else{%> <button type="button" class="btn btn-danger btn-sm ms-2"
-                                                onclick="updateStatusAPI('<%= Data[index]['Employee_ID'] %>','0')"><i
+                                                onclick="updateStatusAPI('<%= Data[index][`Employee_ID`] %>','0')"><i
                                                     class="bi bi-x-circle"></i></button>
                                             <% } %>
 
@@ -298,11 +304,13 @@
                             </select>
                         </div>
                         <div class="form-floating mb-3">
-                            <input type="text" id="u-empReportingManager" class="form-control" placeholder="key" readonly required>
+                            <input type="text" id="u-empReportingManager" class="form-control" placeholder="key"
+                                readonly required>
                             <label for="u-empReportingManager">Reporting Manager: </label>
                         </div>
                         <div class="mb-3">
-                            <input type="hidden" name="" id="u-empReportingManagerID" placeholder="key" required value="">
+                            <input type="hidden" name="" id="u-empReportingManagerID" placeholder="key" required
+                                value="">
                             <select name="u-empReportingManager" class="from-select form-control"
                                 id="ReportingMangerSelect" aria-label="Select">
                                 <option selected>Select the new Reporting Manager</option>
@@ -325,9 +333,6 @@
             </div>
         </div>
     </div>
-    <footer>
-        <%- include('../partials/footer') %>
-    </footer>
     <%- include('../partials/dependencies-js') %>
         <script>
             document.getElementById("ReportingMangerSelect").addEventListener("change", (e) => {
@@ -598,6 +603,12 @@
                 }
 
             }
+
+            $("#SearchBox").on("keydown", function (e) {
+                if (e.keyCode === 13) {  //checks whether the pressed key is "Enter"
+                    document.getElementById("FilterBtn").click()
+                }
+            });
         </script>
 </body>
 
