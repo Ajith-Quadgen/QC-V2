@@ -55,7 +55,7 @@ function getTimeStamp(){
                 basicDetails.NameMail = result
             })
             basicDetails.Roles = ["Admin","PMO", "Engineer"]
-            db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users", function (error, result) {
+            db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users  where Role!='Root'", function (error, result) {
                 if (error) throw error
                 res.render('../views/admin/Users', { Data: result, Checklist: checklist, Basic: basicDetails,title:"Users", Role: req.session.UserRole  });
             })

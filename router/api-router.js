@@ -453,7 +453,7 @@ api_Router.post("/SubmitQC", (req, res) => {
                                             transporter.sendMail(mailOptions, (error, info) => {
                                                 if (error) {
                                                     console.error('Error on sending email:', error);
-                                                    return res.status(400).json({ Message: "QQ Submitted Successfully....Unable to sent the Confirmation E-Mail\nPlease Contact the Manager" })
+                                                    return res.status(400).json({ Message: "QQ Submitted Successfully....Unable to send the Confirmation E-Mail\nPlease Contact the Manager" })
                                                 } 
                                             });
                                             return res.status(200).json({ Message: 'QC Submitted Successfully', Score: newData[0].Percentage });

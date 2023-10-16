@@ -237,12 +237,14 @@ input:focus {
   flex-direction: row;
   width: auto;
   height: auto;
-  margin-top: 100px;
   background: #ffffff;
   border-radius: 4px;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-overflow: hidden;}
-
+overflow: hidden;
+top: 50%;
+left: 50%;
+transform: translate(-50%,-50%);
+position: absolute;}
 .left {
   width: 250px;
   height: auto;
