@@ -99,7 +99,7 @@ admin_router.get("/Jobs", (req, res) => {
             if (error) throw error
             Customer = result
         })
-        db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Number_Of_Responses Desc limit 50", function (error, result) {
+        db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Modified_Date limit 50", function (error, result) {
             if (error) throw error
             res.render('../views/admin/Jobs', { Data: result, CustomerList: Customer,title:"Jobs",Role: req.session.UserRole });
         });
@@ -205,7 +205,7 @@ admin_router.get('/viewResponses/:QC_Name', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Checklist=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc", [req.params.QC_Name], (error, result) => {
             if (error) throw error
-            res.render("../views/admin/viewResponses", { Data: result, Checklist: req.params.QC_Name, title: req.params.QC_Name })
+            res.render("../views/admin/viewResponses", { Data: result, Checklist: req.params.QC_Name, title: req.params.QC_Name,Role: req.session.UserRole })
         })
     } else {
         res.redirect('/')

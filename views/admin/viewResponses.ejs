@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        <%= title %>Responses
+        <%= title %> Responses
     </title>
     <%- include('../partials/dependencies') %>
 </head>
@@ -17,12 +17,12 @@
             <%- include('../partials/engineer-header',{title:title,IncludeBackButton:0}) %>
                 <% }else if(Role=="Admin" ){ %>
                     <%- include('../partials/admin-header',{title:title}) %>
-                        <% }else if(Role=="PMO"){ %>
+                        <% }else if(Role=="PMO" ){ %>
                             <%- include('../partials/PMO-header',{title:title}) %>
-                            <%}%>
+                                <%}%>
     </header>
     <main class="main_container">
-        <div class="d-flex justify-content-center align-items-center">
+        <div class="d-flex justify-content-center align-items-end">
             <div class="col-md-3 m-2" style="width: max-content;">
                 <label for="job_id">Enter Job-ID/CFAS Number</label>
                 <input type="text" name="" id="job_id" class="form-control" placeholder="Enter Job ID/CFAS Number">
@@ -49,16 +49,18 @@
                 <button type="button" id="FilterBtn" class="btn btn-outline-success">Filter &nbsp; <i
                         class="bi bi-funnel"></i></button>
             </div>
-            <div class="col-md-3 m-2" style="width: max-content;">
-                <% if (Checklist) { %>
-                    <button type="button" class="btn btn-outline-info m-3" id="FilterDownloadBtn">Download the Filtered
-                        Data <i class="bi bi-cloud-download"></i></button>
-                    <a href="/api/DownloadQCResponses/<%= Checklist%>" target="_self"><button
-                            class="btn btn-outline-primary m-3"> Download
-                            Master Excel <i class="bi bi-download"></i> </button></a>
-                    <% } %>
-            </div>
 
+            <% if (Checklist) { %>
+                <div class="col-md-3 m-2" style="width: max-content;">
+                    <button type="button" class="btn btn-outline-info" id="FilterDownloadBtn">Download the Filtered
+                        Data <i class="bi bi-cloud-download"></i></button>
+                </div>
+                <div class="col-md-3 m-2" style="width: max-content;">
+                    <a href="/api/DownloadQCResponses/<%= Checklist%>" target="_self"><button
+                            class="btn btn-outline-primary"> Download
+                            Master Excel <i class="bi bi-download"></i> </button></a>
+                </div>
+                <% } %>
 
         </div>
         <div class="d-flex w-100 flex-column-reverse">
@@ -84,16 +86,16 @@
                                 <td>
                                     <%= index+1%>
                                 </td>
-                                <td >
+                                <td>
                                     <%= Data[index]["Submitted_Date"] %>
                                 </td>
-                                <td >
+                                <td>
                                     <%= Data[index]['Job_ID'] %>
                                 </td>
-                                <td >
+                                <td>
                                     <%= Data[index]['State'] %>
                                 </td>
-                                <td >
+                                <td>
                                     <%- Data[index]['City'] %>
                                 </td>
                                 <td>
@@ -167,9 +169,10 @@
                         type: type,
                         from: from,
                         to: to,
-                        Checklist:'<%=Checklist%>'
+                        Checklist: '<%-Checklist%>'
                     }
                 }).then(async res => {
+                    console.log(res)
                     if (res.status == 200) {
                         if (res.data.length > 0) {
                             await updateContentArea(res.data);
@@ -194,9 +197,9 @@
                 from = encodeURIComponent(document.getElementById("fromDate").value);
                 to = encodeURIComponent(document.getElementById("toDate").value);
                 const url = `/api/downloadFilteredContent?id=${Job_ID}&type=${type}&from=${from}&to=${to}&Checklist=${'<%=title%>'}`;
-                let filterlink=document.createElement("a");
-                filterlink.href=url;
-                filterlink.target="_self"
+                let filterlink = document.createElement("a");
+                filterlink.href = url;
+                filterlink.target = "_self"
                 filterlink.click()
                 //window.location.href=url
             })

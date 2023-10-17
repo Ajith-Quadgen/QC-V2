@@ -293,6 +293,8 @@ th {
   width: -webkit-fill-available;
   height: -webkit-fill-available;
   object-fit: contain;
+  width: inherit;
+  height: inherit;
 }
 
 .profile-card {

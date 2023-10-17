@@ -61,22 +61,22 @@
                                 <td>
                                     <%= index+1%>
                                 </td>
-                                <td style="text-align: start; align-items:start;">
+                                <td >
                                     <%= Data[index]["Job_Number"] %>
                                 </td>
-                                <td style="text-align: start; align-items:start;">
+                                <td>
                                     <%= Data[index]['Customer'] %>
                                 </td>
-                                <td style="text-align: start; align-items:start;">
+                                <td >
                                     <%= Data[index]['State'] %>
                                 </td>
-                                <td style="text-align:left">
+                                <td>
                                     <%= Data[index]['City'] %>
                                 </td>
                                 <td>
                                     <%= Data[index]['Number_Of_Responses'] %>
                                 </td>
-                                <td style="text-align: start; align-items:start;">
+                                <td >
                                     <%= Data[index]['Created_By'] %>
                                 </td>
                                 <td>
@@ -220,11 +220,11 @@
                 fromData.append("UserExcelFile", file)
                 await axios.post('/api/uploadJobs', fromData).then(res => {
                     if (res.status == 200) {
-                        alert(res.data.message);
+                        alert(res.data.Message);
                         updateContentArea(res.data.Data);
                     }
                 }).catch(e => {
-                    alert(e.response.data.message);
+                    alert(e.response.data.Message);
                 })
             })
 

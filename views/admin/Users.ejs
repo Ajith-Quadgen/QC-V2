@@ -374,11 +374,11 @@
                 fromData.append("UserExcelFile", file)
                 await axios.post('/api/uploadUsers', fromData).then(res => {
                     if (res.status == 200) {
-                        alert(res.data.message);
+                        alert(res.data.Message);
                         updateContentArea(res.data.Data);
                     }
                 }).catch(e => {
-                    alert(e.response.data);
+                    alert(e.response.data.Message);
                 })
             })
 
