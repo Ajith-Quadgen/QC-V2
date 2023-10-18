@@ -124,7 +124,6 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
                 });
                 insertionPromises.push(insertionPromise);
               });
-              console.log(data[0])
               Promise.all(insertionPromises)
                 .then(() => {
                   console.log('All Users data inserted successfully.');
@@ -137,7 +136,9 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
                   console.error('Error inserting data:', error);
                   if(error.code=="ER_BAD_FIELD_ERROR"){
                     return res.status(406).json({Message:"Since the uploaded CSV file does not fit the users' template, data import is unsuccessful."})
-                  }else{
+                  }else if(error.sqlState=="45000"){
+                    return res.status(406).json({Message:"Some Employee ID/Email is not Exact Format, That records are not Imported...!"})
+                  } else{
                     return res.status(500).json({Message:"Internal Server Error."})
                   }
                   
@@ -677,7 +678,6 @@ api_Router.post('/filterResponses', (req, res) => {
             main += `AND Type='${type}'`
         }
         main += "group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc ";
-        console.log(main)
         db.query(main, (error, result) => {
             if (error) {
                 console.error(error)
@@ -695,6 +695,7 @@ api_Router.post('/filterResponses', (req, res) => {
 api_Router.get('/downloadFilteredContent', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
         const { Checklist, from, to, id, type } = req.query;
+        console.log(req.query)
         let workbook = new excel_js.Workbook();
         let sheet = workbook.addWorksheet("Responses");
 
@@ -711,6 +712,7 @@ api_Router.get('/downloadFilteredContent', (req, res) => {
         if (type) {
             main += `AND Type='${type}'`
         }
+
         db.query(main, async function (error, result) {
             if (error) {
                 console.log(error)

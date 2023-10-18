@@ -62,7 +62,17 @@ httpsServer.listen(port, () => {
   console.log('server is Running under Https with port:' + port)
 })
 
-
+const io=new Server(httpsServer)
+io.on('connection',(socket)=>{
+socket.on('Check_Employee_Exist',(data,callback)=>{
+  callback("Present")
+})
+})
+io.engine.on("connection_error", (err) => {
+  console.log(err.req);      // the request object
+  console.log(err.message);  // the error message, for example "Session ID unknown"
+  console.log(err.context);  // some additional error context
+});
 // const server = app.listen(port, function () {
 //   console.log("QC-Portal is hosted at http://localhost:%s", port);
 // });

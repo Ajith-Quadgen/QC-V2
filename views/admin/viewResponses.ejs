@@ -191,12 +191,13 @@
 
             })
             document.getElementById("FilterDownloadBtn").addEventListener('click', (e) => {
-                var Job_ID, type, from, to;
+                var Job_ID, type, from, to,Checklist;
                 Job_ID = encodeURIComponent(document.getElementById("job_id").value.replaceAll(' ', ""));
                 type = encodeURIComponent(document.getElementById("qc_type").value);
                 from = encodeURIComponent(document.getElementById("fromDate").value);
                 to = encodeURIComponent(document.getElementById("toDate").value);
-                const url = `/api/downloadFilteredContent?id=${Job_ID}&type=${type}&from=${from}&to=${to}&Checklist=${'<%=title%>'}`;
+                Checklist=encodeURIComponent('<%-Checklist%>');
+                const url = `/api/downloadFilteredContent?id=${Job_ID}&type=${type}&from=${from}&to=${to}&Checklist=${Checklist}`;
                 let filterlink = document.createElement("a");
                 filterlink.href = url;
                 filterlink.target = "_self"

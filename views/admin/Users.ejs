@@ -34,7 +34,7 @@
             <button type="submit" class="btn btn-primary m-2">Upload &nbsp; <i
                     class="bi bi-cloud-arrow-up"></i></button>
             <input type="button" value="Add New User" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
-                data-bs-target="#UserInputModel">
+                data-bs-target="#UserInputModel">            
         </form>
         <div class="d-flex w-100">
             <table class="table table-hover m-2 AVRTable table-striped caption-top">
@@ -558,7 +558,7 @@
             })
             document.getElementById("FilterBtn").addEventListener('click', async (e) => {
                 const Key = document.getElementById("SearchBox").value.replaceAll(" ", "");
-                var regex = /^[0-9a-zA-Z]+$/
+                var regex = /^[0-9a-zA-Z\/-]+$/
                 if (regex.test(Key)) {
                     axios.get('/api/GetUser', {
                         params: {
@@ -575,7 +575,7 @@
                         })
                 } else {
                     document.getElementById("SearchBox").value = null;
-                    alert("Special Characters are Not Allowed for");
+                    alert("Special Characters are Not Allowed...!");
                 }
             })
             function updateContentArea(data) {
@@ -609,6 +609,28 @@
                     document.getElementById("FilterBtn").click()
                 }
             });
+
+            const socket = io();
+            // Listen for 'chat message' event and display the message
+            socket.on('chat message', msg => {
+                const messages = document.getElementById('messages');
+                const li = document.createElement('li');
+                li.textContent = msg;
+                messages.appendChild(li);
+            });
+
+            function sendMessage() {
+                const messageInput = document.getElementById('messageInput');
+                const message = messageInput.value;
+                socket.emit('chat message', message); // Send a message to the server
+                messageInput.value = '';
+            }
+            document.getElementById("empId").addEventListener("change",(e)=>{
+               const EmployeeID=e.target.value;
+               socket.emit("Check_Employee_Exist",{ID:EmployeeID},(response)=>{
+                console.log(response)
+               });
+            })
         </script>
 </body>
 
