@@ -32,3 +32,4 @@ function hideLoadingSpinner() {
   const spinner = document.getElementById('loading-spinner');
   spinner.style.display = 'none';
 }
+const socket = io();

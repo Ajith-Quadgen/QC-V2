@@ -39,6 +39,7 @@ const EngineerRouter = require('./router/engineer-router')
 const RootRouter = require('./router/root-router')
 const AdminRouter = require('./router/api-router');
 const api_Router = require('./router/api-router');
+const { error } = require('console');
 app.use('/admin', adminRouter)
 app.use('/PMO', PMORouter)
 app.use('/engineer', EngineerRouter)
@@ -65,7 +66,22 @@ httpsServer.listen(port, () => {
 const io=new Server(httpsServer)
 io.on('connection',(socket)=>{
 socket.on('Check_Employee_Exist',(data,callback)=>{
-  callback("Present")
+  console.log(data)
+  db.query("select * from users where Employee_ID=? or Email_ID=?",[data.ID,data.ID],(error,result)=>{
+    if(error) throw error
+    if(result.length>0){
+      callback("Present")
+    }
+  })
+})
+socket.on('Check_Job_Exist',(data,callback)=>{
+  console.log(data)
+  db.query("select * from jobs where Job_Number=?",[data.ID],(error,result)=>{
+    if(error) throw error
+    if(result.length>0){
+      callback("Present")
+    }
+  })
 })
 })
 io.engine.on("connection_error", (err) => {

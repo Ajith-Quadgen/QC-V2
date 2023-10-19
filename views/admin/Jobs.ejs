@@ -47,7 +47,7 @@
                         <th scope="col">State</th>
                         <th scope="col">City</th>
                         <!-- <th scope="col">Work Print Number</th> -->
-                        <th scope="col">Number Of Responses</th>
+                        <th scope="col">Total Responses</th>
                         <th scope="col">Created By</th>
                         <th scope="col">Created Date</th>
                         <th scope="col">Modified Date</th>
@@ -144,11 +144,21 @@
                             <input type="text" class="form-control" id="Job_Number" placeholder="key" min="5" required>
                             <label for="empId">Job Number</label>
                         </div>
+                        <div class="toast bg-warning align-items-center border-0 mb-3 rounded-3" id="Job-Tost"
+                        role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body fs-6">
+                                This Job/CFAS is already exist..!
+                            </div>
+                            <button type="button" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast"
+                                aria-label="Close"></button>
+                        </div>
+                    </div>
                         <div class="mb-3">
                             <label for="Customer">Customer</label>
                             <select name="Customer" id="Customer" class="from-select form-control" aria-label="Select"
                                 required>
-                                <option selected>Select the Customer</option>
+                                <option selected value="">Select the Customer</option>
                                 <% CustomerList.forEach(record=> { %>
                                     <option value="<%= record.Customer_Name %>">
                                         <%= record.Customer_Name %>
@@ -276,6 +286,15 @@
                     document.getElementById("FilterBtn").click()
                 }
             });
+            document.getElementById("Job_Number").addEventListener("change", (e) => {
+                const EmployeeID = e.target.value;
+                socket.emit("Check_Job_Exist", { ID: EmployeeID }, (response) => {
+                    if (response == "Present") {
+                        $("#Job-Tost").toast('show');
+                        // e.target.value=null;
+                    }
+                });
+            })
         </script>
 </body>
 

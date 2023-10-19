@@ -15,8 +15,8 @@ const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
 const path = require('path');
 const { resume } = require('pdfkit');
-const parse=require('csv-parser')
-const streamifier=require('streamifier')
+const parse = require('csv-parser')
+const streamifier = require('streamifier')
 
 const transporter = nodemailer.createTransport(
     smtpTransport({
@@ -43,24 +43,33 @@ const myStorage = multer.diskStorage({
 const Upload = multer({ storage: multer.memoryStorage() })
 
 api_Router.post('/AddUser', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
         let inputData = req.body.params;
         inputData["Added_By"] = req.session.UserName;
         db.query("select Full_Name,Email_ID from users where Employee_ID=?", [req.body.params.Reporting_Manager_ID], (error, result) => {
-            if (error) throw error
-            inputData["Reporting_Manager_Name"] = result[0].Full_Name;
-            inputData['Reporting_Manager_Mail'] = result[0].Email_ID;
-            delete inputData.Reporting_Manager_ID
+            if (error) {
+                console.log(error)
+                return res.status(400).json({ Message: "Internal Server Error" })
+            }
+            if (result.length > 0) {
+                inputData["Reporting_Manager_Name"] = result[0].Full_Name;
+                inputData['Reporting_Manager_Mail'] = result[0].Email_ID;
+                delete inputData.Reporting_Manager_ID;
+            }
             db.query("insert into users set?", [inputData], (error, result) => {
                 if (error) {
+                    console.log(error)
                     if (error.code == 'ER_DUP_ENTRY') {
                         return res.status(400).json({ Message: "Employee-ID/Email is Already Present in the DataBase." })
+                    } else if (error.sqlState == "45000") {
+                        return res.status(406).json({ Message: "The Employee ID/Email is not in exact format, Operation Failed ...!" })
                     } else {
                         return res.status(400).json({ Message: "Internal Server Error" })
                     }
                 } db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users", function (error, result) {
                     if (error) throw error
                     return res.status(200).json({ Message: 'User Added Successfully...', Data: result });
+
                 })
             })
         })
@@ -70,7 +79,7 @@ api_Router.post('/AddUser', (req, res) => {
 });
 
 api_Router.post('/updateUserStatus', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
         db.query("update users set Active=? where `Employee_ID`=?", [parseInt(req.body.params.status), req.body.params.id], (error, result) => {
             if (error) {
                 console.log(error)
@@ -95,58 +104,63 @@ api_Router.post('/updateUserStatus', (req, res) => {
 
 
 api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
         try {
             const data = [];
             const bufferStream = streamifier.createReadStream(req.file.buffer);
-                
+            let EmptyField = false;
             bufferStream
-            .pipe(parse())
-            .on('data', row => {
-                row["Added_By"]=req.session.UserName;
-                data.push(row);
-            })
-            .on('end', () => {
-              const tableName = 'users';
-              const insertionPromises = [];
-          
-              data.forEach(row => {
-                const query = `INSERT IGNORE INTO ${tableName} SET ?`;
-                const insertionPromise = new Promise((resolve, reject) => {
-                  db.query(query, [row], (error, result) => {
-                    if (error) {
-                      //console.log(error);
-                      reject(error);
-                    } else {
-                      resolve(result);
+                .pipe(parse())
+                .on('data', row => {
+                    if (Object.values(row).some(value => value === '' || value === undefined || value === null)) {
+                        EmptyField = true;
                     }
-                  });
-                });
-                insertionPromises.push(insertionPromise);
-              });
-              Promise.all(insertionPromises)
-                .then(() => {
-                  console.log('All Users data inserted successfully.');
-                  db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users where Role!='Root'", function (error, Data) {
-                    if (error) throw error
-                    res.status(200).json({Message: "User Data Imported Successfully", Data: Data })
+                    row["Added_By"] = req.session.UserName;
+                    data.push(row);
                 })
-                })
-                .catch(error => {
-                  console.error('Error inserting data:', error);
-                  if(error.code=="ER_BAD_FIELD_ERROR"){
-                    return res.status(406).json({Message:"Since the uploaded CSV file does not fit the users' template, data import is unsuccessful."})
-                  }else if(error.sqlState=="45000"){
-                    return res.status(406).json({Message:"Some Employee ID/Email is not Exact Format, That records are not Imported...!"})
-                  } else{
-                    return res.status(500).json({Message:"Internal Server Error."})
-                  }
-                  
+                .on('end', () => {
+                    const tableName = 'users';
+                    const insertionPromises = [];
+                    if (EmptyField = true) {
+                        return res.status(406).json({ Message: 'CSV contains empty fields. Please ensure all fields are  filled with appropriate values.' });
+                    }
+                    data.forEach(row => {
+                        const query = `INSERT IGNORE INTO ${tableName} SET ?`;
+                        const insertionPromise = new Promise((resolve, reject) => {
+                            db.query(query, [row], (error, result) => {
+                                if (error) {
+                                    //console.log(error);
+                                    reject(error);
+                                } else {
+                                    resolve(result);
+                                }
+                            });
+                        });
+                        insertionPromises.push(insertionPromise);
+                    });
+                    Promise.all(insertionPromises)
+                        .then(() => {
+                            console.log('All Users data inserted successfully.');
+                            db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users where Role!='Root'", function (error, Data) {
+                                if (error) throw error
+                                res.status(200).json({ Message: "User Data Imported Successfully", Data: Data })
+                            })
+                        })
+                        .catch(error => {
+                            console.error('Error inserting data:', error);
+                            if (error.code == "ER_BAD_FIELD_ERROR") {
+                                return res.status(406).json({ Message: "Since the uploaded CSV file does not fit the users' template, data import is unsuccessful." })
+                            } else if (error.sqlState == "45000") {
+                                return res.status(406).json({ Message: "Some Employee ID/Email is not Exact Format, That records are not Imported...!" })
+                            } else {
+                                return res.status(500).json({ Message: "Internal Server Error." })
+                            }
+
+                        });
                 });
-            });
         } catch (e) {
             console.error(e)
-            res.status(400).json({Message:e.message})
+            res.status(400).json({ Message: e.message })
         }
     } else {
         res.status(400).send("Access Denied")
@@ -158,7 +172,7 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
 
 
 api_Router.post('/uploadUsers(old)', Upload.single('UserExcelFile'), (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
         try {
             const data = [];
             req.file.buffer
@@ -203,7 +217,7 @@ api_Router.post('/uploadUsers(old)', Upload.single('UserExcelFile'), (req, res) 
 })
 
 api_Router.post('/uploadJobs(old)', Upload.single('UserExcelFile'), (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
         try {
             const data = [];
             req.file.buffer
@@ -245,54 +259,58 @@ api_Router.post('/uploadJobs(old)', Upload.single('UserExcelFile'), (req, res) =
 
 
 api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
         try {
             const data = [];
             const bufferStream = streamifier.createReadStream(req.file.buffer);
-                
+            let EmptyField = false;
             bufferStream
-            .pipe(parse())
-            .on('data', row => {
-                row["Created_By"]=req.session.UserName;
-                data.push(row);
-            })
-            .on('end', () => {
-              const tableName = 'jobs';
-              const insertionPromises = [];
-          
-              data.forEach(row => {
-                const query = `INSERT IGNORE INTO ${tableName} SET ?`;
-                const insertionPromise = new Promise((resolve, reject) => {
-                  db.query(query, [row], (error, result) => {
-                    if (error) {
-                      //console.log(error);
-                      reject(error);
-                    } else {
-                      resolve(result);
+                .pipe(parse())
+                .on('data', row => {
+                    if (Object.values(row).some(value => value === '' || value === undefined || value === null)) {
+                        EmptyField = true;
                     }
-                  });
-                });
-                insertionPromises.push(insertionPromise);
-              });
-              console.log(data[0])
-              Promise.all(insertionPromises)
-                .then(() => {
-                  console.log('All job data inserted successfully.');
-                  db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Created_Date Desc limit 100", function (error, Data) {
-                    if (error) throw error
-                    res.status(200).json({ Message: "Job Data Imported Successfully", Data: Data })
+                    row["Created_By"] = req.session.UserName;
+                    data.push(row);
                 })
-                })
-                .catch(error => {
-                  console.error('Error inserting data:', error);
-                  if(error.code=="ER_BAD_FIELD_ERROR"){
-                    return res.status(406).json({Message:"Since the uploaded CSV file does not fit the Job template, data import is unsuccessful."})
-                  }else{
-                    return res.status(500).json({Message:"Internal Server Error."})
-                  }
-                  
+                .on('end', () => {
+                    const tableName = 'jobs';
+                    const insertionPromises = [];
+                    if (EmptyField = true) {
+                        return res.status(406).json({ Message: 'CSV contains empty fields. Please ensure all fields are  filled with appropriate values.' });
+                    }
+                    data.forEach(row => {
+                        const query = `INSERT IGNORE INTO ${tableName} SET ?`;
+                        const insertionPromise = new Promise((resolve, reject) => {
+                            db.query(query, [row], (error, result) => {
+                                if (error) {
+                                    //console.log(error);
+                                    reject(error);
+                                } else {
+                                    resolve(result);
+                                }
+                            });
+                        });
+                        insertionPromises.push(insertionPromise);
+                    });
+                    Promise.all(insertionPromises)
+                        .then(() => {
+                            console.log('All job data inserted successfully.');
+                            db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Created_Date Desc limit 100", function (error, Data) {
+                                if (error) throw error
+                                res.status(200).json({ Message: "Job Data Imported Successfully", Data: Data })
+                            })
+                        })
+                        .catch(error => {
+                            console.error('Error inserting data:', error);
+                            if (error.code == "ER_BAD_FIELD_ERROR") {
+                                return res.status(406).json({ Message: "Since the uploaded CSV file does not fit the Job template, data import is unsuccessful." })
+                            } else {
+                                return res.status(500).json({ Message: "Internal Server Error." })
+                            }
+
+                        });
                 });
-            });
 
         } catch (e) {
             console.error(e)
@@ -305,7 +323,7 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
 
 
 api_Router.post('/AddJob', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
         let inputData = req.body.params;
         inputData["Created_By"] = req.session.UserName;
         inputData['Created_Date'] = getTimeStamp();
@@ -331,7 +349,7 @@ api_Router.post('/AddJob', (req, res) => {
 });
 
 api_Router.post("/GetJob", (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
         db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs where Job_Number=?", [req.body.params.id], (error, result) => {
             if (error) {
                 console.log(error)
@@ -433,8 +451,7 @@ api_Router.post('/updateCheckListStatus', (req, res) => {
 
 api_Router.post('/getJobData', (req, res) => {
     if (req.session.UserID) {
-        console.log(req.body.params)
-        db.query("SELECT * FROM jobs where Job_Number=? and Customer in (select Customer from checklist where Checklist_Name=?)", [req.body.params.jobID,req.body.params.Checklist], (error, result) => {
+        db.query("SELECT * FROM jobs where Job_Number=? and Customer in (select Customer from checklist where Checklist_Name=?)", [req.body.params.jobID, req.body.params.Checklist], (error, result) => {
             if (error) {
                 console.log(error)
                 res.status(400).send("Internal Server Error")
@@ -582,7 +599,7 @@ api_Router.post("/SubmitQC", (req, res) => {
                                                 if (error) {
                                                     console.error('Error on sending email:', error);
                                                     return res.status(400).json({ Message: "QQ Submitted Successfully....Unable to send the Confirmation E-Mail\nPlease Contact the Manager" })
-                                                } 
+                                                }
                                             });
                                             return res.status(200).json({ Message: 'QC Submitted Successfully', Score: newData[0].Percentage });
                                         }
@@ -599,7 +616,7 @@ api_Router.post("/SubmitQC", (req, res) => {
     }
 })
 api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
         let workbook = new excel_js.Workbook();
         let sheet = workbook.addWorksheet("Master-DB");
         try {
@@ -683,7 +700,6 @@ api_Router.post('/filterResponses', (req, res) => {
                 console.error(error)
                 res.status(400).send("Unable to Apply Filer")
             } else {
-                console.log(result)
                 res.status(200).send(result)
             }
         })
@@ -693,7 +709,7 @@ api_Router.post('/filterResponses', (req, res) => {
 })
 
 api_Router.get('/downloadFilteredContent', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
         const { Checklist, from, to, id, type } = req.query;
         console.log(req.query)
         let workbook = new excel_js.Workbook();
@@ -792,7 +808,7 @@ api_Router.get('/getUserDetails', (req, res) => {
     }
 })
 api_Router.post('/UpdateUser', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole=="PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
         let inputData = req.body.params;
         inputData["Added_By"] = req.session.UserName;
         db.query("update users set ? where Employee_ID=?", [inputData, req.body.params.Employee_ID], (error, result) => {
@@ -812,7 +828,7 @@ api_Router.post('/UpdateUser', (req, res) => {
 
 api_Router.get('/GetUser', (req, res) => {
     if (req.session.UserID) {
-        db.query("select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users where Employee_ID=? or Full_Name like '%" + req.query.key + "%'", [req.query.key], (error, result) => {
+        db.query("select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users where Employee_ID like '%" + req.query.key + "%' or Full_Name like '%" + req.query.key + "%'", (error, result) => {
             if (error) {
                 console.log(error)
                 res.status(400).send("Internal Server Error")
@@ -859,6 +875,24 @@ api_Router.get('/downloadJob', async (req, res) => {
         });
     } else {
         res.status(400).send("Access Denied")
+    }
+})
+api_Router.get('/getPreciousRecord', (req, res) => {
+    if (req.session.UserID) {
+        db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Type=? and Job_ID=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc limit 2",[req.query.type,req.query.job_id],(error,result)=>{
+            if(error){
+                console.log(error)
+                return res.status(406).json({Message:"Internal Server Error"})
+            }else{
+                if(result.length>0){
+                    return res.status(200).json({Data:result})
+                }else{
+                    return res.status(200).json({Data:null})
+                }
+            }
+        })
+    } else {
+        res.status(400).json({ Message: "Access Denied" })
     }
 })
 module.exports = api_Router;

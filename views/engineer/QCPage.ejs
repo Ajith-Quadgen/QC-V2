@@ -17,43 +17,50 @@
             <%- include('../partials/engineer-header',{title:title,IncludeBackButton:0}) %>
                 <% }else if(Role=="Admin" ){ %>
                     <%- include('../partials/admin-header',{title:title}) %>
-                        <% }else if(Role=="PMO"){ %>
+                        <% }else if(Role=="PMO" ){ %>
                             <%- include('../partials/PMO-header',{title:title}) %>
-                            <%}%>
+                                <%}%>
     </header>
     <main class="main_container">
         <form action="#" method="post" enctype="multipart/form-data" id="QCFrom">
             <div class="p-3 section1">
                 <div class="row justify-content-center">
-                    <div class="col-mb-3" style="width: max-content;">
+                <div class="row justify-content-center" style="width: 30dvw;">
+                    <div class="col-mb-3" style="width: 75%">
                         <input type="hidden" class="form-control" id="checklist" required value=" <%= title %>"
                             readonly>
                         <label for="cfas_no" class="form-label">Enter Job ID/CFAS Number </label>
                         <input type="text" class="form-control" id="cfas_no" onchange="getBasicData(this);"
                             placeholder="Min 4 Character" required>
                     </div>
-                    <div class="col-md-3" style="width: max-content;">
+                    <div class="col-md-3" style="width: 25%">
                         <label for="qc_type" class="form-label">QC Type</label>
-                        <select id="qc_type" class="form-select" required>
+                        <select id="qc_type" class="form-select" required onchange="getPreviousRecord(this)">
                             <option value="">Select</option>
                             <option value="Self QC">Self QC</option>
                             <option value="IQC">IQC</option>
                         </select>
                     </div>
-                    <div class="col-md-3" style="width: max-content;">
+                </div>
+                <div class="row justify-content-center" style="width: 30dvw;">
+
+
+                    <div class="col-md-3" style="width: 50%">
                         <label for="qc_state" class="form-label">State</label>
                         <input type="text" class="form-control" id="qc_state" class="form-select" required disabled>
                     </div>
-                    <div class="col-md-3" style="width: max-content;">
+                    <div class="col-md-3" style="width: 50%">
                         <label for="qc_city" class="form-label">City</label>
                         <input type="text" class="form-control" id="qc_city" class="form-select" required disabled>
                     </div>
-                    <div class="col-md-3" style="width: max-content;">
-                        <label for="remarks" class="form-label">Remarks
-                        </label>
-                        <input type="text" class="form-control" id="remarks">
-                    </div>
                 </div>
+            </div>
+                <div class="md-1 w-100">
+                    <label for="remarks" class="form-label">Remarks
+                    </label>
+                    <textarea name="" id="remarks" cols="30" rows="3" class="form-control" spellcheck="true"></textarea>
+                </div>
+
             </div>
             </div>
             <div class="d-flex w-100">
@@ -101,7 +108,9 @@
                                                     <%- row.Description %>
                                                 </td>
                                                 <td>
-                                                    <% if (row.Reference_Link!=null && row.Reference_Link!="" &&row.Reference_Document!=null && row.Reference_Document!="" ) { %>
+                                                    <% if (row.Reference_Link!=null && row.Reference_Link!=""
+                                                        &&row.Reference_Document!=null && row.Reference_Document!="" ) {
+                                                        %>
                                                         <a href="<%= row.Reference_Link %>" target="_blank"><button
                                                                 type="button"
                                                                 class="btn btn-outline-secondary btn-sm col-9"
@@ -117,7 +126,7 @@
                                                         <div class="d-flex flex-column align-items-start mb-3">
                                                             <input type="radio" name="Check_<%= row.Question_ID %>"
                                                                 id="Check_<%= row.Question_ID %>_Yes" value="Yes"
-                                                                class="form-check-input" 
+                                                                class="form-check-input"
                                                                 onchange="toggleRequired(this)"><label
                                                                 for="Check_<%= row.Question_ID %>_Yes">Yes</label>
                                                         </div>
@@ -138,8 +147,9 @@
                                                     </div>
                                                 </td>
                                                 <td><input type="text" class="form-control" required
-                                                        id="Note_<%= row.Question_ID %>" placeholder="* Reviewer Note" >
-                                                        <input type="hidden" name="" value="<%= row.Weight%>" id="Weight_<%= row.Question_ID %>">
+                                                        id="Note_<%= row.Question_ID %>" placeholder="* Reviewer Note">
+                                                    <input type="hidden" name="" value="<%= row.Weight%>"
+                                                        id="Weight_<%= row.Question_ID %>">
                                                 </td>
                                             </tr>
                                             <% itemNumber++; %>
@@ -221,7 +231,7 @@
                         axios.post('/api/getJobData', {
                             params: {
                                 jobID: job_id,
-                                Checklist:'<%- title %>'
+                                Checklist: '<%- title %>'
                             }
                         }).then(res => {
                             if (res.status == 200) {
@@ -259,11 +269,13 @@
                             job_id: job_id
                         }
                     }).then(res => {
+                        console.log(res.data.Data);
                         if (res.status == 200) {
-                            updatePreviousRecord(res.data)
+                            updatePreviousScore(res.data.Data)
                         }
                     }).catch(er => {
-                        alert(er.response.data)
+                        console.log(er)
+                        alert(er.response.data.Message)
                     })
                 }
 
@@ -291,20 +303,20 @@
                         const item = {
                             SlNo: row.querySelector('.slno').textContent.trim(),
                             Item: row.querySelector('.item').textContent.trim(),
-                            Weight:row.querySelector(`input[id*="Weight_"]`).value.trim(),
+                            Weight: row.querySelector(`input[id*="Weight_"]`).value.trim(),
                             Description: row.querySelector('.Description').textContent.trim(),
                             Check: row.querySelector(`input[name*="Check_"]:checked`).value,
                             Note: row.querySelector(`input[id*="Note_"]`).value.trim()
                         };
                         switch (row.querySelector(`input[name*="Check_"]:checked`).value) {
                             case 'Yes':
-                                total_yes+= parseInt( row.querySelector(`input[id*="Weight_"]`).value.trim());
+                                total_yes += parseInt(row.querySelector(`input[id*="Weight_"]`).value.trim());
                                 break;
                             case 'No':
-                                total_no+= parseInt( row.querySelector(`input[id*="Weight_"]`).value.trim());
+                                total_no += parseInt(row.querySelector(`input[id*="Weight_"]`).value.trim());
                                 break;
                             case 'N/A':
-                                total_na+= parseInt( row.querySelector(`input[id*="Weight_"]`).value.trim());
+                                total_na += parseInt(row.querySelector(`input[id*="Weight_"]`).value.trim());
                                 break
                         }
 
@@ -392,6 +404,10 @@
                     noteInput.setAttribute('placeholder', '* Reviewer Note')
                 };
                 processData()
+            }
+
+            function updatePreviousScore(Data) {
+
             }
         </script>
 </body>

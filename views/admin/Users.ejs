@@ -34,7 +34,7 @@
             <button type="submit" class="btn btn-primary m-2">Upload &nbsp; <i
                     class="bi bi-cloud-arrow-up"></i></button>
             <input type="button" value="Add New User" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
-                data-bs-target="#UserInputModel">            
+                data-bs-target="#UserInputModel">
         </form>
         <div class="d-flex w-100">
             <table class="table table-hover m-2 AVRTable table-striped caption-top">
@@ -172,6 +172,17 @@
                             <input type="text" class="form-control" id="empId" placeholder="key" required>
                             <label for="empId">Employee ID</label>
                         </div>
+                        <div class="toast bg-warning align-items-center border-0 mb-3 rounded-3" id="Employee-ID_Tost"
+                            role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body fs-6">
+                                    This Employee-ID is already exist..!
+                                </div>
+                                <button type="button" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast"
+                                    aria-label="Close"></button>
+                            </div>
+                        </div>
+
                         <div class="form-floating mb-3">
                             <input type="text" class="form-control" id="empName" placeholder="key" required>
                             <label for="empName">Employee Name</label>
@@ -180,11 +191,21 @@
                             <input type="email" class="form-control" id="empEmail" placeholder="key" required>
                             <label for="empEmail">Email ID</label>
                         </div>
+                        <div class="toast bg-warning align-items-center border-0 mb-3 rounded-3" id="Employee-Email_Tost"
+                        role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body fs-6">
+                                This Email is already exist..!
+                            </div>
+                            <button type="button" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast"
+                                aria-label="Close"></button>
+                        </div>
+                    </div>
                         <div class="mb-3">
                             <label for="empDesignation" class="mb-3">Designation</label>
                             <select name="empDesignation" id="empDesignation" class="from-select form-control"
                                 aria-label="Select" required>
-                                <option selected>Select the Designation</option>
+                                <option selected value="">Select the Designation</option>
                                 <% Basic.Designation.forEach(element=> { %>
                                     <option value="<%= element %>">
                                         <%= element %>
@@ -196,7 +217,7 @@
                             <label for="empLocation" class="mb-2">Location</label>
                             <select name="empLocation" id="empLocation" class="from-select form-control"
                                 aria-label="Select" required>
-                                <option selected>Select the Location</option>
+                                <option selected value="">Select the Location</option>
                                 <% Basic.Location.forEach(element=> { %>
                                     <option value="<%= element %>">
                                         <%= element %>
@@ -209,7 +230,7 @@
                             <label for="empRole" class="mb-2">Role</label>
                             <select name="empRole" id="empRole" class="from-select form-control" aria-label="Select"
                                 required>
-                                <option selected>Select the Role</option>
+                                <option selected value="">Select the Role</option>
                                 <% Basic.Roles.forEach(element=> { %>
                                     <option value="<%= element %>">
                                         <%= element %>
@@ -221,7 +242,7 @@
                             <label for="empReportingManager" class="mb-2">Reporting Manager</label>
                             <select name="empReportingManager" id="empReportingManager" class="from-select form-control"
                                 aria-label="Select" required>
-                                <option selected>Select the Reporting Manager</option>
+                                <option selected value="">Select the Reporting Manager</option>
                                 <% Basic.NameMail.forEach(record=> { %>
                                     <option value="<%= record.Employee_ID %>">
                                         <%= record.Full_Name %>
@@ -245,8 +266,8 @@
 
     <!-- Update User Model -->
     <div class="modal fade" id="UserUpdateModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        aria-labelledby="staticBackdropLabel" aria-hidden="true" role="dialog">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content ">
                 <div class="modal-header">
                     <h3 class="modal-title fs-5" id="staticBackdropLabel">Update User Details
@@ -335,6 +356,9 @@
     </div>
     <%- include('../partials/dependencies-js') %>
         <script>
+            $(document).ready(function () {
+
+            });
             document.getElementById("ReportingMangerSelect").addEventListener("change", (e) => {
                 const select = e.target;
                 document.getElementById('u-empReportingManager').value = select.options[select.selectedIndex].text;
@@ -358,7 +382,7 @@
                         $("#UserInputModel").modal('hide')
                         updateContentArea(res.data.Data);
                         alert(res.data.Message);
-
+                        document.getElementById("addUserForm").reset();
                     }
                 }).catch(e => {
                     // $("#UserInputModel").modal('hide')
@@ -609,27 +633,23 @@
                     document.getElementById("FilterBtn").click()
                 }
             });
-
-            const socket = io();
-            // Listen for 'chat message' event and display the message
-            socket.on('chat message', msg => {
-                const messages = document.getElementById('messages');
-                const li = document.createElement('li');
-                li.textContent = msg;
-                messages.appendChild(li);
-            });
-
-            function sendMessage() {
-                const messageInput = document.getElementById('messageInput');
-                const message = messageInput.value;
-                socket.emit('chat message', message); // Send a message to the server
-                messageInput.value = '';
-            }
-            document.getElementById("empId").addEventListener("change",(e)=>{
-               const EmployeeID=e.target.value;
-               socket.emit("Check_Employee_Exist",{ID:EmployeeID},(response)=>{
-                console.log(response)
-               });
+            document.getElementById("empId").addEventListener("change", (e) => {
+                const EmployeeID = e.target.value;
+                socket.emit("Check_Employee_Exist", { ID: EmployeeID }, (response) => {
+                    if (response == "Present") {
+                        $("#Employee-ID_Tost").toast('show');
+                        // e.target.value=null;
+                    }
+                });
+            })
+            document.getElementById("empEmail").addEventListener("change", (e) => {
+                const EmployeeMail = e.target.value;
+                socket.emit("Check_Employee_Exist", { ID: EmployeeMail }, (response) => {
+                    if (response == "Present") {
+                        $("#Employee-Email_Tost").toast('show');
+                        // e.target.value=null;
+                    }
+                });
             })
         </script>
 </body>
