@@ -296,7 +296,7 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
                     Promise.all(insertionPromises)
                         .then(() => {
                             console.log('All job data inserted successfully.');
-                            db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Created_Date Desc limit 100", function (error, Data) {
+                            db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Modified_Date Desc limit 100", function (error, Data) {
                                 if (error) throw error
                                 res.status(200).json({ Message: "Job Data Imported Successfully", Data: Data })
                             })
