@@ -108,7 +108,7 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
         try {
             const data = [];
             const bufferStream = streamifier.createReadStream(req.file.buffer);
-            let EmptyField = false;
+            var EmptyField = false;
             bufferStream
                 .pipe(parse())
                 .on('data', row => {
@@ -121,7 +121,7 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
                 .on('end', () => {
                     const tableName = 'users';
                     const insertionPromises = [];
-                    if (EmptyField = true) {
+                    if (EmptyField == true) {
                         return res.status(406).json({ Message: 'CSV contains empty fields. Please ensure all fields are  filled with appropriate values.' });
                     }
                     data.forEach(row => {
@@ -263,7 +263,7 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
         try {
             const data = [];
             const bufferStream = streamifier.createReadStream(req.file.buffer);
-            let EmptyField = false;
+            var EmptyField = false;
             bufferStream
                 .pipe(parse())
                 .on('data', row => {
@@ -276,7 +276,7 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
                 .on('end', () => {
                     const tableName = 'jobs';
                     const insertionPromises = [];
-                    if (EmptyField = true) {
+                    if (EmptyField == true) {
                         return res.status(406).json({ Message: 'CSV contains empty fields. Please ensure all fields are  filled with appropriate values.' });
                     }
                     data.forEach(row => {
