@@ -16,13 +16,18 @@ const smtpTransport = require('nodemailer-smtp-transport');
 const path = require('path');
 const { resume } = require('pdfkit');
 const parse = require('csv-parser')
-const streamifier = require('streamifier')
-
+const streamifier = require('streamifier');
+const { type } = require('os');
+const crypto = require('crypto');
 const transporter = nodemailer.createTransport(
     smtpTransport({
         host: 'smtp.gmail.com',
         port: 465,
         secure: true, // true for 465, false for other ports
+        auth: {
+            user: 'software.development@quadgenwireless.com ', // Your Gmail email address
+            pass: 'mrzpgphmoulavifx '   // Your Gmail password or app-specific password
+        }
 
     })
 );
@@ -272,6 +277,7 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
                     }
                     row["Created_By"] = req.session.UserName;
                     data.push(row);
+                   
                 })
                 .on('end', () => {
                     const tableName = 'jobs';
@@ -879,7 +885,31 @@ api_Router.get('/downloadJob', async (req, res) => {
 })
 api_Router.get('/getPreciousRecord', (req, res) => {
     if (req.session.UserID) {
-        db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Type=? and Job_ID=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc limit 2",[req.query.type,req.query.job_id],(error,result)=>{
+        if(req.query.type=="IQC"){
+
+        
+        db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Job_ID=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Iteration desc",[req.query.job_id],(error,result1)=>{
+            if(error){
+                console.log(error)
+                return res.status(406).json({Message:"Internal Server Error"})
+            }else{
+                if(result1.length>0){
+                    var temp={};
+                    for(const item of result1){
+                        const type=item.Type;
+                        if(!temp[type]||item.Iteration>temp[type].Iteration){
+                            temp[type]=item;
+                        }
+                    }
+                    const result=Object.keys(temp).map(type=>temp[type])
+                    return res.status(200).json({Data:result})
+                }else{
+                    return res.status(200).json({Data:null})
+                }
+            }
+        })
+    }else{
+        db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Type=? and Job_ID=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Iteration desc limit 1",[req.query.type,req.query.job_id],(error,result)=>{
             if(error){
                 console.log(error)
                 return res.status(406).json({Message:"Internal Server Error"})
@@ -891,8 +921,85 @@ api_Router.get('/getPreciousRecord', (req, res) => {
                 }
             }
         })
+    }
     } else {
         res.status(400).json({ Message: "Access Denied" })
+    }
+})
+api_Router.post('/GeneratePasswordResetOPT',async (req,res)=>{
+    let n = 0;
+    n = crypto.randomInt(100000, 999999)
+    db.query("Select * from users where Active=1 and Employee_ID=?",[req.body.params.UserID],async (error,result)=>{
+        if(error){
+            console.log(error)
+            return res.status(406).json({Message:"Unable to find your Details, Try after sometime...!"})
+        }else{
+            if(result.length>0){
+                const mailOptions = {
+                    from: 'software.development@quadgenwireless.com ',
+                    to: result[0].Email_ID,
+                    subject: `OTP For Password Generation is_${n}`,
+                    html: `<h3>Hi ${result[0].Full_Name}</h3><br>The One Time Password for Generating new Login Credentials for QC-Portal is<b><h2>${n}</h2></b><br>This is OTP will Expire in 5 Min.<br><br><br>Regards`,
+                };
+               await transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.error('Error on sending email:', error);
+                        req.session.PWDResetOTP = null;
+                        res.status(406).json({Message:"Failed to Generate OTP, Try again...!"})
+                    } else {
+                        req.session.PWDResetOTP = n;
+                        req.session.PWDresetEmail=result[0].Email_ID;
+                        req.session.PWDResetUserID=req.body.params.UserID;
+                       res.status(200).json({Message:"The OTP is sent to your mail"})
+                    }
+                });
+            }else{
+                return res.status(406).json({Message:"Unable to find your Details, Try after sometime...!"})
+            }
+        }
+    })
+
+})
+
+api_Router.post("/GenerateNewPassword",(req,res)=>{
+    const UserOTP = req.body.params.OTP;
+    if (req.session.PWDResetOTP == UserOTP) {
+        const RandomPWD = Math.random().toString(36).substring(2,12);
+        db.query("update users set Password=? where Employee_ID=? and Email_ID=? and active=1",[RandomPWD,req.session.PWDResetUserID,req.session.PWDresetEmail],(error,result)=>{
+            if(error){
+                console.log(error)
+                return res.status(406).json({Message:"Something Went wrong, Unable to Generate New Password."})
+            }else{
+                const mailOptions = {
+                    from: 'software.development@quadgenwireless.com ',
+                    to: req.session.PWDresetEmail,
+                    subject: `New Password for QC-Portal-`,
+                    html: `<h3>Hi</h3>
+                    The New Login Credentials for QC-Portal is:<br>
+                    <p><b>UserID:</b> ${req.session.PWDResetUserID}</p>
+                    <p><b>Password:</b> ${RandomPWD}<br></p></br>
+                    <b>Note:</b> After Login Please Change Your Password.
+                    <br><br>--<br>Regards`,
+                };
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.error('Error on sending email:', error);
+                        req.session.PWDResetOTP = null;
+                        req.session.PWDResetUserID=null;
+                        req.session.PWDresetEmail=null;
+                        return res.status(406).json({Message:"Something Went wrong, Unable to Generate New Password."})
+                    } else {
+                        req.session.PWDResetOTP = null;
+                        req.session.PWDResetUserID=null;
+                        req.session.PWDresetEmail=null;
+                        return res.status(200).json({Message:"OTP Verification Successful\nNew Password has been shared to you vai Email."})
+                    }
+                });
+            }
+        })
+
+    }else{
+        return res.status(406).json({Message:"Invalid OTP,Try again...!"})
     }
 })
 module.exports = api_Router;

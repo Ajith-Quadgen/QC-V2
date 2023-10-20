@@ -11,7 +11,11 @@ const transporter = nodemailer.createTransport(
     smtpTransport({
         host: 'smtp.gmail.com',
         port: 465,
-        secure: true, // true for 465, false for other ports
+        secure: true, // true for 465, false for other ports\
+        auth: {
+            user: 'software.development@quadgenwireless.com ', // Your Gmail email address
+            pass: 'mrzpgphmoulavifx '   // Your Gmail password or app-specific password
+        }
     })
 );
 

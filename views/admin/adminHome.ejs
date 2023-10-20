@@ -54,7 +54,7 @@
             <% if (Object.values(Data).length>0) { %>
                 <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
                     <a href="/Engineer/Customers/<%= Data[index].Customer_Name %>">
-                        <div class="localcard m-3 text-center">
+                        <div class="localcard m-3 text-center" style="width: 200px;height: 100px;">
                             <img src="../../public/uploads/Customer-Logo/<%= Data[index].Customer_Logo%>"
                                 alt="Icon_<%= Data[index].Customer_Name %>" class="rounded checklist-icon">
                         </div>

@@ -24,41 +24,44 @@
     <main class="main_container">
         <form action="#" method="post" enctype="multipart/form-data" id="QCFrom">
             <div class="p-3 section1">
-                <div class="row justify-content-center">
-                <div class="row justify-content-center" style="width: 30dvw;">
-                    <div class="col-mb-3" style="width: 75%">
-                        <input type="hidden" class="form-control" id="checklist" required value=" <%= title %>"
-                            readonly>
-                        <label for="cfas_no" class="form-label">Enter Job ID/CFAS Number </label>
-                        <input type="text" class="form-control" id="cfas_no" onchange="getBasicData(this);"
-                            placeholder="Min 4 Character" required>
+                <div class="d-flex  align-items-center justify-content-center">
+                    <div class="row justify-content-center me-2" style="width: 30dvw;">
+                        <div class="col-mb-3" style="width: 75%">
+                            <input type="hidden" class="form-control" id="checklist" required value=" <%= title %>"
+                                readonly>
+                            <label for="cfas_no" class="form-label">Enter Job ID/CFAS Number </label>
+                            <input type="text" class="form-control" id="cfas_no" onchange="getBasicData(this);"
+                                placeholder="Min 4 Character" required>
+                        </div>
+                        <div class="col-md-3" style="width: 25%">
+                            <label for="qc_type" class="form-label">QC Type</label>
+                            <select id="qc_type" class="form-select" required onchange="getPreviousRecord(this)">
+                                <option value="">Select</option>
+                                <option value="Self QC">Self QC</option>
+                                <option value="IQC">IQC</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-md-3" style="width: 25%">
-                        <label for="qc_type" class="form-label">QC Type</label>
-                        <select id="qc_type" class="form-select" required onchange="getPreviousRecord(this)">
-                            <option value="">Select</option>
-                            <option value="Self QC">Self QC</option>
-                            <option value="IQC">IQC</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row justify-content-center" style="width: 30dvw;">
+                    <div class="row justify-content-center me-2" style="width: 30dvw;">
 
 
-                    <div class="col-md-3" style="width: 50%">
-                        <label for="qc_state" class="form-label">State</label>
-                        <input type="text" class="form-control" id="qc_state" class="form-select" required disabled>
+                        <div class="col-md-3" style="width: 50%">
+                            <label for="qc_state" class="form-label">State</label>
+                            <input type="text" class="form-control" id="qc_state" class="form-select" required disabled>
+                        </div>
+                        <div class="col-md-3" style="width: 50%">
+                            <label for="qc_city" class="form-label">City</label>
+                            <input type="text" class="form-control" id="qc_city" class="form-select" required disabled>
+                        </div>
                     </div>
-                    <div class="col-md-3" style="width: 50%">
-                        <label for="qc_city" class="form-label">City</label>
-                        <input type="text" class="form-control" id="qc_city" class="form-select" required disabled>
+                    <div class="row justify-content-left me-2" style="width: max-content;" id="ScoreArea">
+
                     </div>
                 </div>
-            </div>
-                <div class="md-1 w-100">
+                <div class=" w-100">
                     <label for="remarks" class="form-label">Remarks
                     </label>
-                    <textarea name="" id="remarks" cols="30" rows="3" class="form-control" spellcheck="true"></textarea>
+                    <textarea name="" id="remarks" cols="30" rows="3" class="form-control" spellcheck="true" placeholder="Any remark for this QC...?"></textarea>
                 </div>
 
             </div>
@@ -260,6 +263,7 @@
 
             }
             function getPreviousRecord(e) {
+                $('#ScoreArea').empty();
                 var type = e.value;
                 var job_id = document.getElementById("cfas_no").value.replaceAll(" ", '');
                 if (job_id.length > 3 && type) {
@@ -269,14 +273,16 @@
                             job_id: job_id
                         }
                     }).then(res => {
-                        console.log(res.data.Data);
                         if (res.status == 200) {
                             updatePreviousScore(res.data.Data)
                         }
                     }).catch(er => {
                         console.log(er)
+                        $('#ScoreArea').empty();
                         alert(er.response.data.Message)
                     })
+                }else{
+                    updatePreviousScore({})
                 }
 
             }
@@ -392,6 +398,7 @@
                         alert(e.response.data.Message);
                     })
             })
+
             function toggleRequired(radioButton) {
                 const noteInputId = 'Note_' + radioButton.name.split('_')[1];
                 const noteInput = document.getElementById(noteInputId);
@@ -406,8 +413,22 @@
                 processData()
             }
 
-            function updatePreviousScore(Data) {
+            function updatePreviousScore(data) {
+                const div = document.getElementById("ScoreArea");
+                if (data.length > 0) {
+                    $('#ScoreArea').empty();
+                    div.style.width='30dvw'
+                    for (let i = 0; i < data.length; i++) {
 
+                        div.innerHTML += `
+                        <div class="col-md-3" style="width: 50%">
+                            <label for="" class="form-label">${data[i]["Type"]} | ${data[i]["Submitted_By"]}</label>
+                            <input type="text" class="form-control" id="" class="form-select"value='${data[i]["Percentage"]}' required disabled>
+                        </div>`
+                    }
+                }else{
+div.style.width='max-content'
+                }
             }
         </script>
 </body>

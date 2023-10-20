@@ -11,8 +11,16 @@ const multer = require('multer');
 const PDFGenerator = require('pdfkit');
 const cors = require('cors')
 const https = require('https')
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
+const smtpTransport = require('nodemailer-smtp-transport');
+const transporter = nodemailer.createTransport(
+  smtpTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, // true for 465, false for other ports
 
+  })
+);
 
 process.env.tz = 'Asia/Calcutta';
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -63,26 +71,26 @@ httpsServer.listen(port, () => {
   console.log('server is Running under Https with port:' + port)
 })
 
-const io=new Server(httpsServer)
-io.on('connection',(socket)=>{
-socket.on('Check_Employee_Exist',(data,callback)=>{
-  console.log(data)
-  db.query("select * from users where Employee_ID=? or Email_ID=?",[data.ID,data.ID],(error,result)=>{
-    if(error) throw error
-    if(result.length>0){
-      callback("Present")
-    }
+const io = new Server(httpsServer)
+io.on('connection', (socket) => {
+  socket.on('Check_Employee_Exist', (data, callback) => {
+    console.log(data)
+    db.query("select * from users where Employee_ID=? or Email_ID=?", [data.ID, data.ID], (error, result) => {
+      if (error) throw error
+      if (result.length > 0) {
+        callback("Present")
+      }
+    })
   })
-})
-socket.on('Check_Job_Exist',(data,callback)=>{
-  console.log(data)
-  db.query("select * from jobs where Job_Number=?",[data.ID],(error,result)=>{
-    if(error) throw error
-    if(result.length>0){
-      callback("Present")
-    }
+  socket.on('Check_Job_Exist', (data, callback) => {
+    console.log(data)
+    db.query("select * from jobs where Job_Number=?", [data.ID], (error, result) => {
+      if (error) throw error
+      if (result.length > 0) {
+        callback("Present")
+      }
+    })
   })
-})
 })
 io.engine.on("connection_error", (err) => {
   console.log(err.req);      // the request object
@@ -142,7 +150,7 @@ app.post('/AuthenticateLogin', (req, res) => {
       req.session.UserName = result[0]['Full_Name'];
       req.session.UserMail = result[0]['Email_ID'];
       req.session.RMail = result[0]['Reporting_Manager_Mail'];
-      if(result[0]['Role']=="Root"){
+      if (result[0]['Role'] == "Root") {
         delete req.session.UserRole;
       }
       if (result[0]['Role'] == "Engineer") {
@@ -151,7 +159,7 @@ app.post('/AuthenticateLogin', (req, res) => {
         res.redirect('/Admin');
       } else if (result[0]['Role'] == "PMO") {
         res.redirect('/PMO');
-      }else if (result[0]['Role'] == "Root") {
+      } else if (result[0]['Role'] == "Root") {
         res.redirect('/root/LoginVerification');
       } else {
         return res.send("Internal Server Error");

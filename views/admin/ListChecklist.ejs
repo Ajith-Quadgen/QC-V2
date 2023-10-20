@@ -24,17 +24,18 @@
             <% if (Object.values(Data).length>0) { %>
                 <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
  
-                        <div class="localcard m-4 text-center d-flex flex-column" onclick="location.href='/<%=Role%>/ViewChecklist/<%= Data[index][`Checklist_Name`]%>'">
+                        <div class="localcard m-4 text-center d-flex flex-column" onclick="location.href='/<%=Role%>/ViewChecklist/<%= Data[index][`Checklist_Name`]%>'"
+                            style='background: rgb(78,78,78);background: linear-gradient(180deg, rgba(78,78,78,0.0032387955182072714) 11%, rgba(2,0,36,0.7539390756302521) 100%),url("../../public/uploads/Checklist-Icon/<%= Data[index].Icon %>"); background-size: contain; background-position: center; background-repeat: no-repeat; justify-content: end;'>
                             
-                            <img src="../../public/uploads/Checklist-Icon/<%= Data[index]['Icon']%> "
-                                alt="<%= Data[index]['Checklist_Name']%> Icon" class="Checklist-Icon">
-                            <h5 class="card-title">
+                            <!-- <img src="../../public/uploads/Checklist-Icon/<%= Data[index]['Icon']%> "
+                                alt="<%= Data[index]['Checklist_Name']%> Icon" class="Checklist-Icon"> -->
+                            <p class="card-title fs-5 text-light">
                                 <%= Data[index]['Checklist_Name']%>
-                            </h5>
-                            <p class="card-text">
+                            </p>
+                            <p class="card-text fs-6 text-light">
                                 <%= Data[index]['Customer']%>
                             </p>
-                            <a href="/<%=Role%>/viewResponses/<%= Data[index]['Checklist_Name']%>"><button type="button" class="btn btn-primary rounded-pill">View Responses <i class="bi bi-arrow-right-circle-fill"></i></button></a>
+                            <a href="/<%=Role%>/viewResponses/<%= Data[index]['Checklist_Name']%>"><button type="button" class="btn btn-primary rounded-pill btn-sm">View Responses <i class="bi bi-arrow-right-circle-fill"></i></button></a>
 
                         </div>
              
