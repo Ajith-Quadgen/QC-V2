@@ -153,7 +153,7 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
                         })
                         .catch(error => {
                             console.error('Error inserting data:', error);
-                            if (error.code == "ER_BAD_FIELD_ERROR") {
+                            if (error.code == "ER_BAD_FIELD_ERROR" || error.code=='ER_PARSE_ERROR') {
                                 return res.status(406).json({ Message: "Since the uploaded CSV file does not fit the users' template, data import is unsuccessful." })
                             } else if (error.sqlState == "45000") {
                                 return res.status(406).json({ Message: "Some Employee ID/Email is not Exact Format, That records are not Imported...!" })
@@ -687,7 +687,7 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
 api_Router.post('/filterResponses', (req, res) => {
     if (req.session.UserID) {
         const { Checklist, from, to, id, type } = req.body.params;
-        let main = "select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Checklist='" + Checklist + "'";
+        let main = "select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as New_Submitted_Date from responses where Checklist='" + Checklist + "'";
         if (from) {
             main += `AND date_format(Submitted_Date,'%Y-%m-%d')>='${from}'`
         }
@@ -717,7 +717,6 @@ api_Router.post('/filterResponses', (req, res) => {
 api_Router.get('/downloadFilteredContent', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
         const { Checklist, from, to, id, type } = req.query;
-        console.log(req.query)
         let workbook = new excel_js.Workbook();
         let sheet = workbook.addWorksheet("Responses");
 

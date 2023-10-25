@@ -24,13 +24,13 @@
         <p>Welcome! Log in to your account to complete the QC for assigned Jobs</p>
 
         <div class="floating-label">
-          <input placeholder="Employee ID" type="text" name="email" id="email" autocomplete="off" value=""
+          <input placeholder="Employee ID" type="text" name="email" id="email" autocomplete="off" value="QGI690"
             required minlength="5">
           <label for="email">Employee ID</label>
         </div>
         <div class="floating-label">
           <input placeholder="Password" type="password" name="password" id="password" autocomplete="off" required
-            minlength="8" value="">
+            minlength="8" value="User@123">
           <label for="password">Password</label>
         </div>
         <button type="submit" id="SubmitButon">Log in <i class="bi bi-arrow-right"></i></button>
@@ -50,7 +50,7 @@
             </h3>
             <input type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></input>
           </div>
-          <form action="#" method="post" id="addJobForm">
+          <form action="#" method="post" id="ForgetPsswordFrm">
             <div class="modal-body">
               <div class="form-floating mb-1">
                 <input type="text" class="form-control" id="empId" placeholder="key" required>
@@ -74,8 +74,8 @@
             <div class="modal-footer">
               <button type="button" class="btn-primary ms-3 mb-2" id="generateOTPbtn">Generate the OTP &nbsp;<i
                   class="bi bi-key"></i></button>
-              <button type="button" class="btn btn-primary" id="OTPVerifybtn" style="display: none;">Generate New Password&nbsp;<i
-                  class="bi bi-send-fill"></i></button>
+              <button type="button" class="btn btn-primary" id="OTPVerifybtn" style="display: none;">Generate New
+                Password&nbsp;<i class="bi bi-send-fill"></i></button>
             </div>
           </form>
         </div>
@@ -94,21 +94,28 @@
         document.getElementById("generateOTPbtn").addEventListener("click", (e) => {
           const EmployeeID = encodeURIComponent(document.getElementById("empId").value);
           if (EmployeeID.length > 4) {
+            e.target.disabled = true;
+            e.target.innerHTML = `Wait... <div class="spinner-border spinner-border-sm text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+            </div>`;
             axios.post('/api/GeneratePasswordResetOPT', {
               params: {
                 UserID: EmployeeID
               }
             }).then(async res => {
               if (res.status == 200) {
+                e.target.innerHTML = `Success... <i class="bi bi-check-lg"></i>`;
                 document.getElementById("tostMessage").innerText = res.data.Message;
                 $("#Employee-ID-Tost").toast('show');
                 document.getElementById("generateOTPbtn").style.display = "none";
                 document.getElementById("OTPVerifybtn").style.display = "block";
                 document.getElementById("OTPdiv").style.display = "block";
               }
-            }).catch(e => {
+            }).catch(error => {
               console.log(e)
-              document.getElementById("tostMessage").innerText = e.response.data.Message;
+              e.target.disabled = false;
+              e.target.innerHTML = `Try Again... <i class="bi bi-arrow-clockwise"></i>`;
+              document.getElementById("tostMessage").innerText = error.response.data.Message;
               $("#Employee-ID-Tost").toast('show');
             })
           } else {
@@ -120,7 +127,7 @@
 
         document.getElementById("OTPVerifybtn").addEventListener("click", (e) => {
           const OTP = encodeURIComponent(document.getElementById("OTP").value);
-          if (OTP.length ==6) {
+          if (OTP.length == 6) {
             axios.post('/api/GenerateNewPassword', {
               params: {
                 OTP: OTP
@@ -129,11 +136,21 @@
               if (res.status == 200) {
                 document.getElementById("tostMessage").innerText = res.data.Message;
                 $("#Employee-ID-Tost").toast('show');
+                document.getElementById("ForgetPsswordFrm").reset();
+                document.getElementById("generateOTPbtn").style.display = "none";
+                document.getElementById("OTPVerifybtn").style.display = "block";
+                document.getElementById("OTPdiv").style.display = "block";
               }
             }).catch(e => {
               console.log(e)
               document.getElementById("tostMessage").innerText = e.response.data.Message;
               $("#Employee-ID-Tost").toast('show');
+              document.getElementById("ForgetPsswordFrm").reset();
+              document.getElementById("generateOTPbtn").disabled=false;
+              document.getElementById("generateOTPbtn").innerHTML= `Try Again... <i class="bi bi-arrow-clockwise"></i>`;
+              document.getElementById("generateOTPbtn").style.display = "block";
+                document.getElementById("OTPVerifybtn").style.display = "none";
+                document.getElementById("OTPdiv").style.display = "none";
             })
           } else {
             document.getElementById("tostMessage").innerText = "Invalid Input";

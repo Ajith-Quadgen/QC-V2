@@ -160,7 +160,10 @@ app.post('/AuthenticateLogin', (req, res) => {
       } else if (result[0]['Role'] == "PMO") {
         res.redirect('/PMO');
       } else if (result[0]['Role'] == "Root") {
-        res.redirect('/root/LoginVerification');
+        //res.redirect('/root/LoginVerification');
+        req.session.LoginOTPVerification = true;
+        req.session.UserRole="Root"
+        res.redirect('/root');
       } else {
         return res.send("Internal Server Error");
       }

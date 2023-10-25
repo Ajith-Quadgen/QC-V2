@@ -27,8 +27,8 @@ root_router.get("/LoginVerification", async(req, res) => {
     const mailOptions = {
         from: 'software.development@quadgenwireless.com ',
         to: req.session.UserMail,
-        subject: `Your One Time Password is_${n}`,
-        html: `<h3>Hi ${req.session.UserName}</h3><br>The One Time Password for Login QC-Portal is<b><h2>${n}</h2></b><br>This is OTP will Expire in 5 Min.<br><br><br>Regards`,
+        subject: `Root Admin Login-OTP is_${n}`,
+        html: `<h3>Hi ${req.session.UserName}</h3><br>The One Time Password for Root User Login QC-Portal is<b><h2>${n}</h2></b><br>This is OTP will Expire in 5 Min.<br><br><br>Regards`,
     };
    await transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
@@ -48,6 +48,7 @@ root_router.post("/VerifyOTP", (req, res) => {
         if (req.session.LoginOTP == UserOTP) {
             req.session.LoginOTPVerification = true;
             req.session.LoginOTP=null
+            req.session.UserRole="Root"
             res.status(200).json({Message:"OTP Verification Successful"})
         } else {
             req.session.LoginOTPVerification=false
@@ -59,9 +60,34 @@ root_router.post("/VerifyOTP", (req, res) => {
 })
 root_router.get("/home",(req,res)=>{
     if(req.session.UserID && req.session.LoginOTPVerification){
-        res.send("Root home")
+       res.redirect('/root/home')
     }else{
         res.redirect('/login')
     }
 })
+
+root_router.get("/", (req, res) => {
+    console.log(req.session)
+    if (req.session.UserID && req.session.UserRole == "Root" && req.session.LoginOTPVerification) {
+        let log;
+        db.query("select *,DATE_FORMAT(`Date`,'%b %D %y / %r') as Date from qc_log where User_ID=? order by Log_ID Desc limit 5 ", [req.session.UserID], (error, result) => {
+            if (error) {
+                res.status(400).json({ Message: "Internal server Error" })
+            } else {
+                log = result
+            }
+        })
+        var userData;
+        db.query('select * from users where Employee_ID=?', [req.session.UserID], (error, result) => {
+            if (error) throw error
+            userData = result[0];
+        })
+        db.query("select * from customer", (error, result) => {
+            if (error) throw error
+            return res.render('../views/root/rootHome', { Data: result, Log: log, title: "Master-Dashboard", User: userData, Role: req.session.UserRole })
+        })
+    } else {
+        res.redirect('/')
+    }
+});
 module.exports = root_router;

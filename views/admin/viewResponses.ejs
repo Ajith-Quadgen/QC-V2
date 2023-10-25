@@ -87,7 +87,7 @@
                                     <%= index+1%>
                                 </td>
                                 <td>
-                                    <%= Data[index]["Submitted_Date"] %>
+                                    <%= Data[index]["New_Submitted_Date"] %>
                                 </td>
                                 <td>
                                     <%= Data[index]['Job_ID'] %>
@@ -212,7 +212,7 @@
                     for (let i = 0; i < data.length; i++) {
                         table.innerHTML += `<tr>
                                     <td>${i + 1}</td>
-                                    <td>${data[i]["Submitted_Date"]}</td>
+                                    <td>${data[i]["New_Submitted_Date"]}</td>
                                     <td>${data[i]["Job_ID"]}</td>
                                     <td>${data[i]["State"]}</td>
                                     <td>${data[i]["City"]}</td>

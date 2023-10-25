@@ -26,14 +26,14 @@
             <div class="p-3 section1">
                 <div class="d-flex  align-items-center justify-content-center">
                     <div class="row justify-content-center me-2" style="width: 30dvw;">
-                        <div class="col-mb-3" style="width: 75%">
+                        <div class="col-mb-1" style="width: 65%">
                             <input type="hidden" class="form-control" id="checklist" required value=" <%= title %>"
                                 readonly>
                             <label for="cfas_no" class="form-label">Enter Job ID/CFAS Number </label>
                             <input type="text" class="form-control" id="cfas_no" onchange="getBasicData(this);"
                                 placeholder="Min 4 Character" required>
                         </div>
-                        <div class="col-md-3" style="width: 25%">
+                        <div class="col-md-1" style="width: 35%">
                             <label for="qc_type" class="form-label">QC Type</label>
                             <select id="qc_type" class="form-select" required onchange="getPreviousRecord(this)">
                                 <option value="">Select</option>
@@ -61,14 +61,14 @@
                 <div class=" w-100">
                     <label for="remarks" class="form-label">Remarks
                     </label>
-                    <textarea name="" id="remarks" cols="30" rows="3" class="form-control" spellcheck="true" placeholder="Any remark for this QC...?"></textarea>
+                    <textarea name="" id="remarks" cols="30" rows="1" class="form-control" spellcheck="true" placeholder="Any remark for this QC...?"></textarea>
                 </div>
 
             </div>
             </div>
             <div class="d-flex w-100">
-                <table class="table table-hover m-2  table-striped align-middle table-light" id="QCTable">
-                    <thead class="table-primary">
+                <table class="table table-hover m-2 align-middle table-light" id="QCTable">
+                    <thead class="table-primary" style="font-size: 12px;">
                         <tr>
                             <th scope="col">Sl.No</th>
                             <th scope="col">Item</th>
@@ -78,7 +78,7 @@
                             <th scope="col">Reviewer Note</th>
                         </tr>
                     </thead>
-                    <tbody id="content-area">
+                    <tbody id="content-area" style="font-size: 12px;">
                         <% if (Object.values(Data).length>0) { %>
                             <% let sectionNumber=1; %>
                                 <% for (const Section in Data) { %>

@@ -51,9 +51,9 @@
                                 <th scope="col">Reference Document</th>
                                 <th scope="col" style="width: 300px; word-wrap: break-word;">Reference Link(URL)</th>
                                 <% if (Role=="Admin" ) { %>
-                                <th scope="col" colspan="2">Status</th>
-                                <%}%>
-                                <th></th>
+                                    <th scope="col" colspan="2">Status</th>
+                                    <%}%>
+                                        <th></th>
                             </tr>
                             <div id="loading-spinner"></div>
                         </thead>
@@ -83,7 +83,7 @@
                                         <td style="text-align: start; align-items:start;">
                                             <%= Data[index]['Reference_Document'] %>
                                         </td>
-                                        <td style="width: 300px; word-wrap: break-word;">
+                                        <td style=" word-wrap: break-word; text-wrap:balance ;">
                                             <%= Data[index]['Reference_Link'] %>
                                         </td>
 
@@ -91,23 +91,23 @@
                                             <td>
                                                 <%=Data[index]['Status']%>
                                             </td>
-                                        <td>
-                                            <% if (Data[index]['Status']=="Active" ) { %>
-                                                <button type="button" class="btn btn-danger  ms-2"
-                                                    onclick="updateStatusAPI('<%= Data[index][`Question_ID`] %>','Inactive')"><i
-                                                        class="bi bi-x-circle"></i></button>
-                                                <% }else{ %>
-                                                    <button type="button" class="btn btn-success  ms-2 me-2"
-                                                        onclick="updateStatusAPI('<%= Data[index][`Question_ID`] %>','Active')"><i
-                                                            class="bi bi-check-circle-fill"></i></button>
-                                                    <% } %>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-outline-primary"
-                                                onclick='gatherRowData(this)' id="<%= Data[index]['Question_ID'] %>"
-                                                data-bs-toggle="modal" data-bs-target="#UpdateQCModal">Edit</button>
-                                        </td>
-                                        <%}%>
+                                            <td>
+                                                <% if (Data[index]['Status']=="Active" ) { %>
+                                                    <button type="button" class="btn btn-danger  ms-2"
+                                                        onclick="updateStatusAPI('<%= Data[index][`Question_ID`] %>','Inactive')"><i
+                                                            class="bi bi-x-circle"></i></button>
+                                                    <% }else{ %>
+                                                        <button type="button" class="btn btn-success  ms-2 me-2"
+                                                            onclick="updateStatusAPI('<%= Data[index][`Question_ID`] %>','Active')"><i
+                                                                class="bi bi-check-circle-fill"></i></button>
+                                                        <% } %>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-outline-primary"
+                                                    onclick='gatherRowData(this)' id="<%= Data[index]['Question_ID'] %>"
+                                                    data-bs-toggle="modal" data-bs-target="#UpdateQCModal">Edit</button>
+                                            </td>
+                                            <%}%>
                                     </tr>
                                     <% } %>
                                         <% } else { %>
@@ -157,7 +157,7 @@
     <!-- Add QC Modal -->
     <div class="modal fade" id="UserInputModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content ">
                 <div class="modal-header">
                     <h3 class="modal-title fs-5" id="staticBackdropLabel">Add New Check Point
@@ -218,7 +218,7 @@
     <!-- Update QC Modal -->
     <div class="modal fade" id="UpdateQCModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content ">
                 <div class="modal-header">
                     <h3 class="modal-title fs-5" id="staticBackdropLabel">Update the QC
@@ -249,8 +249,8 @@
                             <input type="text" class="form-control" id="updateitem" placeholder="key">
                             <label for="updateitem">Item</label>
                         </div>
-                        <div class="form-floating mb-3">
-                            <textarea name="" class="form-control" style="height: 100px;" id="updateDescription"
+                        <div class=" mb-3" id="">
+                            <textarea name="updateDescription" class="form-control" rows="3" id="updateDescription"
                                 placeholder="key" required></textarea>
                             <!-- <input type="text" class="form-control" id="updateDescription" placeholder="key" required> -->
                             <label for="updateDescription">Description</label>
@@ -280,6 +280,21 @@
     </div>
     <%- include('../partials/dependencies-js') %>
         <script>
+            tinymce.init({
+                // Select the element(s) to add TinyMCE to using any valid CSS selector
+                selector: "#updateDescription",
+                plugins: "preview powerpaste casechange searchreplace autolink autosave save directionality advcode visualblocks visualchars fullscreen image link media mediaembed template codesample advtable table charmap pagebreak nonbreaking anchor advlist lists checklist wordcount tinymcespellchecker a11ychecker help formatpainter permanentpen pageembed linkchecker emoticons export",
+                height: '300px',
+                toolbar_sticky: true,
+                icons: 'thin',
+                autosave_restore_when_empty: true
+            });
+
+            document.addEventListener('focusin', (e) => {
+                if (e.target.closest(".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
+                    e.stopImmediatePropagation();
+                }
+            });
 
             document.getElementById('addQCCheckForm').addEventListener("submit", async (e) => {
                 e.preventDefault();
@@ -372,25 +387,28 @@
             function gatherRowData(button) {
                 const row = button.closest('tr'); // Get the parent tr using closest
                 const cells = Array.from(row.cells); // Convert HTMLCollection to array
-                var rowData = cells.map((cell) => cell.innerText.trim());
+                var rowData = cells.map((cell) => cell.innerHTML.trim());
                 rowData = rowData.slice(1, -3)
-                console.log(rowData)
                 document.getElementById("updateID").value = button.id;
                 document.getElementById("updateqc").value = rowData[0];
                 document.getElementById("updatesection").value = rowData[1];
                 document.getElementById("updateweight").value = rowData[2];
                 document.getElementById("updateitem").value = rowData[3];
+                tinymce.get("updateDescription").setContent(rowData[4]);
                 document.getElementById("updateDescription").value = rowData[4];
                 document.getElementById("updatereferDocName").value = rowData[5];
                 document.getElementById("updatereferDocLink").value = rowData[6];
             }
+
             document.getElementById("UpdateQC").addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const id = document.getElementById("updateID").value;
                 const qc = document.getElementById("updateqc").value;
                 const sec = document.getElementById("updatesection").value;
                 const item = document.getElementById("updateitem").value;
-                const desc = document.getElementById("updateDescription").value;
+                // const desc = document.getElementById("updateDescription").value;
+                const desc = tinymce.get("updateDescription").getContent();
+                console.log(desc)
                 const docName = document.getElementById("updatereferDocName").value;
                 const docLink = document.getElementById("updatereferDocLink").value;
                 const weight = document.getElementById("updateweight").value;
@@ -418,6 +436,10 @@
                         //alert("Unable to Update the Checklist...\nPlease Contact Admin");
                     })
             })
+        </script>
+
+        <script>
+
         </script>
 </body>
 

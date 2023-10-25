@@ -36,8 +36,8 @@
             <input type="button" value="Add New User" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
                 data-bs-target="#UserInputModel">
         </form>
-        <div class="d-flex w-100">
-            <table class="table table-hover m-2 AVRTable table-striped caption-top">
+        <div class="d-flex ">
+            <table class="table table-hover m-2 AVRTable caption-top" style="font-size: 12px;">
                 <thead class="table-dark">
                     <tr>
                         <th scope="col">Sl.No</th>
@@ -55,7 +55,7 @@
                         <th></th>
                     </tr>
                 </thead>
-                <tbody id="content-area">
+                <tbody id="content-area" style="font-size: 12px;">
                     <% if (Object.values(Data).length>0) { %>
                         <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
                             <tr ondblclick="getUserDetails('<%= Data[index][`Employee_ID`] %>')"
@@ -191,16 +191,16 @@
                             <input type="email" class="form-control" id="empEmail" placeholder="key" required>
                             <label for="empEmail">Email ID</label>
                         </div>
-                        <div class="toast bg-warning align-items-center border-0 mb-3 rounded-3" id="Employee-Email_Tost"
-                        role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="d-flex">
-                            <div class="toast-body fs-6">
-                                This Email is already exist..!
+                        <div class="toast bg-warning align-items-center border-0 mb-3 rounded-3"
+                            id="Employee-Email_Tost" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body fs-6">
+                                    This Email is already exist..!
+                                </div>
+                                <button type="button" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast"
+                                    aria-label="Close"></button>
                             </div>
-                            <button type="button" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast"
-                                aria-label="Close"></button>
                         </div>
-                    </div>
                         <div class="mb-3">
                             <label for="empDesignation" class="mb-3">Designation</label>
                             <select name="empDesignation" id="empDesignation" class="from-select form-control"
@@ -448,7 +448,7 @@
                                     flexDiv.classList.add("m-2")
                                     coverDiv.classList.add("d-flex", "justify-content-center")
                                     const checkbox = document.createElement('input');
-                                    checkbox.classList.add("form-check-input")
+                                    checkbox.classList.add("form-check-input", "master-checkbox")
                                     checkbox.type = 'checkbox';
                                     checkbox.name = 'checklist';
                                     checkbox.value = key;
@@ -475,6 +475,7 @@
                                         checkbox.name = key;
                                         checkbox.value = item.Checklist_Name;
                                         checkbox.id = `CheckList_${item.Checklist_Name}`;
+                                        checkbox.addEventListener("change",handleChildCheckboxChange)
                                         const label = document.createElement('label');
                                         label.textContent = item.Checklist_Name;
                                         label.setAttribute('for', item.Checklist_Name);
@@ -539,7 +540,23 @@
                 childCheckboxes.forEach(childCheckbox => {
                     childCheckbox.checked = parentCheckbox.checked;
                 });
-                
+
+            }
+            function handleChildCheckboxChange(event) {
+                const childCheckbox = event.target;
+                const parentName = childCheckbox.name;
+
+                // Find all child checkboxes with the same name attribute as the current child checkbox
+                const childCheckboxes = document.querySelectorAll(`input[name="${parentName}"]`);
+
+                // Check if any child checkbox is checked
+                const anyChildChecked = Array.from(childCheckboxes).some(checkbox => checkbox.checked);
+
+                // Get the parent checkbox by ID (assuming it has a unique ID)
+                const parentCheckbox = document.getElementById(parentName);
+
+                // Update the state of the parent checkbox based on the child checkboxes' states
+                parentCheckbox.checked = anyChildChecked;
             }
 
             document.getElementById("UpdateUserForm").addEventListener('submit', async (e) => {
