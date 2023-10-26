@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jobs</title>
+    <%- include('../partials/dependencies') %>
+</head>
+
+<body>
+    <header>
+        <%- include('../partials/root-header',{title:title}) %>
+    </header>
+    <main class="main_container">
+        <form action="#" method="POST" enctype="multipart/form-data" id="userExcelUploadForm"
+            class="d-flex justify-content-center align-items-center">
+            <div class="input-group m-2" style="width: max-content;">
+                <input type="text" class="form-control" placeholder="Enter Job-Id/CFAS Number"
+                    aria-label="Recipient's username" aria-describedby="FilterBtn" id="cfas_no">
+                <button class="btn btn-success" type="button" id="FilterBtn"><i class="bi bi-search"></i></button>
+            </div>
+            <p class="form-label">Select Only CSV File</p>
+            <label class="input-group-text" for="UserExcelFile">Select Job Data</label>
+            <input type="file" class="form-control m-2" name="UserExcelFile" id="UserExcelFile" accept=".csv" required
+                style="display: none;">
+            <button type="submit" class="btn btn-primary m-2">Bulk Upload &nbsp; <i
+                    class="bi bi-cloud-arrow-up"></i></button>
+            <input type="button" value="Add New Job" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
+                data-bs-target="#UserInputModel">
+            <a href="/api/downloadJob" role="button" class="btn btn-secondary">Download Job Data </a>
+        </form>
+        <div class="d-flex w-100 flex-column-reverse">
+            <table class="table table-hover p-2 AVRTable table-striped caption-top">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Sl.No</th>
+                        <th scope="col">Job Number</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">State</th>
+                        <th scope="col">City</th>
+                        <!-- <th scope="col">Work Print Number</th> -->
+                        <th scope="col">Total Responses</th>
+                        <th scope="col">Created By</th>
+                        <th scope="col">Created Date</th>
+                        <th scope="col">Modified Date</th>
+                        <th></th>
+                    </tr>
+                    <div id="loading-spinner"></div>
+                </thead>
+                <tbody id="content-area">
+                    <% if (Object.values(Data).length>0) { %>
+                        <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
+                            <tr>
+                                <td>
+                                    <%= index+1%>
+                                </td>
+                                <td >
+                                    <%= Data[index]["Job_Number"] %>
+                                </td>
+                                <td>
+                                    <%= Data[index]['Customer'] %>
+                                </td>
+                                <td >
+                                    <%= Data[index]['State'] %>
+                                </td>
+                                <td>
+                                    <%= Data[index]['City'] %>
+                                </td>
+                                <td>
+                                    <%= Data[index]['Number_Of_Responses'] %>
+                                </td>
+                                <td >
+                                    <%= Data[index]['Created_By'] %>
+                                </td>
+                                <td>
+                                    <%= Data[index]['Created_Date'] %>
+                                </td>
+                                <td>
+                                    <%= Data[index]['Modified_Date'] %>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-danger btn-sm ms-2 me-2"
+                                        onclick="DeleteJob('<%= Data[index][`Job_Number`] %>')"><i
+                                            class="bi bi-trash"></i></button>
+                                </td>
+                            </tr>
+                            <% } %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="9">
+                                            <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                                                <symbol id="check-circle-fill" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                                                </symbol>
+                                                <symbol id="info-fill" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                </symbol>
+                                                <symbol id="exclamation-triangle-fill" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                                                </symbol>
+                                            </svg>
+                                            <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center"
+                                                role="alert">
+                                                <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Info:">
+                                                    <use xlink:href="#info-fill" />
+                                                </svg>
+
+                                                <strong>Sorry...!😕</strong> Data not found.
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9" class="text-center">
+
+                                            <a href="/login" class="btn btn-outline-primary rounded-pill"><i
+                                                    class="bi bi-arrow-left-circle-fill"></i> Go Back To Home</a>
+
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <div class="modal fade" id="UserInputModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content ">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5" id="staticBackdropLabel">Add New Job
+                    </h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="#" method="post" id="addJobForm">
+                    <div class="modal-body">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="Job_Number" placeholder="key" min="5" required>
+                            <label for="empId">Job Number</label>
+                        </div>
+                        <div class="toast bg-warning align-items-center border-0 mb-3 rounded-3" id="Job-Tost"
+                        role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body fs-6">
+                                This Job/CFAS is already exist..!
+                            </div>
+                            <button type="button" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast"
+                                aria-label="Close"></button>
+                        </div>
+                    </div>
+                        <div class="mb-3">
+                            <label for="Customer">Customer</label>
+                            <select name="Customer" id="Customer" class="from-select form-control" aria-label="Select"
+                                required>
+                                <option selected value="">Select the Customer</option>
+                                <% CustomerList.forEach(record=> { %>
+                                    <option value="<%= record.Customer_Name %>">
+                                        <%= record.Customer_Name %>
+                                    </option>
+                                    <% }) %>
+                            </select>
+
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="State" placeholder="key" min="2" required>
+                            <label for="empEmail">State</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="City" placeholder="key" min="3" required>
+                            <label for="empDesignation">City</label>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="AddJobbtn">Add &nbsp;<i
+                                class="bi bi-send-fill"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <%- include('../partials/dependencies-js') %>
+        <script>
+
+            document.getElementById('addJobForm').addEventListener("submit", async (e) => {
+                e.preventDefault();
+                var Job_Id = document.getElementById("Job_Number").value.replaceAll(" ", '');
+                var regex = /^[0-9a-zA-Z\_\-]+$/
+                if (regex.test(Job_Id) && Job_Id.length > 3) {
+                    showLoadingSpinner();
+                    await axios.post('/api/AddJob', {
+                        params: {
+                            "Job_Number": document.getElementById("Job_Number").value,
+                            "Customer": document.getElementById("Customer").value,
+                            "State": document.getElementById("State").value,
+                            "City": document.getElementById("City").value,
+                            "Created_Date": Date.now()
+                        }
+                    }).then(async res => {
+                        if (res.status == 200) {
+                            // $("#UserInputModel").modal('hide')
+                            await updateContentArea(res.data.Data)
+                            hideLoadingSpinner();
+                            alert(res.data.Message);
+                        }
+                    }).catch(e => {
+                        console.log(e);
+                        // $("#UserInputModel").modal('hide')
+                        hideLoadingSpinner();
+                        alert(e.response.data.Message);
+                    })
+                } else {
+                    document.getElementById("addJobForm").reset();
+                    document.getElementById("Job_Number").value = null;
+                    alert("Min of 4 Characters are needed & Special Characters Other Than '-' and '_' are Not Allowed for Job-ID/CFAS Number.")
+                }
+            })
+
+            document.getElementById('userExcelUploadForm').addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const fileInput = document.getElementById('UserExcelFile');
+                const file = fileInput.files[0];
+                let fromData = new FormData();
+                fromData.append("UserExcelFile", file)
+                await axios.post('/api/uploadJobs', fromData).then(res => {
+                    if (res.status == 200) {
+                        alert(res.data.Message);
+                        updateContentArea(res.data.Data);
+                    }
+                }).catch(e => {
+                    alert(e.response.data.Message);
+                })
+            })
+
+            function updateContentArea(data) {
+                if (data.length > 0) {
+                    $('#content-area').empty();
+                    const table = document.getElementById("content-area");
+                    for (let i = 0; i < data.length; i++) {
+                        table.innerHTML += `<tr>
+                                    <td>${i + 1}</td>
+                                    <td>${data[i]["Job_Number"]}</td>
+                                    <td>${data[i]["Customer"]}</td>
+                                    <td>${data[i]["State"]}</td>
+                                    <td style="text-align:left">${data[i]["City"]}</td>
+                                    <td>${data[i]["Number_Of_Responses"]}</td>
+                                    <td>${data[i]["Created_By"]}</td>
+                                    <td>${data[i]["Created_Date"]}</td>
+                                    <td>${data[i]["Modified_Date"]}</td>`;
+                    }
+                }
+
+            }
+
+            document.getElementById("FilterBtn").addEventListener("click", (e) => {
+                var Job_Id = document.getElementById("cfas_no").value.replaceAll(" ", '');
+                var regex = /^[0-9a-zA-Z\_\-]+$/
+                if (regex.test(Job_Id)) {
+                    axios.post('/api/GetJob', {
+                        params: {
+                            id: Job_Id
+                        }
+                    }).then(res => {
+                        if (res.status == 200) {
+                            updateContentArea(res.data);
+                        }
+                    })
+                        .catch(e => {
+                            console.log(e);
+                            alert("Unable to Get the Job...\nPlease Contact Admin");
+                        })
+                } else {
+                    document.getElementById("cfas_no").value = null;
+                    alert("Special Characters Other Than '-' and '_' are Not Allowed for Job-ID/CFAS Number.")
+                }
+            })
+
+            $("#cfas_no").on("keydown", function (e) {
+                if (e.keyCode === 13) {  //checks whether the pressed key is "Enter"
+                    document.getElementById("FilterBtn").click()
+                }
+            });
+            document.getElementById("Job_Number").addEventListener("change", (e) => {
+                const EmployeeID = e.target.value;
+                socket.emit("Check_Job_Exist", { ID: EmployeeID }, (response) => {
+                    if (response == "Present") {
+                        $("#Job-Tost").toast('show');
+                        // e.target.value=null;
+                    }
+                });
+            })
+            function DeleteJob(JobID){
+                let confirm = prompt(`Do you really wish to remove the Job '${JobID}'...? (Yes/No)`)
+                const options = ['Yes', 'YES', 'Y', 'y']
+                if (options.includes(confirm)) {
+                    axios.post('/root/deleteJob',
+                        {
+                            params: { JobID: JobID }
+                        }).then(res => {
+                            if (res.status == 200) {
+                                alert(res.data.Message)
+                                window.location.reload()
+                            }
+                        }).catch(e => {
+                            alert(e.responses.data.Message)
+                            window.location.reload()
+                        })
+                }
+            }
+        </script>
+</body>
+
+</html>

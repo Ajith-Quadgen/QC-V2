@@ -21,7 +21,7 @@ const transporter = nodemailer.createTransport(
 
 
 
-root_router.get("/LoginVerification", async(req, res) => {
+root_router.get("/LoginVerification", async (req, res) => {
     let n = 0;
     n = crypto.randomInt(100000, 999999)
     const mailOptions = {
@@ -30,7 +30,7 @@ root_router.get("/LoginVerification", async(req, res) => {
         subject: `Root Admin Login-OTP is_${n}`,
         html: `<h3>Hi ${req.session.UserName}</h3><br>The One Time Password for Root User Login QC-Portal is<b><h2>${n}</h2></b><br>This is OTP will Expire in 5 Min.<br><br><br>Regards`,
     };
-   await transporter.sendMail(mailOptions, (error, info) => {
+    await transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
             console.error('Error on sending email:', error);
             req.session.LoginOTP = null;
@@ -47,47 +47,279 @@ root_router.post("/VerifyOTP", (req, res) => {
         const UserOTP = req.body.params.OTP;
         if (req.session.LoginOTP == UserOTP) {
             req.session.LoginOTPVerification = true;
-            req.session.LoginOTP=null
-            req.session.UserRole="Root"
-            res.status(200).json({Message:"OTP Verification Successful"})
+            req.session.LoginOTP = null
+            req.session.UserRole = "Root"
+            res.status(200).json({ Message: "OTP Verification Successful" })
         } else {
-            req.session.LoginOTPVerification=false
-           res.status(400).json({Message:"Invalid OTP..!"})
+            req.session.LoginOTPVerification = false
+            res.status(400).json({ Message: "Invalid OTP..!" })
         }
-    }else{
-        res.status(400).json({Message:"Access Denied"})
+    } else {
+        res.status(400).json({ Message: "Access Denied" })
     }
 })
-root_router.get("/home",(req,res)=>{
-    if(req.session.UserID && req.session.LoginOTPVerification){
-       res.redirect('/root/home')
-    }else{
+root_router.get("/home", (req, res) => {
+    if (req.session.UserID && req.session.LoginOTPVerification) {
+        res.redirect('/root/home')
+    } else {
         res.redirect('/login')
     }
 })
 
 root_router.get("/", (req, res) => {
-    console.log(req.session)
     if (req.session.UserID && req.session.UserRole == "Root" && req.session.LoginOTPVerification) {
-        let log;
-        db.query("select *,DATE_FORMAT(`Date`,'%b %D %y / %r') as Date from qc_log where User_ID=? order by Log_ID Desc limit 5 ", [req.session.UserID], (error, result) => {
+        var userData, UserCount, ChecklistCount;
+        db.query(`SELECT  SUM(CASE WHEN Active = '1' THEN 1 ELSE 0 END) AS active_user,  SUM(CASE WHEN Active = '0' THEN 1 ELSE 0 END) AS inactive_users FROM users`, (error, result) => {
             if (error) {
-                res.status(400).json({ Message: "Internal server Error" })
+                console.log(error)
             } else {
-                log = result
+                UserCount = result;
             }
         })
-        var userData;
         db.query('select * from users where Employee_ID=?', [req.session.UserID], (error, result) => {
             if (error) throw error
             userData = result[0];
         })
-        db.query("select * from customer", (error, result) => {
+        db.query('select Customer,count(*) as No_Of_Checklist from checklist group by Customer', (error, result) => {
             if (error) throw error
-            return res.render('../views/root/rootHome', { Data: result, Log: log, title: "Master-Dashboard", User: userData, Role: req.session.UserRole })
+            ChecklistCount = result;
+            return res.render('../views/root/rootHome', { title: "Master-Dashboard", User: userData, Role: req.session.UserRole, UserCount: UserCount[0], ChecklistCount: ChecklistCount })
         })
     } else {
         res.redirect('/')
     }
 });
+root_router.get('/users', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Root") {
+        let checklist;
+        db.query("select * from checklist", (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(500).json({ Message: "Internal Server Error" })
+            } else {
+                checklist = result;
+            }
+        })
+        let basicDetails = {};
+        db.query("select (select group_concat(distinct Location) from users) as Location,(select group_concat(distinct Designation) from users) as Designation", (error, result) => {
+            if (error) {
+                console.log(error)
+            } else if (result.length > 0) {
+                let Location = result[0].Location.split(',');
+                let Designation = result[0].Designation.split(',');
+                basicDetails.Location = Location;
+                basicDetails.Designation = Designation;
+            }
+        })
+        db.query('SELECT Employee_ID,Full_Name,Email_ID FROM users where Active=1 and  Designation not in ("Developer","OSP Drafter II","GET-OSP Drafter","OSP Drafter","Fiber Design Engineer") order by Full_Name', (error, result) => {
+            if (error) throw error
+            basicDetails.NameMail = result
+        })
+        basicDetails.Roles = ["Admin", "PMO", "Engineer"]
+        db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users where Role!='Root' ", function (error, result) {
+            if (error) throw error
+            res.render('../views/root/Users', { Data: result, Checklist: checklist, Basic: basicDetails, title: "Users", Role: req.session.UserRole });
+        })
+    } else {
+        res.redirect('/')
+    }
+})
+root_router.post('/deleteUser', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Root") {
+        const id = req.body.params.userID;
+        db.query("delete from users where Active=? and Employee_ID=?", [0, id], (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(400).json({ Message: "Internal Server Error" });
+            } else {
+                if (result.affectedRows == 1) {
+                    return res.status(200).json({ Message: "User Deleted Successfully..." })
+                } else if (result.affectedRows == 0) {
+                    return res.status(200).json({ Message: "Unable to delete the user\nPlease Make sure the user is Inactive" })
+                }
+            }
+        })
+    }
+})
+root_router.get("/Customers", (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Root") {
+        db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date from customer", function (error, result) {
+            if (error) throw error
+            db.query("select Customer_Name from customer", function (error, Customer_result) {
+                if (error) throw error
+                res.render('../views/root/Customers', { Data: result, Customer_Data: Customer_result, title: "Customers", Role: req.session.UserRole });
+            })
+        });
+    } else {
+        res.redirect('/')
+    }
+});
+
+root_router.post('/deleteCustomer', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Root") {
+        const id = req.body.params.CustomerID;
+        db.query("delete from customer where Customer_ID=?", [id], (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(400).json({ Message: "Internal Server Error" });
+            } else {
+                console.log(result)
+                if (result.affectedRows == 1) {
+                    return res.status(200).json({ Message: "Customer Deleted Successfully..." })
+                } else if (result.affectedRows == 0) {
+                    return res.status(200).json({ Message: "Unable to delete this Customer..." })
+                }
+            }
+        })
+    }
+})
+root_router.get('/ListChecklist/:Customer_Name', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Root") {
+        db.query("select * from checklist where Customer=?", [req.params.Customer_Name], (error, result) => {
+            if (error) throw error
+            res.render("../views/root/ListChecklist", { Data: result, title: `${req.params.Customer_Name}-Checklist`, Role: req.session.UserRole })
+        })
+    } else {
+        res.redirect('/')
+    }
+})
+root_router.get('/ViewChecklist/:QC_Name', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Root") {
+        let sections = "";
+        db.query("select * from questions where Checklist=? order by Question_ID", [req.params.QC_Name], (error, result) => {
+            if (error) throw error
+            db.query("select Section from questions where Checklist=? group by Section;", [req.params.QC_Name], (error, result1) => {
+                if (error) throw error
+                sections = result1;
+                res.render("../views/admin/viewChecklist", { Data: result, Checklist: req.params.QC_Name, Sections: sections, title: `${req.params.QC_Name}`, Role: req.session.UserRole })
+            })
+        })
+    } else {
+        res.redirect('/')
+    }
+})
+
+root_router.post('/dropTheCheckpoints', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Root") {
+        const checklistName = req.body.params.ChecklistName;
+        db.query("delete from questions where Checklist=?", [checklistName], (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(400).json({ Message: "Internal Server Error" });
+            } else {
+                console.log(result)
+                if (result.affectedRows > 0) {
+                    return res.status(200).json({ Message: `Every checkpoint on the ${checklistName} has been successfully deleted.` })
+                } else if (result.affectedRows == 0) {
+                    return res.status(200).json({ Message: "Unable to delete the Checkpoints..." })
+                }
+            }
+        })
+    }
+})
+
+root_router.post('/dropTheChecklist', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Root") {
+        const checklistName = req.body.params.ChecklistName;
+        db.query("delete from checklist where Checklist_Name=?", [checklistName], (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(400).json({ Message: "Internal Server Error" });
+            } else {
+                console.log("Checklist");
+                console.log(result)
+                if (result.affectedRows == 1) {
+                    db.query("delete from questions where Checklist=?", [checklistName], (error, result1) => {
+                        if (error) {
+                            console.log(error)
+                            return res.status(400).json({ Message: "Internal Server Error" });
+                        } else {
+                            return res.status(200).json({ Message: `The ${checklistName} Checklist has been successfully deleted.` })
+                        }
+                    })
+                } else if (result.affectedRows == 0) {
+                    return res.status(200).json({ Message: "Unable to delete the Checkpoints..." })
+                }
+            }
+        })
+    }
+})
+
+
+root_router.get('/viewResponses/:QC_Name', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Root") {
+        db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as New_Submitted_Date from responses where Checklist=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc", [req.params.QC_Name], (error, result) => {
+            if (error) throw error
+            res.render("../views/admin/viewResponses", { Data: result, Checklist: req.params.QC_Name, title: req.params.QC_Name, Role: req.session.UserRole })
+        })
+    } else {
+        res.redirect('/')
+    }
+})
+root_router.get("/QC/:QC_Name", (req, res) => {
+    if (req.session.UserID) {
+        db.query("Select * from questions where checklist=? and Status='Active' ", [req.params.QC_Name], (error, result) => {
+            if (result.length > 0) {
+                const groupedData = result.reduce((acc, { Section, Item, Description, Reference_Document, Reference_Link }) => {
+                    //console.log(Section)
+                    acc[Section] = acc[Section] || [];
+                    acc[Section].push(Item, Description, Reference_Document, Reference_Link);
+
+                    return acc;
+                }, {});
+                //console.log(groupedData)
+                const organizedData = {};
+
+                // Organize data by sections
+                result.forEach((row) => {
+                    const { Section } = row;
+                    if (!organizedData[Section]) {
+                        organizedData[Section] = [];
+                    }
+                    organizedData[Section].push(row);
+                });
+                res.render('../views/engineer/QCPage', { Data: organizedData, title: result[0].Checklist, Role: req.session.UserRole, IncludeBackButton: false })
+            } else {
+                res.send("Checklist is Not Prepared Yet, Contact Manager")
+            }
+        })
+
+    } else {
+        res.redirect('/')
+    }
+})
+
+root_router.get("/Jobs", (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Root") {
+        var Customer;
+        db.query("SELECT * FROM customer", function (error, result) {
+            if (error) throw error
+            Customer = result
+        })
+        db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Modified_Date limit 50", function (error, result) {
+            if (error) throw error
+            res.render('../views/root/Jobs', { Data: result, CustomerList: Customer,title:"Jobs",Role: req.session.UserRole });
+        });
+    } else {
+        res.redirect('/')
+    }
+});
+root_router.post('/deleteJob', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Root") {
+        const id = req.body.params.JobID;
+        db.query("delete from jobs where Job_Number=?", [id], (error, result) => {
+            if (error) {
+                console.log(error)
+                return res.status(400).json({ Message: "Internal Server Error" });
+            } else {
+                console.log(result)
+                if (result.affectedRows == 1) {
+                    return res.status(200).json({ Message: `Job ${id} Deleted Successfully...`})
+                } else if (result.affectedRows == 0) {
+                    return res.status(200).json({ Message: "Unable to delete this job..." })
+                }
+            }
+        })
+    }
+})
 module.exports = root_router;

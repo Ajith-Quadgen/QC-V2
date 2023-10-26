@@ -19,7 +19,9 @@
                     <%- include('../partials/admin-header',{title:title}) %>
                         <% }else if(Role=="PMO" ){ %>
                             <%- include('../partials/PMO-header',{title:title}) %>
-                                <%}%>
+                                <%} if(Role=="Root" ){ %>
+                                    <%- include('../partials/root-header',{title:title}) %>
+                                        <%}%>
     </header>
     <main class="main_container">
         <form action="#" method="post" enctype="multipart/form-data" id="QCFrom">
@@ -68,7 +70,7 @@
             </div>
             <div class="d-flex w-100">
                 <table class="table table-hover m-2 align-middle table-light" id="QCTable">
-                    <thead class="table-primary" style="font-size: 12px;">
+                    <thead class="table-primary" style="font-size: 14px;">
                         <tr>
                             <th scope="col">Sl.No</th>
                             <th scope="col">Item</th>
@@ -78,7 +80,7 @@
                             <th scope="col">Reviewer Note</th>
                         </tr>
                     </thead>
-                    <tbody id="content-area" style="font-size: 12px;">
+                    <tbody id="content-area" style="font-size: 14px;">
                         <% if (Object.values(Data).length>0) { %>
                             <% let sectionNumber=1; %>
                                 <% for (const Section in Data) { %>

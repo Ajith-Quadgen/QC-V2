@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers</title>
+    <%- include('../partials/dependencies') %>
+</head>
+
+<body>
+    <header>
+        <%- include('../partials/root-header',{title:title}) %>
+
+    </header>
+    <style>
+        .input-group {
+            max-width: 90% !important;
+        }
+    </style>
+    <main class="main_container">
+        <form action="#" method="POST" enctype="multipart/form-data" id="CustomerDataImport"
+            class="d-flex justify-content-center align-items-center">
+            <!-- <p class="form-label">Select Only CSV File</p>
+            <label class="input-group-text" for="UserExcelFile">Select Job Data</label>
+            <input type="file" class="form-control m-2" name="UserExcelFile" id="UserExcelFile" accept=".csv" required
+                style="display: none;">
+            <button type="submit" class="btn btn-primary m-2">Upload &nbsp; <i
+                    class="bi bi-cloud-arrow-up"></i></button> -->
+            <% if (Role=="Root" ) { %>
+
+
+                <input type="button" value="Add New Customer" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
+                    data-bs-target="#UserInputModel">
+                <input type="button" value="Add New Checklist" class="btn btn-outline-primary m-2"
+                    data-bs-toggle="modal" data-bs-target="#ChecklistModel">
+                <% } %>
+
+        </form>
+        <div class="d-flex w-100">
+            <table class="table table-hover m-2 AVRTable table-striped caption-top">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Sl.No</th>
+                        <th scope="col">Customer Name</th>
+                        <th scope="col">Logo</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Created By</th>
+                        <th scope="col">Created On</th>
+                        <th scope="col">View Checklist</th>
+                        <th scope="col">Delete</th>
+                    </tr>
+                </thead>
+                <tbody id="content-area">
+                    <% if (Object.values(Data).length>0) { %>
+                        <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
+                            <tr>
+                                <td>
+                                    <%= index+1%>
+                                </td>
+                                <td>
+                                    <%= Data[index]['Customer_Name'] %>
+                                </td>
+                                <td>
+                                    <img src="../../public/uploads/Customer-Logo/<%= Data[index]['Customer_Logo']%>"
+                                        alt="" srcset="" style="object-fit: contain; width: 100px; height: 100px;">
+                                </td>
+                                <td>
+                                    <%= Data[index]['Description'] %>
+                                </td>
+                                <td>
+                                    <%= Data[index]['Created_By'] %>
+                                </td>
+                                <td>
+                                    <%= Data[index]['Created_Date'] %>
+                                </td>
+                                <td>
+                                    <a href="/<%=Role%>/ListChecklist/<%= Data[index]['Customer_Name'] %>">View</a>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-danger btn-sm ms-2 me-2"
+                                        onclick="DeleteCustomer('<%= Data[index][`Customer_ID`] %>')"><i
+                                            class="bi bi-trash"></i></button>
+                                </td>
+                            </tr>
+                            <% } %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                                                <symbol id="check-circle-fill" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                                                </symbol>
+                                                <symbol id="info-fill" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                                                </symbol>
+                                                <symbol id="exclamation-triangle-fill" viewBox="0 0 16 16">
+                                                    <path
+                                                        d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                                                </symbol>
+                                            </svg>
+                                            <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center"
+                                                role="alert">
+                                                <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Info:">
+                                                    <use xlink:href="#info-fill" />
+                                                </svg>
+
+                                                <strong>Sorry...!😕</strong> Data not found.
+                                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="9" class="text-center">
+
+                                            <a href="/login" class="btn btn-outline-primary rounded-pill"><i
+                                                    class="bi bi-arrow-left-circle-fill"></i> Go Back To Home</a>
+
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <% if (Role=="Root" ) { %>
+        <!-- Adding Customer Model -->
+        <div class="modal fade" id="UserInputModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered ">
+                <div class="modal-content ">
+                    <div class="modal-header">
+                        <h3 class="modal-title fs-5" id="staticBackdropLabel">Add New Customer
+                        </h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="#" method="post" id="addCustomerForm">
+                        <div class="modal-body">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="Customer_Name" placeholder="key" min="5"
+                                    required>
+                                <label for="Customer_Name">Customer Name</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="Customers_Desc" placeholder="key">
+                                <label for="Customers_Desc">Description</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="file" class="form-control" id="Customer_Logo" placeholder="key"
+                                    alt="Customer-Logo" accept="image/png" required
+                                    onchange="showLogo(this,'Customer_logo_Area')">
+                                <label for="Customer_Logo">Logo <em style="color: red;">Max: 400 KB</em> </label>
+                            </div>
+                            <div class="mb-3" style="width: 300; height: 300;">
+                                <img src="" alt="" srcset="" id="Customer_logo_Area"
+                                    style="  width: -webkit-fill-available; height: -webkit-fill-available;  object-fit: contain;">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" id="AddCustomer">Add &nbsp;<i
+                                    class="bi bi-send-fill"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adding Checklist Model -->
+        <div class="modal fade" id="ChecklistModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content ">
+                    <div class="modal-header">
+                        <h3 class="modal-title fs-5" id="staticBackdropLabel">Create Checklist
+                        </h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="#" method="post" id="addChecklistForm">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="Customer" class="form-label">Select Customer</label>
+                                <select id="Customer" class="form-select" required> </select>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="Checklist_Name" placeholder="key" min="5"
+                                    required>
+                                <label for="Checklist_Name">Checklist Name</label>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="file" class="form-control" id="Checklist_Icon" placeholder="key"
+                                    accept="image/png" required onchange="showLogo(this,'Customer_Icon_Area')">
+                                <label for="Checklist_Icon">Logo <em style="color: red;">Max: 400 KB</em> </label>
+                            </div>
+                            <div class="form-control mb-3" style="width: 300; height: 300;">
+                                <img src="" alt="Customer_Icon" srcset="" id="Customer_Icon_Area"
+                                    style="  width: -webkit-fill-available; height: -webkit-fill-available;  object-fit: contain;">
+                            </div>
+                            <div id="textbox-container">
+                                <!-- Initial text input fields -->
+                                <p>Add the Sections</p>
+                                <div class="input-group m-3 p-2">
+                                    <input type="text" class="form-control" name="SectionName" placeholder="Section 1"
+                                        aria-label="Section">
+                                    <button onclick="removeTextBox(this)" class="btn btn-outline-danger">Remove</button>
+                                </div>
+                                <div class=" input-group m-3 p-2">
+                                    <input type="text" class="form-control" name="SectionName" placeholder="Section 2">
+                                    <button onclick="removeTextBox(this)" class="btn btn-outline-danger">Remove</button>
+                                </div>
+                                <div class=" input-group m-3 p-2">
+                                    <input type="text" class="form-control" name="SectionName" placeholder="Section 3">
+                                    <button onclick="removeTextBox(this)" class="btn btn-outline-danger">Remove</button>
+                                </div>
+                            </div>
+
+                            <button onclick="addTextBox()" type="button" class="btn btn-outline-info">Insert New
+                                Section</button>
+
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" id="AddChecklist">Add &nbsp;<i
+                                    class="bi bi-send-fill"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <% } %>
+            <%- include('../partials/dependencies-js') %>
+                <script>
+                    function addTextBox() {
+                        const container = document.getElementById('textbox-container');
+                        const div = document.createElement('div');
+                        div.classList.add("input-group")
+                        div.classList.add("m-3")
+                        div.classList.add("p-2")
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.name = 'SectionName';
+                        input.classList.add("form-control")
+                        input.placeholder = `Section ${container.childElementCount + 1}`;
+                        const removeButton = document.createElement('button');
+                        removeButton.textContent = 'Remove';
+                        removeButton.classList.add("btn");
+                        removeButton.classList.add("btn-outline-danger")
+                        removeButton.onclick = function () {
+                            removeTextBox(this);
+                        };
+                        div.appendChild(input);
+                        div.appendChild(removeButton);
+                        container.appendChild(div);
+                        updatePlaceholders();
+                    }
+
+                    function removeTextBox(button) {
+                        const container = document.getElementById('textbox-container');
+                        container.removeChild(button.parentNode);
+                        updatePlaceholders();
+                    }
+
+                    function updatePlaceholders() {
+                        const container = document.getElementById('textbox-container');
+                        const inputs = container.querySelectorAll('input[name="SectionName"]');
+                        inputs.forEach((input, index) => {
+                            input.placeholder = `Section ${index + 1}`;
+                        });
+                    }
+
+
+
+                    document.getElementById('addCustomerForm').addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        var fromData = new FormData();
+                        const fileInput = document.getElementById('Customer_Logo');
+                        const file = fileInput.files[0];
+                        const name = document.getElementById("Customer_Name").value;
+                        const desc = document.getElementById("Customers_Desc").value;
+                        fromData.append("Customer_Logo", file)
+                        await axios.post('/admin/UploadCustomerLogo', fromData).then(res => {
+                            if (res.status == 200) {
+                                axios.post('/admin/AddCustomer', {
+                                    params: {
+                                        "Customer_Logo": res.data,
+                                        "Customer_Name": name,
+                                        "Description": desc,
+                                    }
+                                }).then(res => {
+                                    $("#UserInputModel").modal('hide')
+                                    alert(res.data.message)
+                                    window.location.reload()
+                                    //updateContentArea(res.data.Data)
+                                }
+                                ).catch(e => {
+                                    // $("#UserInputModel").modal('hide')
+                                    console.log(e);
+                                    alert(e.response.data);
+                                })
+                            }
+                        }).catch(e => {
+                            // $("#UserInputModel").modal('hide')
+                            console.log(e);
+                            alert(e.response.data);
+                        })
+                    })
+
+                    function collectValues() {
+                        const inputs = document.getElementsByName('SectionName');
+                        const values = [];
+                        for (let i = 0; i < inputs.length; i++) {
+                            values.push(inputs[i].value);
+                        }
+                        console.log(values);
+                    }
+                    document.getElementById('CustomerDataImport').addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        const fileInput = document.getElementById('UserExcelFile');
+                        const file = fileInput.files[0];
+                        let fromData = new FormData();
+                        fromData.append("UserExcelFile", file)
+                        await axios.post('/api/uploadCustomer', fromData).then(res => {
+                            if (res.status == 200) {
+                                alert(res.data.message);
+                                updateContentArea(res.data.Data);
+                            }
+                        }).catch(e => {
+                            alert(e.response.data);
+                        })
+                    })
+                    function updateContentArea(data) {
+                        if (data.length > 0) {
+                            $('#content-area').empty();
+                            const table = document.getElementById("content-area");
+
+                            for (let i = 0; i < data.length; i++) {
+                                table.innerHTML += `<tr>
+                                    <td>${i + 1}</td>
+                                    <td>${data[i]["Customer_Name"]}</td>
+                                    <td>${data[i]["Description"]}</td>
+                                    <td>${data[i]["Created_By"]}</td>
+                                    <td>${data[i]["Created_Date"]}</td>
+                                    <td>
+                                    <a href="/admin/ListChecklist/${data[i]["Customer_Name"]}">View</a>
+                                </td>`;
+                            }
+                        }
+
+                    }
+                    function showLogo(e, destination) {
+                        const file = document.getElementById(e.id);
+                        const logoFile = file.files[0];
+                        const reader = new FileReader();
+                        reader.onload = function () {
+                            document.getElementById(destination).setAttribute('src', reader.result);
+                        }
+                        reader.readAsDataURL(logoFile)
+                    }
+
+
+                    document.getElementById('addChecklistForm').addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        var fromData = new FormData();
+                        const fileInput = document.getElementById('Checklist_Icon');
+                        const file = fileInput.files[0];
+                        fromData.append("Checklist_Icon", file)
+                        await axios.post('/admin/UploadChecklistIcon', fromData).then(res => {
+                            if (res.status == 200) {
+                                const inputs = document.getElementsByName('SectionName');
+                                const Sections = [];
+                                for (let i = 0; i < inputs.length; i++) {
+                                    Sections.push(inputs[i].value);
+                                }
+                                axios.post('/admin/AddChecklist', {
+                                    params: {
+                                        "Icon": res.data,
+                                        "Checklist_Name": document.getElementById("Checklist_Name").value,
+                                        "Customer": document.getElementById("Customer").value,
+                                    },
+                                    sectionData: {
+                                        "Customer": document.getElementById("Customer").value,
+                                        "SectionList": Sections
+                                    }
+                                }).then(res => {
+                                    $("#ChecklistModel").modal('hide')
+                                    alert(res.data.message)
+                                }
+                                ).catch(e => {
+                                    // $("#ChecklistModel").modal('hide')
+                                    console.log(e);
+                                    alert(e.response.data.message);
+                                })
+                            }
+                        }).catch(e => {
+                            // $("#ChecklistModel").modal('hide')
+                            console.log(e);
+                            alert(e.message);
+                        })
+                    })
+
+                    $(window).on('load', function () {
+                        let CustomerName = '<%- JSON.stringify(Object.values(Customer_Data)) %>'
+                        CustomerName = JSON.parse(CustomerName);
+                        UpdateCustomerName(CustomerName);
+                    })
+                    function UpdateCustomerName(CustomerName) {
+                        var selectBox = document.getElementById("Customer");
+                        selectBox.innerHTML = "";
+                        CustomerName.forEach(Customer => {
+                            const newOption = document.createElement('option');
+                            const optionText = document.createTextNode(Customer.Customer_Name);
+                            newOption.appendChild(optionText);
+                            newOption.setAttribute('value', Customer.Customer_Name);
+                            selectBox.appendChild(newOption);
+                        })
+                    }
+                    function DeleteCustomer(CustomerID) {
+                        let confirm = prompt(`Are you shure you want to delete this Customer...? (Yes/No)`)
+                        const options = ['Yes', 'YES', 'Y', 'y']
+                        if (options.includes(confirm)) {
+                            axios.post('/root/deleteCustomer',
+                                {
+                                    params: { CustomerID: CustomerID }
+                                }).then(res => {
+                                    if (res.status == 200) {
+                                        alert(res.data.Message)
+                                        window.location.reload()
+                                    }
+                                }).catch(e => {
+                                    alert(e.responses.data.Message)
+                                    window.location.reload()
+                                })
+                        }
+                    }
+                </script>
+</body>
+
+</html>

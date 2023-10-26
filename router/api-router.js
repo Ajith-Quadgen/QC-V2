@@ -48,7 +48,7 @@ const myStorage = multer.diskStorage({
 const Upload = multer({ storage: multer.memoryStorage() })
 
 api_Router.post('/AddUser', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
         let inputData = req.body.params;
         inputData["Added_By"] = req.session.UserName;
         db.query("select Full_Name,Email_ID from users where Employee_ID=?", [req.body.params.Reporting_Manager_ID], (error, result) => {
@@ -84,7 +84,7 @@ api_Router.post('/AddUser', (req, res) => {
 });
 
 api_Router.post('/updateUserStatus', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
         db.query("update users set Active=? where `Employee_ID`=?", [parseInt(req.body.params.status), req.body.params.id], (error, result) => {
             if (error) {
                 console.log(error)
@@ -109,7 +109,7 @@ api_Router.post('/updateUserStatus', (req, res) => {
 
 
 api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
         try {
             const data = [];
             const bufferStream = streamifier.createReadStream(req.file.buffer);
@@ -177,7 +177,7 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
 
 
 api_Router.post('/uploadUsers(old)', Upload.single('UserExcelFile'), (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
         try {
             const data = [];
             req.file.buffer
@@ -222,7 +222,7 @@ api_Router.post('/uploadUsers(old)', Upload.single('UserExcelFile'), (req, res) 
 })
 
 api_Router.post('/uploadJobs(old)', Upload.single('UserExcelFile'), (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
         try {
             const data = [];
             req.file.buffer
@@ -264,7 +264,7 @@ api_Router.post('/uploadJobs(old)', Upload.single('UserExcelFile'), (req, res) =
 
 
 api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
         try {
             const data = [];
             const bufferStream = streamifier.createReadStream(req.file.buffer);
@@ -329,7 +329,7 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
 
 
 api_Router.post('/AddJob', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
         let inputData = req.body.params;
         inputData["Created_By"] = req.session.UserName;
         inputData['Created_Date'] = getTimeStamp();
@@ -355,7 +355,7 @@ api_Router.post('/AddJob', (req, res) => {
 });
 
 api_Router.post("/GetJob", (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
         db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs where Job_Number=?", [req.body.params.id], (error, result) => {
             if (error) {
                 console.log(error)
@@ -370,7 +370,7 @@ api_Router.post("/GetJob", (req, res) => {
 })
 
 api_Router.post('/uploadChecklist', Upload.single('QCFile'), (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "Root") {
         try {
             const workbook = xlsx.read(req.file.buffer);
             const sheetName = workbook.SheetNames[0]; // Assuming there's only one sheet
@@ -415,7 +415,7 @@ api_Router.post('/uploadChecklist', Upload.single('QCFile'), (req, res) => {
 })
 
 api_Router.post('/updateCheckList/:id', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "Root") {
         db.query("update questions set ? where `Question_ID`=?", [req.body.params, req.params.id], (error, result) => {
             if (error) {
                 console.error(error)
@@ -435,7 +435,7 @@ api_Router.post('/updateCheckList/:id', (req, res) => {
     }
 })
 api_Router.post('/updateCheckListStatus', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "Root") {
         db.query("update questions set Status=? where `Question_ID`=?", [req.body.params.status, req.body.params.id], (error, result) => {
             if (error) {
                 console.error(error)
@@ -622,7 +622,7 @@ api_Router.post("/SubmitQC", (req, res) => {
     }
 })
 api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
         let workbook = new excel_js.Workbook();
         let sheet = workbook.addWorksheet("Master-DB");
         try {
@@ -715,7 +715,7 @@ api_Router.post('/filterResponses', (req, res) => {
 })
 
 api_Router.get('/downloadFilteredContent', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
         const { Checklist, from, to, id, type } = req.query;
         let workbook = new excel_js.Workbook();
         let sheet = workbook.addWorksheet("Responses");
@@ -813,7 +813,7 @@ api_Router.get('/getUserDetails', (req, res) => {
     }
 })
 api_Router.post('/UpdateUser', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
         let inputData = req.body.params;
         inputData["Added_By"] = req.session.UserName;
         db.query("update users set ? where Employee_ID=?", [inputData, req.body.params.Employee_ID], (error, result) => {

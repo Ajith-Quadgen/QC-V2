@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist</title>
+    <%- include('../partials/dependencies') %>
+</head>
+
+<body>
+    <header>
+        <%- include('../partials/root-header',{title:title}) %>
+
+    </header>
+    <main class="main_container justify-content-md-center">
+        <% if (Object.values(Data).length>0) { %>
+            <div class="accordion" id="accordionFlushExample">
+                <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#<%- Data[index]['Checklist_Name'].replaceAll(" ",'')%>" aria-expanded="false"
+                                aria-controls="<%- Data[index]['Checklist_Name'].replaceAll(" ",'')%>">
+                                <%- Data[index]['Checklist_Name'].replaceAll(" ",'')%>
+                            </button>
+                        </h2>
+                        <div id="<%- Data[index]['Checklist_Name'].replaceAll(" ",'') %>" class="accordion-collapse collapse"
+                            data-bs-parent="#accordionFlushExample">
+                            <div class="accordion-body d-flex align-items-center justify-content-evenly">
+                                <img src="../../public/uploads/Checklist-Icon/<%= Data[index].Icon %>" alt=""
+                                    style="width: 100px;height: 100px; object-fit: contain;">
+                                <a href="/<%=Role%>/ViewChecklist/<%= Data[index]['Checklist_Name']%>"><button
+                                        type="button" class="btn btn-outline-primary rounded-pill btn-sm">View Check
+                                        Points <i class="bi bi-arrow-right-circle"></i></button></a>
+
+                                <a href="/<%=Role%>/viewResponses/<%= Data[index]['Checklist_Name']%>"><button
+                                        type="button" class="btn btn-outline-primary rounded-pill btn-sm">View Responses
+                                        <i class="bi bi-arrow-right-circle"></i></button></a>
+                                <a href="/<%=Role%>/QC/<%= Data[index]['Checklist_Name']%>"><button type="button"
+                                        class="btn btn-outline-info rounded-pill btn-sm">Preview the Checklist <i
+                                            class="bi bi-arrow-right-circle"></i></button></a>
+                                <button type="button" class="btn btn-outline-danger rounded-pill btn-sm" onclick="DropTheCheckpoints('<%- Data[index][`Checklist_Name`]%>')">Drop all the
+                                    Check Points <i class="bi bi-x-circle"></i></button>
+                                <button type="button" class="btn btn-outline-danger rounded-pill btn-sm" onclick="DropTheChecklist('<%- Data[index][`Checklist_Name`]%>')">Delete the
+                                    Checklist <i class="bi bi-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+            </div>
+            <% } else { %>
+
+                <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Info:">
+                        <use xlink:href="#info-fill" />
+                    </svg>
+
+                    <strong>Sorry...!😕</strong> Data not found.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <% } %>
+                    </tbody>
+                    </table>
+
+
+    </main>
+    <div class="modal fade" id="UserInputModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content ">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5" id="staticBackdropLabel">Add New User
+                    </h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/api/AddUser" method="post" id="addUserForm">
+                    <div class="modal-body">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="empId" placeholder="key">
+                            <label for="empId">Employee ID</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="empName" placeholder="key">
+                            <label for="empName">Employee Name</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="empEmail" placeholder="key">
+                            <label for="empEmail">Email ID</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="empDesignation" placeholder="key">
+                            <label for="empDesignation">Designation</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="empLocation" placeholder="key">
+                            <label for="empLocation">Location</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="empRole" placeholder="key">
+                            <label for="empRole">Role</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="empReportingManager" placeholder="key">
+                            <label for="empReportingManager">Reporting Manager</label>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="AddEmployeebtn">Add &nbsp;<i
+                                class="bi bi-send-fill"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <%- include('../partials/dependencies-js') %>
+        <script>
+
+            document.getElementById('addUserForm').addEventListener("submit", async (e) => {
+                e.preventDefault();
+                await axios.post('/api/AddUser', {
+                    params: {
+                        "Employee_ID": document.getElementById("empId").value,
+                        "Full_Name": document.getElementById("empName").value,
+                        "Email_ID": document.getElementById("empEmail").value,
+                        "Designation": document.getElementById("empDesignation").value,
+                        "Location": document.getElementById("empLocation").value,
+                        "Role": document.getElementById("empRole").value,
+                        "Reporting_Manager_Name": document.getElementById("empReportingManager").value,
+                    }
+                }).then(res => {
+                    if (res.status == 200) {
+                        $("#UserInputModel").modal('hide')
+                        alert(res.data);
+                    }
+                }).catch(e => {
+                    $("#UserInputModel").modal('hide')
+                    console.log(e);
+                    alert(e.response.data);
+                })
+            })
+            document.getElementById('userExcelUploadForm').addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const fileInput = document.getElementById('UserExcelFile');
+                const file = fileInput.files[0];
+                let fromData = new FormData();
+                fromData.append("UserExcelFile", file)
+                await axios.post('/api/uploadUsers', fromData).then(res => {
+                    if (res.status == 200) {
+                        alert(res.data.message);
+                        updateContentArea(res.data.Data);
+                    }
+                }).catch(e => {
+                    alert(e.response.data);
+                })
+            })
+
+            function updateStatusAPI(id, newStatus) {
+                axios.post('/api/updateUserStatus', {
+                    params: {
+                        id: id,
+                        status: newStatus
+                    }
+                }).then(res => {
+                    if (res.status == 200) {
+                        updateContentArea(res.data);
+                    }
+                })
+                    .catch(e => {
+                        console.log(e);
+                        alert("Unable to Update the Status...\nPlease Contact Admin");
+                    })
+            }
+
+            function updateContentArea(data) {
+                if (data.length > 0) {
+                    $('#content-area').empty();
+                    const table = document.getElementById("content-area");
+                    for (let i = 0; i < data.length; i++) {
+                        table.innerHTML += `<tr>
+                                    <td>${i + 1}</td>
+                                    <td>${data[i]["Employee_ID"]}</td>
+                                    <td>${data[i]["Full_Name"]}</td>
+                                    <td>${data[i]["Email_ID"]}</td>
+                                    <td>${data[i]["Designation"]}</td>
+                                    <td>${data[i]["Location"]}</td>
+                                    <td>${data[i]["Role"]}</td>
+                                    <td>${data[i]["No_of_Submission"]}</td>
+                                    <td>${data[i]["Reporting_Manager_Name"]}</td>
+                                    <td>${data[i]["Active"] ? "Active" : "Inactive"}</td>
+                                    <td>${data[i]["lastSeen"]}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-success btn-sm ms-2 me-2"
+                                            onclick="updateStatusAPI('${data[i]['Employee ID']}','1')"><i
+                                                class="bi bi-check-circle-fill"></i></button>
+                                        <button type="button" class="btn btn-danger btn-sm ms-2"
+                                            onclick="updateStatusAPI('${data[i]['Employee ID']}','0')"><i
+                                                class="bi bi-x-circle"></i></button>
+                                    </td>
+                                    </td>`;
+                    }
+                }
+
+            }
+            function DropTheCheckpoints(ChecklistName){
+                let confirm = prompt(`Do you really wish to remove every checkpoint under '${ChecklistName}'...?\nIf so, you must upload the updated template with the new set of checkpoints. (Yes/No)`)
+                const options = ['Yes', 'YES', 'Y', 'y']
+                if (options.includes(confirm)) {
+                    axios.post('/root/dropTheCheckpoints',
+                        {
+                            params: { ChecklistName: ChecklistName }
+                        }).then(res => {
+                            if (res.status == 200) {
+                                alert(res.data.Message)
+                                window.location.reload()
+                            }
+                        }).catch(e => {
+                            alert(e.responses.data.Message)
+                            window.location.reload()
+                        })
+                }
+            }
+            function DropTheChecklist(ChecklistName){
+                let confirm = prompt(`Do you really wish to remove the '${ChecklistName}' Checklist...? (Yes/No)`)
+                const options = ['Yes', 'YES', 'Y', 'y']
+                if (options.includes(confirm)) {
+                    axios.post('/root/dropTheChecklist',
+                        {
+                            params: { ChecklistName: ChecklistName }
+                        }).then(res => {
+                            if (res.status == 200) {
+                                alert(res.data.Message)
+                                window.location.reload()
+                            }
+                        }).catch(e => {
+                            alert(e.responses.data.Message)
+                            window.location.reload()
+                        })
+                }
+            }
+        </script>
+</body>
+
+</html>

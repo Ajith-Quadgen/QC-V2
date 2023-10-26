@@ -125,7 +125,7 @@ admin_router.post('/UploadCustomerLogo', CustomerLogoUpload.single("Customer_Log
     return res.status(200).send(res.req.file.filename);
 });
 admin_router.post('/AddCustomer', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "Root") {
         let inputData = req.body.params;
         inputData["Created_By"] = req.session.UserName;
         inputData['Created_Date'] = getTimeStamp();
@@ -144,7 +144,7 @@ admin_router.post('/UploadChecklistIcon', ChecklistIconUpload.single("Checklist_
     return res.status(200).send(res.req.file.filename);
 });
 admin_router.post('/AddChecklist', async (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "Root") {
         let inputData = req.body.params;
         inputData["Created_By"] = req.session.UserName;
         inputData['Created_Date'] = getTimeStamp();
@@ -213,7 +213,7 @@ admin_router.get('/viewResponses/:QC_Name', (req, res) => {
     }
 })
 admin_router.post('/AddNewCheckPoint', (req, res) => {
-    if (req.session.UserID && req.session.UserRole == "Admin") {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "Root") {
         let inputData = req.body.params;
         db.query("insert into questions set?", [inputData], async (error, result) => {
             if (error) {

@@ -17,10 +17,12 @@
                     <%- include('../partials/admin-header',{title:title}) %>
                         <% }else if(Role=="PMO" ){ %>
                             <%- include('../partials/PMO-header',{title:title}) %>
-                                <%}%>
+                                <%}else if(Role=="Root" ){ %>
+                                    <%- include('../partials/root-header',{title:title}) %>
+                                        <%}%>
     </header>
     <main class="main_container">
-        <% if (Role=="Admin" ) { %>
+        <% if (Role=="Admin" || Role=="Root" ) { %>
             <form action="#" method="POST" enctype="multipart/form-data" id="QC-Excel-UploadForm"
                 class="d-flex justify-content-center align-items-center">
                 <p class="form-label">Select Only Excel File</p>
@@ -40,7 +42,7 @@
             <%}%>
                 <div class="d-flex w-100 flex-column-reverse">
                     <table class="table table-hover p-2 table-sm table-striped caption-top">
-                        <thead class="table-dark sticky-top">
+                        <thead class="table-dark sticky-top" style="font-size: 14px;">
                             <tr>
                                 <th scope="col">Sl.No</th>
                                 <th scope="col">Checklist</th>
@@ -50,7 +52,7 @@
                                 <th scope="col">Description</th>
                                 <th scope="col">Reference Document</th>
                                 <th scope="col" style="width: 300px; word-wrap: break-word;">Reference Link(URL)</th>
-                                <% if (Role=="Admin" ) { %>
+                                <% if (Role=="Admin" || Role=="Root" ) { %>
                                     <th scope="col" colspan="2">Status</th>
                                     <%}%>
                                         <th></th>
@@ -58,7 +60,7 @@
                             <div id="loading-spinner"></div>
                         </thead>
 
-                        <tbody id="content-area">
+                        <tbody id="content-area" style="font-size: 14px;">
                             <% if (Object.values(Data).length>0) { %>
                                 <% for( let index=0; index < Object.values(Data).length; index++ ) { %>
                                     <tr>
@@ -87,7 +89,7 @@
                                             <%= Data[index]['Reference_Link'] %>
                                         </td>
 
-                                        <% if (Role=="Admin" ) { %>
+                                        <% if (Role=="Admin" || Role=="Root" ) { %>
                                             <td>
                                                 <%=Data[index]['Status']%>
                                             </td>
