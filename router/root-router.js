@@ -256,6 +256,7 @@ root_router.get('/viewResponses/:QC_Name', (req, res) => {
         res.redirect('/')
     }
 })
+
 root_router.get("/QC/:QC_Name", (req, res) => {
     if (req.session.UserID) {
         db.query("Select * from questions where checklist=? and Status='Active' ", [req.params.QC_Name], (error, result) => {
@@ -296,7 +297,7 @@ root_router.get("/Jobs", (req, res) => {
             if (error) throw error
             Customer = result
         })
-        db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Modified_Date limit 50", function (error, result) {
+        db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as ModifiedDate from jobs order by Modified_Date limit 50", function (error, result) {
             if (error) throw error
             res.render('../views/root/Jobs', { Data: result, CustomerList: Customer,title:"Jobs",Role: req.session.UserRole });
         });

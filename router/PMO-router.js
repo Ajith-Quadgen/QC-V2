@@ -70,7 +70,7 @@ function getTimeStamp(){
                 if (error) throw error
                 Customer = result
             })
-            db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Number_Of_Responses Desc limit 50", function (error, result) {
+            db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as ModifiedDate from jobs order by Modified_Date Desc limit 50", function (error, result) {
                 if (error) throw error
                 res.render('../views/admin/Jobs', { Data: result, CustomerList: Customer,title:"Jobs", Role: req.session.UserRole  });
             });

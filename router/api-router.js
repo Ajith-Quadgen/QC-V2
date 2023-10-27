@@ -302,7 +302,7 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
                     Promise.all(insertionPromises)
                         .then(() => {
                             console.log('All job data inserted successfully.');
-                            db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs order by Modified_Date Desc limit 100", function (error, Data) {
+                            db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as ModifiedDate from jobs order by Modified_Date Desc limit 100", function (error, Data) {
                                 if (error) throw error
                                 res.status(200).json({ Message: "Job Data Imported Successfully", Data: Data })
                             })
@@ -343,7 +343,7 @@ api_Router.post('/AddJob', (req, res) => {
                     return res.status(400).json({ Message: "Internal Server Error" })
                 }
             } else {
-                db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs limit 100", function (error, result) {
+                db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as ModifiedDate from jobs order by Modified_Date Desc limit 100", function (error, result) {
                     if (error) throw error
                     return res.status(200).json({ Message: `Job "${inputData.Job_Number}" Added Successfully`, Data: result });
                 })
