@@ -356,7 +356,7 @@ api_Router.post('/AddJob', (req, res) => {
 
 api_Router.post("/GetJob", (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
-        db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as Modified_Date from jobs where Job_Number=?", [req.body.params.id], (error, result) => {
+        db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as ModifiedDate from jobs where Job_Number=?", [req.body.params.id], (error, result) => {
             if (error) {
                 console.log(error)
                 res.status(400).send("Internal Server Error")
