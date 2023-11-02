@@ -8,7 +8,16 @@
     <title>Jobs</title>
     <%- include('../partials/dependencies') %>
 </head>
-
+<div class="loader" id="loader">
+    <div class="cycles">
+        <div id="cycle1" class="cycle"></div>
+        <div id="cycle2" class="cycle"></div>
+        <div id="cycle3" class="cycle"></div>
+        <div id="cycle4" class="cycle"></div>
+        <div id="cycle5" class="cycle"></div>
+    </div>
+    <div class="loadng-label">Loading Assets...</div>
+</div>
 <body>
     <header>
         <% if (Role=="Engineer" ) { %>
@@ -28,7 +37,7 @@
                 <button class="btn btn-success" type="button" id="FilterBtn"><i class="bi bi-search"></i></button>
             </div>
             <p class="form-label">Select Only CSV File</p>
-            <label class="input-group-text" for="UserExcelFile">Select Job Data</label>
+            <label class="input-group-text" for="UserExcelFile">Browse</label>
             <input type="file" class="form-control m-2" name="UserExcelFile" id="UserExcelFile" accept=".csv" required
                 style="display: none;">
             <button type="submit" class="btn btn-primary m-2">Bulk Upload &nbsp; <i
@@ -49,8 +58,12 @@
                         <!-- <th scope="col">Work Print Number</th> -->
                         <th scope="col">Total Responses</th>
                         <th scope="col">Created By</th>
-                        <th scope="col">Created Date</th>
-                        <th scope="col">Modified Date</th>
+                        <th scope="col">Created Date <button type="button"
+                            class="btn btn-sm btn-outline-light border border-0" id="dateSort"><i
+                                class="bi bi-arrow-down-up"></i></button></th>
+                        <th scope="col">Modified Date <button type="button"
+                            class="btn btn-sm btn-outline-light border border-0" id="dateSort"><i
+                                class="bi bi-arrow-down-up"></i></button></th>
                     </tr>
                     <div id="loading-spinner"></div>
                 </thead>

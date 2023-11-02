@@ -33,3 +33,21 @@ function hideLoadingSpinner() {
   spinner.style.display = 'none';
 }
 const socket = io();
+
+document.onreadystatechange = function () {
+  if (document.readyState !== "complete") {
+      document.querySelector(
+          "body").style.visibility = "hidden";
+          document.querySelector(
+          "header").style.visibility = "hidden";
+      document.querySelector(
+          "#loader").style.visibility = "visible";
+  } else {
+      document.querySelector(
+          "#loader").style.display = "none";
+      document.querySelector(
+          "header").style.visibility = "visible";
+          document.querySelector(
+          "body").style.visibility = "visible";
+  }
+};

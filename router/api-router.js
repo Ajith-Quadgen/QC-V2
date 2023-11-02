@@ -14,11 +14,12 @@ const { error, log } = require('console');
 const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
 const path = require('path');
-const { resume } = require('pdfkit');
+const { resume, file } = require('pdfkit');
 const parse = require('csv-parser')
 const streamifier = require('streamifier');
 const { type } = require('os');
 const crypto = require('crypto');
+const { forEach } = require('jszip');
 const transporter = nodemailer.createTransport(
     smtpTransport({
         host: 'smtp.gmail.com',
@@ -73,7 +74,14 @@ api_Router.post('/AddUser', (req, res) => {
                     }
                 } db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users", function (error, result) {
                     if (error) throw error
-                    return res.status(200).json({ Message: 'User Added Successfully...', Data: result });
+                    let modifiedData = result.map((e) => {
+                        const obj = Object.assign({}, e);
+                        if (obj['Remark'] != null && obj['Remark'] != undefined && obj['Remark'] !== "") {
+                            obj['Remark'] = JSON.parse(obj['Remark'])
+                        }
+                        return obj;
+                    })
+                    return res.status(200).json({ Message: 'User Added Successfully...', Data: modifiedData });
 
                 })
             })
@@ -85,17 +93,28 @@ api_Router.post('/AddUser', (req, res) => {
 
 api_Router.post('/updateUserStatus', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
-        db.query("update users set Active=? where `Employee_ID`=?", [parseInt(req.body.params.status), req.body.params.id], (error, result) => {
+        let Remark = {
+            By: req.session.UserName,
+            Remark: req.body.params.remark
+        }
+        db.query("update users set Active=?, Remark=? where Employee_ID=?", [parseInt(req.body.params.status), JSON.stringify(Remark), req.body.params.id], (error, result) => {
             if (error) {
                 console.log(error)
-                res.status(400).send(error)
+                return res.status(400).send(error)
             }
             db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users", function (error, Data) {
                 if (error) {
                     console.log(error)
-                    res.status(400).send(error);
+                    return res.status(400).send(error);
                 } else {
-                    res.status(200).send(Data);
+                    let modifiedData = Data.map((e) => {
+                        const obj = Object.assign({}, e);
+                        if (obj['Remark'] != null && obj['Remark'] != undefined && obj['Remark'] !== "") {
+                            obj['Remark'] = JSON.parse(obj['Remark'])
+                        }
+                        return obj;
+                    })
+                    return res.status(200).send(modifiedData);
                 }
             });
 
@@ -143,17 +162,72 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
                         });
                         insertionPromises.push(insertionPromise);
                     });
-                    Promise.all(insertionPromises)
+                    const DefaultPassword='User@123';
+                    const portalURL='https://172.17.1.22:5000'
+                    const emailData = data.map((user) => ({
+                        from: 'software.development@quadgenwireless.com',
+                        to: user.Email_ID,
+                        subject: "Welcome to OSP QC-Portal",
+                        html: `<!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>Document</title>
+                        </head>
+                        <body>
+                            <div class="container" style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                                <h1 style="color: #333;">Welcome, ${user.Full_Name}!</h1>
+                                <p style="color: #666;">You have been successfully added to our portal.</p>
+                                <p style="color: #666;">Your login credentials are as follows:</p>
+                                <p style="color: #666;"><strong>Username:</strong> ${user.Employee_ID}</p>
+                                <p style="color: #666;"><strong>Password:</strong> ${DefaultPassword}</p>
+                                <p style="color: #666;">Please change your password once you have successfully logged in. Be sure to keep your login information secure.</p>
+                                <p style="color: #666;">You can access our portal by visiting <a href="${portalURL}">${portalURL}</a>.</p>
+                                <p style="color: #666;">If you have any questions or need assistance, please don't hesitate to contact our support team at <a href="mailto:software.development@quadgenwireless.com">software.development@quadgenwireless.com</a>.</p>
+                        </body>
+                        </html>   `,
+                    }));
+                    const emailPromises = emailData.map((mailOptions) => {
+                        return new Promise(async (resolve, reject) => {
+                            try {
+                                const info = await transporter.sendMail(mailOptions);
+                                console.log("Message sent: " + info.response);
+                                resolve();
+                            } catch (error) {
+                                console.error("Error sending email:", error);
+                                resolve(); // Resolve the promise even in case of an error to continue processing other emails
+                            }
+                        });
+                    });
+
+                    Promise.all(emailPromises)
+                        .then(() => {
+                            console.log("All emails sent successfully.");
+                            transporter.close();
+                        })
+                        .catch((error) => {
+                            console.error("Error sending emails:", error);
+                            transporter.close();
+                        });
+                    Promise.all([insertionPromises,emailPromises])
                         .then(() => {
                             console.log('All Users data inserted successfully.');
                             db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users where Role!='Root'", function (error, Data) {
                                 if (error) throw error
-                                res.status(200).json({ Message: "User Data Imported Successfully", Data: Data })
+                                let modifiedData = Data.map((e) => {
+                                    const obj = Object.assign({}, e);
+                                    if (obj['Remark'] != null && obj['Remark'] != undefined && obj['Remark'] !== "") {
+                                        obj['Remark'] = JSON.parse(obj['Remark'])
+                                    }
+                                    return obj;
+                                })
+                                res.status(200).json({ Message: "User Data Imported Successfully", Data: modifiedData })
                             })
                         })
                         .catch(error => {
                             console.error('Error inserting data:', error);
-                            if (error.code == "ER_BAD_FIELD_ERROR" || error.code=='ER_PARSE_ERROR') {
+                            if (error.code == "ER_BAD_FIELD_ERROR" || error.code == 'ER_PARSE_ERROR') {
                                 return res.status(406).json({ Message: "Since the uploaded CSV file does not fit the users' template, data import is unsuccessful." })
                             } else if (error.sqlState == "45000") {
                                 return res.status(406).json({ Message: "Some Employee ID/Email is not Exact Format, That records are not Imported...!" })
@@ -277,7 +351,7 @@ api_Router.post('/uploadJobs', Upload.single('UserExcelFile'), (req, res) => {
                     }
                     row["Created_By"] = req.session.UserName;
                     data.push(row);
-                   
+
                 })
                 .on('end', () => {
                     const tableName = 'jobs';
@@ -686,7 +760,7 @@ api_Router.get('/DownloadQCResponses/:QC', (req, res) => {
 })
 api_Router.post('/filterResponses', (req, res) => {
     if (req.session.UserID) {
-        const { Checklist, from, to, id, type } = req.body.params;
+        const { Checklist, from, to, id, type, sortField, order } = req.body.params;
         let main = "select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as New_Submitted_Date from responses where Checklist='" + Checklist + "'";
         if (from) {
             main += `AND date_format(Submitted_Date,'%Y-%m-%d')>='${from}'`
@@ -700,7 +774,12 @@ api_Router.post('/filterResponses', (req, res) => {
         if (type) {
             main += `AND Type='${type}'`
         }
-        main += "group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc ";
+        main += "group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by ";
+        if (sortField && order) {
+            main += `${sortField} ${order}`
+        } else {
+            main += 'Submitted_Date desc';
+        }
         db.query(main, (error, result) => {
             if (error) {
                 console.error(error)
@@ -884,91 +963,100 @@ api_Router.get('/downloadJob', async (req, res) => {
 })
 api_Router.get('/getPreciousRecord', (req, res) => {
     if (req.session.UserID) {
-        if(req.query.type=="IQC"){
+        if (req.query.type == "IQC") {
 
-        
-        db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Job_ID=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Iteration desc",[req.query.job_id],(error,result1)=>{
-            if(error){
-                console.log(error)
-                return res.status(406).json({Message:"Internal Server Error"})
-            }else{
-                if(result1.length>0){
-                    var temp={};
-                    for(const item of result1){
-                        const type=item.Type;
-                        if(!temp[type]||item.Iteration>temp[type].Iteration){
-                            temp[type]=item;
+
+            db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Job_ID=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Iteration desc", [req.query.job_id], (error, result1) => {
+                if (error) {
+                    console.log(error)
+                    return res.status(406).json({ Message: "Internal Server Error" })
+                } else {
+                    if (result1.length > 0) {
+                        var temp = {};
+                        for (const item of result1) {
+                            const type = item.Type;
+                            if (!temp[type] || item.Iteration > temp[type].Iteration) {
+                                temp[type] = item;
+                            }
                         }
+                        const result = Object.keys(temp).map(type => temp[type])
+                        console.log(result)
+                        var hasSelfQc = false;
+                        result.forEach(record => {
+                            if (record.Type == 'Self QC') hasSelfQc = true
+                        })
+                        if (hasSelfQc) {
+                            return res.status(200).json({ Data: result, Self_QC: true })
+                        } else {
+                            return res.status(200).json({ Data: result, Self_QC: false })
+                        }
+                    } else {
+                        return res.status(200).json({ Data: null, Self_QC: false })
                     }
-                    const result=Object.keys(temp).map(type=>temp[type])
-                    return res.status(200).json({Data:result})
-                }else{
-                    return res.status(200).json({Data:null})
                 }
-            }
-        })
-    }else{
-        db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Type=? and Job_ID=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Iteration desc limit 1",[req.query.type,req.query.job_id],(error,result)=>{
-            if(error){
-                console.log(error)
-                return res.status(406).json({Message:"Internal Server Error"})
-            }else{
-                if(result.length>0){
-                    return res.status(200).json({Data:result})
-                }else{
-                    return res.status(200).json({Data:null})
+            })
+        } else {
+            db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Type=? and Job_ID=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Iteration desc limit 1", [req.query.type, req.query.job_id], (error, result) => {
+                if (error) {
+                    console.log(error)
+                    return res.status(406).json({ Message: "Internal Server Error" })
+                } else {
+                    if (result.length > 0) {
+                        return res.status(200).json({ Data: result })
+                    } else {
+                        return res.status(200).json({ Data: null })
+                    }
                 }
-            }
-        })
-    }
+            })
+        }
     } else {
         res.status(400).json({ Message: "Access Denied" })
     }
 })
-api_Router.post('/GeneratePasswordResetOPT',async (req,res)=>{
+api_Router.post('/GeneratePasswordResetOPT', async (req, res) => {
     let n = 0;
     n = crypto.randomInt(100000, 999999)
-    db.query("Select * from users where Active=1 and Employee_ID=?",[req.body.params.UserID],async (error,result)=>{
-        if(error){
+    db.query("Select * from users where Active=1 and Employee_ID=?", [req.body.params.UserID], async (error, result) => {
+        if (error) {
             console.log(error)
-            return res.status(406).json({Message:"Unable to find your Details, Try after sometime...!"})
-        }else{
-            if(result.length>0){
+            return res.status(406).json({ Message: "Unable to find your Details, Try after sometime...!" })
+        } else {
+            if (result.length > 0) {
                 const mailOptions = {
                     from: 'software.development@quadgenwireless.com ',
                     to: result[0].Email_ID,
                     subject: `OTP For Password Generation is_${n}`,
                     html: `<h3>Hi ${result[0].Full_Name}</h3><br>The One Time Password for Generating new Login Credentials for QC-Portal is<b><h2>${n}</h2></b><br>This is OTP will Expire in 5 Min.<br><br><br>Regards`,
                 };
-               await transporter.sendMail(mailOptions, (error, info) => {
+                await transporter.sendMail(mailOptions, (error, info) => {
                     if (error) {
                         console.error('Error on sending email:', error);
                         req.session.PWDResetOTP = null;
-                        res.status(406).json({Message:"Failed to Generate OTP, Try again...!"})
+                        res.status(406).json({ Message: "Failed to Generate OTP, Try again...!" })
                     } else {
                         req.session.PWDResetOTP = n;
-                        req.session.PWDresetEmail=result[0].Email_ID;
-                        req.session.PWDResetUserID=req.body.params.UserID;
-                       res.status(200).json({Message:"The OTP is sent to your mail"})
+                        req.session.PWDresetEmail = result[0].Email_ID;
+                        req.session.PWDResetUserID = req.body.params.UserID;
+                        res.status(200).json({ Message: "The OTP is sent to your mail" })
                     }
                 });
-            }else{
-                return res.status(406).json({Message:"Unable to find your Details, Try after sometime...!"})
+            } else {
+                return res.status(406).json({ Message: "Unable to find your Details, Try after sometime...!" })
             }
         }
     })
 
 })
 
-api_Router.post("/GenerateNewPassword",(req,res)=>{
+api_Router.post("/GenerateNewPassword", (req, res) => {
     const UserOTP = req.body.params.OTP;
     if (req.session.PWDResetOTP == UserOTP) {
-        const RandomPWD = Math.random().toString(36).substring(2,12);
-        db.query("update users set Password=? where Employee_ID=? and Email_ID=? and active=1",[RandomPWD,req.session.PWDResetUserID,req.session.PWDresetEmail],(error,result)=>{
-            if(error){
+        const RandomPWD = Math.random().toString(36).substring(2, 12);
+        db.query("update users set Password=? where Employee_ID=? and Email_ID=? and active=1", [RandomPWD, req.session.PWDResetUserID, req.session.PWDresetEmail], (error, result) => {
+            if (error) {
                 console.log(error)
-                return res.status(406).json({Message:"Something Went wrong, Unable to Generate New Password."})
-            }else{
+                return res.status(406).json({ Message: "Something Went wrong, Unable to Generate New Password." })
+            } else {
                 const mailOptions = {
                     from: 'software.development@quadgenwireless.com ',
                     to: req.session.PWDresetEmail,
@@ -984,21 +1072,63 @@ api_Router.post("/GenerateNewPassword",(req,res)=>{
                     if (error) {
                         console.error('Error on sending email:', error);
                         req.session.PWDResetOTP = null;
-                        req.session.PWDResetUserID=null;
-                        req.session.PWDresetEmail=null;
-                        return res.status(406).json({Message:"Something Went wrong, Unable to Generate New Password."})
+                        req.session.PWDResetUserID = null;
+                        req.session.PWDresetEmail = null;
+                        return res.status(406).json({ Message: "Something Went wrong, Unable to Generate New Password." })
                     } else {
                         req.session.PWDResetOTP = null;
-                        req.session.PWDResetUserID=null;
-                        req.session.PWDresetEmail=null;
-                        return res.status(200).json({Message:"OTP Verification Successful\nNew Password has been shared to you vai Email."})
+                        req.session.PWDResetUserID = null;
+                        req.session.PWDresetEmail = null;
+                        return res.status(200).json({ Message: "OTP Verification Successful\nNew Password has been shared to you vai Email." })
                     }
                 });
             }
         })
 
-    }else{
-        return res.status(406).json({Message:"Invalid OTP,Try again...!"})
+    } else {
+        return res.status(406).json({ Message: "Invalid OTP,Try again...!" })
+    }
+})
+
+api_Router.post('/sortJob', (req, res) => {
+    if (req.session.UserID) {
+        const { filed, order } = req.body.params;
+        let main = "Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as ModifiedDate from jobs order by ";
+
+        if (filed && order) {
+            main += `${filed} ${order} limit 100`
+        } else {
+            main += ' Modified_Date desc limit 100 ';
+        }
+        db.query(main, (error, result) => {
+            if (error) {
+                console.error(error)
+                res.status(400).send("Unable to Apply Filer")
+            } else {
+                res.status(200).send(result)
+            }
+        })
+    } else {
+        res.status(400).send("Access Denied")
+    }
+})
+api_Router.post('/updateFAQ', (req, res) => {
+    if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "Root") {
+
+        fs.truncate("faq.txt", 0, function () {
+            fs.writeFile("faq.txt", req.body.params.Data, function (err) {
+                if (err) {
+                    console.log("Error writing file: " + err);
+                    return res.status(400).json({ Message: err })
+                } else {
+                    fs.readFile('faq.txt', 'utf-8', (error, data) => {
+                        return res.status(200).json({ Message: "FAQ Updated Successfully", NewData: data })
+                    })
+                }
+            });
+        });
+    } else {
+        return res.status(400).json({ Message: "Access Denied" })
     }
 })
 module.exports = api_Router;

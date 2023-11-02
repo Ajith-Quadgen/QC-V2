@@ -57,7 +57,14 @@ function getTimeStamp(){
             basicDetails.Roles = ["Admin","PMO", "Engineer"]
             db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users  where Role!='Root'", function (error, result) {
                 if (error) throw error
-                res.render('../views/admin/Users', { Data: result, Checklist: checklist, Basic: basicDetails,title:"Users", Role: req.session.UserRole  });
+                let modifiedData=result.map((e)=>{
+                    const obj=Object.assign({},e);
+                    if(obj['Remark']!=null && obj['Remark']!=undefined && obj['Remark']!==""){
+                        obj['Remark']=JSON.parse(obj['Remark'])
+                    }
+                    return obj;
+                })
+                res.render('../views/admin/Users', { Data: modifiedData, Checklist: checklist, Basic: basicDetails,title:"Users", Role: req.session.UserRole  });
             })
         } else {
             res.redirect('/')

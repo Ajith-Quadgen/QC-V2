@@ -10,6 +10,16 @@
     </title>
     <%- include('../partials/dependencies') %>
 </head>
+<div class="loader" id="loader">
+    <div class="cycles">
+        <div id="cycle1" class="cycle"></div>
+        <div id="cycle2" class="cycle"></div>
+        <div id="cycle3" class="cycle"></div>
+        <div id="cycle4" class="cycle"></div>
+        <div id="cycle5" class="cycle"></div>
+    </div>
+    <div class="loadng-label">Loading Assets...</div>
+</div>
 
 <body>
     <header>
@@ -39,7 +49,7 @@
             </div>
 
             <div class="col-md-3 m-2" style="width: max-content;">
-                <label for="fromDate">Select starting date</label>
+                <label for="fromDate">Select start date</label>
                 <input type="date" class="form-control" name="" id="fromDate">
             </div>
             <div class="col-md-3 m-2" style="width: max-content;">
@@ -54,23 +64,25 @@
 
             <% if (Checklist) { %>
                 <div class="col-md-3 m-2" style="width: max-content;">
-                    <button type="button" class="btn btn-outline-info" id="FilterDownloadBtn">Download the Filtered
+                    <button type="button" class="btn btn-outline-info" id="FilterDownloadBtn">Filtered
                         Data <i class="bi bi-cloud-download"></i></button>
                 </div>
                 <div class="col-md-3 m-2" style="width: max-content;">
                     <a href="/api/DownloadQCResponses/<%-Checklist%>" target="_self"><button
-                            class="btn btn-outline-primary"> Download
-                            Master Excel <i class="bi bi-download"></i> </button></a>
+                            class="btn btn-outline-primary">
+                            Master Excel <i class="bi bi-cloud-download"></i> </button></a>
                 </div>
                 <% } %>
 
         </div>
         <div class="d-flex w-100 flex-column-reverse">
-            <table class="table table-hover m-2  table-striped caption-top">
+            <table class="table table-hover  table-striped caption-top">
                 <thead class="table-dark sticky-top">
                     <tr>
                         <th scope="col">Sl.No</th>
-                        <th scope="col">Date/Time</th>
+                        <th scope="col">Date/Time <button type="button"
+                                class="btn btn-sm btn-outline-light border border-0" id="dateSort"><i
+                                    class="bi bi-arrow-down-up"></i></button></th>
                         <th scope="col">Job ID/CFAS Number</th>
                         <th scope="col">State</th>
                         <th scope="col">City</th>
@@ -193,12 +205,12 @@
 
             })
             document.getElementById("FilterDownloadBtn").addEventListener('click', (e) => {
-                var Job_ID, type, from, to,Checklist;
+                var Job_ID, type, from, to, Checklist;
                 Job_ID = encodeURIComponent(document.getElementById("job_id").value.replaceAll(' ', ""));
                 type = encodeURIComponent(document.getElementById("qc_type").value);
                 from = encodeURIComponent(document.getElementById("fromDate").value);
                 to = encodeURIComponent(document.getElementById("toDate").value);
-                Checklist=encodeURIComponent('<%-Checklist%>');
+                Checklist = encodeURIComponent('<%-Checklist%>');
                 const url = `/api/downloadFilteredContent?id=${Job_ID}&type=${type}&from=${from}&to=${to}&Checklist=${Checklist}`;
                 let filterlink = document.createElement("a");
                 filterlink.href = url;
@@ -225,6 +237,50 @@
                                     </tr>`;
                     }
                 }
+            }
+            var dateSortBtn = document.getElementById("dateSort");
+
+            dateSortBtn.addEventListener('click', async (e) => {
+                showLoadingSpinner();
+                currentOrder = localStorage.getItem("DateSortingOrder");
+                newOrder = currentOrder === 'asc' ? 'desc' : 'asc'
+                localStorage.setItem('DateSortingOrder', newOrder);
+                await filterData({Checklist: '<%-Checklist%>', sortField: 'Submitted_Date', currentOrder: currentOrder })
+            })
+            window.addEventListener('load', () => {
+                localStorage.setItem("DateSortingOrder", 'asc')
+            });
+            async function filterData(arguments) {
+                var Job_ID, type, from, to, currentOrder, newOrder;
+                Job_ID = document.getElementById("job_id").value.replaceAll(' ', "");
+                type = document.getElementById("qc_type").value;
+                from = document.getElementById("fromDate").value;
+                to = document.getElementById("toDate").value;
+                await axios.post('/api/filterResponses', {
+                    params: {
+                        id: Job_ID,
+                        type: type,
+                        from: from,
+                        to: to,
+                        Checklist: arguments.Checklist,
+                        sortField: arguments.sortField,
+                        order: arguments.currentOrder
+                    }
+                }).then(async res => {
+                    if (res.status == 200) {
+                        if (res.data.length > 0) {
+                            await updateContentArea(res.data);
+                            hideLoadingSpinner();
+                        } else {
+                            hideLoadingSpinner();
+                            alert("Something Went Wrong.\nTry Again...")
+                        }
+                    }
+                })
+                    .catch(e => {
+                        console.log(e);
+                        alert("Unable to Apply the Sorting...\nPlease Contact Admin");
+                    })
             }
         </script>
 </body>

@@ -8,7 +8,16 @@
     <title>Checklist</title>
     <%- include('../partials/dependencies') %>
 </head>
-
+<div class="loader" id="loader">
+    <div class="cycles">
+        <div id="cycle1" class="cycle"></div>
+        <div id="cycle2" class="cycle"></div>
+        <div id="cycle3" class="cycle"></div>
+        <div id="cycle4" class="cycle"></div>
+        <div id="cycle5" class="cycle"></div>
+    </div>
+    <div class="loadng-label">Loading Assets...</div>
+</div>
 <body>
     <header>
         <% if (Role=="Engineer" ) { %>

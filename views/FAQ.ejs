@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ</title>
+    <%- include('partials/dependencies') %>
+        <meta name="theme-color" content="#319197">
+        <meta name="color-scheme" content="dark">
+</head>
+
+<div class="loader" id="loader">
+    <div class="cycles">
+        <div id="cycle1" class="cycle"></div>
+        <div id="cycle2" class="cycle"></div>
+        <div id="cycle3" class="cycle"></div>
+        <div id="cycle4" class="cycle"></div>
+        <div id="cycle5" class="cycle"></div>
+    </div>
+    <div class="loadng-label">Loading Assets...</div>
+</div>
+
+<body>
+    <header>
+        <% if (Role=="Engineer" ) { %>
+            <%- include('partials/engineer-header',{title:title,IncludeBackButton:0}) %>
+                <% }else if(Role=="Admin" ){ %>
+                    <%- include('partials/admin-header',{title:"OSP QC-Portal-FAQ"}) %>
+                        <% }else if(Role=="PMO" ){ %>
+                            <%- include('partials/PMO-header',{title:"OSP QC-Portal-FAQ"}) %>
+                                <%}else if(Role=="Root" ){ %>
+                                    <%- include('partials/root-header',{title:"OSP QC-Portal-FAQ"}) %>
+                                        <%} else{%>
+                                            <%- include('partials/header',{title:"FAQ"}) %>
+                                                <%}%>
+    </header>
+    <main>
+        <div class="faq-banner">
+            <div style="width: 60%;">
+                <p class="fs-4" style="line-height: normal;">Have Questions? Here You'll find the answers along with
+                    access to step-by-step instructions and support.</p>
+            </div>
+            <img src="../static/images/faq.png" alt=""
+                style="width: auto; height: inherit; object-fit: contain;position: absolute;right: 5px; filter: drop-shadow(0 0 0.75rem #bdd7ff);">
+        </div>
+        <section id="FAQ_Section">
+            <%- Data %>
+        </section>
+
+    </main>
+    <% if (Role=="Admin" || Role=="Root" ) { %>
+        <button type="button" style="    bottom: 5px;" class="faqEditBtn btn btn-info rounded-circle"
+            data-bs-toggle="modal" data-bs-target="#faqeditmodal"><i class="fs-4 bi bi-pencil-square"></i></button>
+        <div class="modal fade" id="faqeditmodal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class=" modal-xl modal-dialog ">
+                <div class="modal-content ">
+                    <div class="modal-header">
+                        <h3 class="modal-title fs-5" id="staticBackdropLabel">Update the FAQ Document
+                        </h3>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class=" mb-3" id="">
+                            <textarea name="updateFAQ" class="form-control" rows="3" id="updateFAQ" placeholder="key"
+                                required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="updateFAQbtn">Update &nbsp;<i
+                                class="bi bi-send-fill"></i></button>
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    <%}%>
+            <%- include('partials/dependencies-js') %>
+                <script>
+                    tinymce.init({
+                        // Select the element(s) to add TinyMCE to using any valid CSS selector
+                        selector: "#updateFAQ",
+                        plugins: "preview powerpaste casechange searchreplace autolink autosave save directionality advcode visualblocks visualchars fullscreen image link media mediaembed  codesample advtable table charmap pagebreak nonbreaking anchor advlist lists checklist wordcount tinymcespellchecker a11ychecker help formatpainter permanentpen pageembed linkchecker emoticons export",
+                        height: '300px',
+                        toolbar_sticky: true,
+                        icons: 'thin',
+                    });
+                    document.addEventListener('focusin', (e) => {
+                        if (e.target.closest(".tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
+                            e.stopImmediatePropagation();
+                        }
+                    });
+
+                    document.getElementById("updateFAQbtn").addEventListener('click', () => {
+                        axios.post('/api/updateFAQ', {
+                            params:
+                            {
+                                Data: tinymce.get("updateFAQ").getContent()
+                            }
+                        }).then(res => {
+                            $('#faqeditmodal').modal('hide');
+                            alert(res.data.Message);
+                            $("#FAQ_Section").empty();
+                            document.getElementById('FAQ_Section').innerHTML = res.data.NewData;
+                        }).catch(e => {
+                            console.log(e.response.data.Message)
+                        })
+                    })
+
+                    $(window).on('load', function () {
+                        const data = document.getElementById('FAQ_Section').innerHTML.trim();
+                        tinymce.get("updateFAQ").setContent(data);
+                    })
+
+                </script>
+</body>
+
+</html>

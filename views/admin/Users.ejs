@@ -8,6 +8,16 @@
     <title>Users</title>
     <%- include('../partials/dependencies') %>
 </head>
+<div class="loader" id="loader">
+    <div class="cycles">
+        <div id="cycle1" class="cycle"></div>
+        <div id="cycle2" class="cycle"></div>
+        <div id="cycle3" class="cycle"></div>
+        <div id="cycle4" class="cycle"></div>
+        <div id="cycle5" class="cycle"></div>
+    </div>
+    <div class="loadng-label">Loading Assets...</div>
+</div>
 
 <body>
     <header>
@@ -28,10 +38,10 @@
                 <button class="btn btn-success" type="button" id="FilterBtn"><i class="bi bi-search"></i></button>
             </div>
             <p class="form-label">Select Only CSV File</p>
-            <label class="input-group-text" for="UserExcelFile">Select User Data</label>
+            <label class="input-group-text" for="UserExcelFile">Browse</label>
             <input type="file" class="form-control m-2" name="UserExcelFile" id="UserExcelFile" accept=".csv" required
                 style="display: none;">
-            <button type="submit" class="btn btn-primary m-2">Upload &nbsp; <i
+            <button type="submit" class="btn btn-primary m-2">Bulk Upload &nbsp; <i
                     class="bi bi-cloud-arrow-up"></i></button>
             <input type="button" value="Add New User" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
                 data-bs-target="#UserInputModel">
@@ -47,11 +57,12 @@
                         <th scope="col">Designation</th>
                         <th scope="col">Location</th>
                         <th scope="col">Role</th>
-                        <th scope="col">No of Submission</th>
+                        <th scope="col">Total Submission</th>
                         <th scope="col">Reporting Manager</th>
                         <th scope="col">Added/Updated By</th>
-                        <th scope="col">Status</th>
                         <th scope="col">Last Seen</th>
+                        <th scope="col" colspan="2">Status</th>
+                        <th scope="col">Remark</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -110,6 +121,20 @@
                                                     class="bi bi-x-circle"></i></button>
                                             <% } %>
 
+                                </td>
+                                <td>
+                                    <% const remarkObject=Data[index]['Remark']; %>
+                                        <% if (remarkObject) { %>
+                                            <blockquote class="" style="width: max-content;">
+
+                                                <%= remarkObject[Object.keys(remarkObject)[1]] %>
+
+                                            </blockquote>
+                                            <figcaption class="blockquote-footer">
+                                                <%= remarkObject[Object.keys(remarkObject)[0]] %>
+                                            </figcaption>
+                                            <% } %>
+                                                </figure>
                                 </td>
 
                             </tr>
@@ -304,7 +329,7 @@
                             <label for="u-empLocation">Location</label>
                             <select name="u-empLocation" id="u-empLocation" class="from-select form-control"
                                 aria-label="Select" required>
-                                <option selected>Select the Location</option>
+                                <option selected value="">Select the Location</option>
                                 <% Basic.Location.forEach(element=> { %>
                                     <option value="<%= element %>">
                                         <%= element %>
@@ -316,7 +341,7 @@
                             <label for="u-empRole">Role</label>
                             <select name="u-empRole" id="u-empRole" class="from-select form-control" aria-label="Select"
                                 required>
-                                <option selected>Select the Role</option>
+                                <option selected value="">Select the Role</option>
                                 <% Basic.Roles.forEach(element=> { %>
                                     <option value="<%= element %>">
                                         <%= element %>
@@ -407,21 +432,26 @@
             })
 
             function updateStatusAPI(id, newStatus) {
-                axios.post('/api/updateUserStatus', {
-                    params: {
-                        id: id,
-                        status: newStatus
-                    }
-                }).then(res => {
-                    if (res.status == 200) {
-                        updateContentArea(res.data);
-                    }
-                })
-                    .catch(e => {
-                        console.log(e);
-                        alert(e.message)
-                        alert("Unable to Update the Status...\nPlease Contact Admin");
+                const remark = prompt("Reason...?")
+                if (remark) {
+                    axios.post('/api/updateUserStatus', {
+                        params: {
+                            id: id,
+                            status: newStatus,
+                            remark: remark
+                        }
+                    }).then(res => {
+                        if (res.status == 200) {
+                            updateContentArea(res.data);
+                        }
                     })
+                        .catch(e => {
+                            console.log(e);
+                            alert(e.message)
+                            alert("Unable to Update the Status...\nPlease Contact Admin");
+                        })
+                }
+
             }
 
             function getUserDetails(userId) {
@@ -436,7 +466,7 @@
                         let groupedData = groupBy(res.data.Checklist, "Customer");
                         $('#ChecklistArea').empty();
                         let area = document.getElementById("ChecklistArea");
-                        area.classList.add("form-check", "form-switch", "form-check-inline", "m-1")
+                        area.classList.add("form-check", "form-switch", "form-check-inline", "m-1",'p-2')
                         const title = document.createElement("h5");
                         title.textContent = "Checklist Accessibility";
                         area.appendChild(title)
@@ -446,7 +476,7 @@
                                     const coverDiv = document.createElement('div');
                                     const flexDiv = document.createElement('div');
                                     flexDiv.classList.add("m-2")
-                                    coverDiv.classList.add("d-flex", "justify-content-center")
+                                    coverDiv.classList.add("d-flex", "justify-content-center",'border','border-dark-subtle','rounded-top')
                                     const checkbox = document.createElement('input');
                                     checkbox.classList.add("form-check-input", "master-checkbox")
                                     checkbox.type = 'checkbox';
@@ -464,8 +494,9 @@
                                     coverDiv.appendChild(hr)
                                     coverDiv.appendChild(flexDiv)
                                     area.appendChild(coverDiv);
-                                    area.appendChild(hr);
+                                    //area.appendChild(hr);
                                     const outerDiv = document.createElement('div');
+                                    outerDiv.classList.add('border','border-dark-subtle','rounded-bottom','shadow','mb-4','ps-4')
                                     groupedData[key].forEach(item => {
                                         const innerDiv = document.createElement('div');
                                         innerDiv.classList.add("form-check", "form-switch", "form-check-inline", "m-2")
@@ -475,7 +506,7 @@
                                         checkbox.name = key;
                                         checkbox.value = item.Checklist_Name;
                                         checkbox.id = `CheckList_${item.Checklist_Name}`;
-                                        checkbox.addEventListener("change",handleChildCheckboxChange)
+                                        checkbox.addEventListener("change", handleChildCheckboxChange)
                                         const label = document.createElement('label');
                                         label.textContent = item.Checklist_Name;
                                         label.setAttribute('for', item.Checklist_Name);
@@ -640,7 +671,8 @@
                                     <td>${data[i]["lastSeen"]}</td>
                                     <td>${data[i]['Active'] == '0' ?
                                 `<button type="button" class="btn btn-success btn-sm ms-2 me-2" onclick="updateStatusAPI('${data[i]['Employee_ID']}','1')"><i class="bi bi-check-circle-fill"></i></button></td>` :
-                                `<button type="button" class="btn btn-danger btn-sm ms-2" onclick="updateStatusAPI('${data[i]['Employee_ID']}','0')"> <i class="bi bi-x-circle"></i></button></td></tr>`}</tr>`
+                                `<button type="button" class="btn btn-danger btn-sm ms-2" onclick="updateStatusAPI('${data[i]['Employee_ID']}','0')"> <i class="bi bi-x-circle"></i></button></td>`}
+                                <td><figure class="text-end">${data[i]["Remark"] !== null ? `<blockquote class="blockquote"> ${data[i]["Remark"].Remark } </blockquote><figcaption class="blockquote-footer">${ data[i]["Remark"].By}</figcaption>`: ""}</figure></td></tr>`
                     }
                 }
 

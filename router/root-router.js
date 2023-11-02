@@ -116,9 +116,16 @@ root_router.get('/users', (req, res) => {
             basicDetails.NameMail = result
         })
         basicDetails.Roles = ["Admin", "PMO", "Engineer"]
-        db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users where Role!='Root' ", function (error, result) {
+        db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users where Role!='Root'", function (error, result) {
             if (error) throw error
-            res.render('../views/root/Users', { Data: result, Checklist: checklist, Basic: basicDetails, title: "Users", Role: req.session.UserRole });
+            let modifiedData=result.map((e)=>{
+                const obj=Object.assign({},e);
+                if(obj['Remark']!=null && obj['Remark']!=undefined && obj['Remark']!==""){
+                    obj['Remark']=JSON.parse(obj['Remark'])
+                }
+                return obj;
+            })
+            res.render('../views/root/Users', { Data: modifiedData, Checklist: checklist, Basic: basicDetails, title: "Users", Role: req.session.UserRole });
         })
     } else {
         res.redirect('/')
@@ -227,7 +234,6 @@ root_router.post('/dropTheChecklist', (req, res) => {
                 return res.status(400).json({ Message: "Internal Server Error" });
             } else {
                 console.log("Checklist");
-                console.log(result)
                 if (result.affectedRows == 1) {
                     db.query("delete from questions where Checklist=?", [checklistName], (error, result1) => {
                         if (error) {
@@ -246,11 +252,24 @@ root_router.post('/dropTheChecklist', (req, res) => {
 })
 
 
-root_router.get('/viewResponses/:QC_Name', (req, res) => {
+root_router.get('/viewResponses/:QC_Name/', (req, res) => {
+    const { field, order } = req.query;
+    const sortOrder = order === 'asc' ? 'ASC' : 'DESC';
+    console.log(req.query)
+    console.log(req.params)
+    let sql = "select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as New_Submitted_Date from responses where Checklist='"+req.params.QC_Name+"' group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By";
+    if (field && order) {
+        sql += ` ORDER BY ${field} ${sortOrder}`;
+    } else {
+        sql += ` ORDER BY Submitted_Date desc`;
+    }
     if (req.session.UserID && req.session.UserRole == "Root") {
-        db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as New_Submitted_Date from responses where Checklist=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc", [req.params.QC_Name], (error, result) => {
-            if (error) throw error
-            res.render("../views/admin/viewResponses", { Data: result, Checklist: req.params.QC_Name, title: req.params.QC_Name, Role: req.session.UserRole })
+        db.query(sql, (error, result) => {
+            if (error) {
+                console.log(error)
+            }else{
+                res.render("../views/admin/viewResponses", { Data: result, Checklist: req.params.QC_Name, title: req.params.QC_Name, Role: req.session.UserRole })
+            }
         })
     } else {
         res.redirect('/')
@@ -297,9 +316,9 @@ root_router.get("/Jobs", (req, res) => {
             if (error) throw error
             Customer = result
         })
-        db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as ModifiedDate from jobs order by Modified_Date limit 50", function (error, result) {
+        db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as ModifiedDate from jobs order by Modified_Date desc limit 100", function (error, result) {
             if (error) throw error
-            res.render('../views/root/Jobs', { Data: result, CustomerList: Customer,title:"Jobs",Role: req.session.UserRole });
+            res.render('../views/root/Jobs', { Data: result, CustomerList: Customer, title: "Jobs", Role: req.session.UserRole });
         });
     } else {
         res.redirect('/')
@@ -315,7 +334,7 @@ root_router.post('/deleteJob', (req, res) => {
             } else {
                 console.log(result)
                 if (result.affectedRows == 1) {
-                    return res.status(200).json({ Message: `Job ${id} Deleted Successfully...`})
+                    return res.status(200).json({ Message: `Job ${id} Deleted Successfully...` })
                 } else if (result.affectedRows == 0) {
                     return res.status(200).json({ Message: "Unable to delete this job..." })
                 }

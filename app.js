@@ -162,7 +162,7 @@ app.post('/AuthenticateLogin', (req, res) => {
       } else if (result[0]['Role'] == "Root") {
         //res.redirect('/root/LoginVerification');
         req.session.LoginOTPVerification = true;
-        req.session.UserRole="Root"
+        req.session.UserRole = "Root"
         res.redirect('/root');
       } else {
         return res.send("Internal Server Error");
@@ -184,6 +184,13 @@ app.get('/ChangePassword', (req, res) => {
 
   }
 });
+
+app.get('/faq', async(req, res) => {
+  fs.readFile('faq.txt', 'utf-8', (error, data) => {
+  res.render("FAQ",{Data:data?data:error,Role: req.session.UserRole})
+  })
+
+})
 
 app.get('/logout', (req, res) => {
   req.session.destroy();

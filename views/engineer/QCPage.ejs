@@ -10,8 +10,18 @@
     </title>
     <%- include('../partials/dependencies') %>
 </head>
-
+<div class="loader" id="loader">
+    <div class="cycles">
+        <div id="cycle1" class="cycle"></div>
+        <div id="cycle2" class="cycle"></div>
+        <div id="cycle3" class="cycle"></div>
+        <div id="cycle4" class="cycle"></div>
+        <div id="cycle5" class="cycle"></div>
+    </div>
+    <div class="loadng-label">Loading Assets...</div>
+</div>
 <body>
+
     <header>
         <% if (Role=="Engineer" ) { %>
             <%- include('../partials/engineer-header',{title:title,IncludeBackButton:0}) %>
@@ -26,7 +36,7 @@
     <main class="main_container">
         <form action="#" method="post" enctype="multipart/form-data" id="QCFrom">
             <div class="p-3 section1">
-                <div class="d-flex  align-items-center justify-content-center">
+                <div class="d-flex  align-items-center justify-content-center" style="font-size: 13px;">
                     <div class="row justify-content-center me-2" style="width: 30dvw;">
                         <div class="col-mb-1" style="width: 65%">
                             <input type="hidden" class="form-control" id="checklist" required value=" <%= title %>"
@@ -60,10 +70,11 @@
 
                     </div>
                 </div>
-                <div class=" w-100">
+                <div class=" w-100" style="font-size: 13px;">
                     <label for="remarks" class="form-label">Remarks
                     </label>
-                    <textarea name="" id="remarks" cols="30" rows="1" class="form-control" spellcheck="true" placeholder="Any remark for this QC...?"></textarea>
+                    <textarea name="" id="remarks" cols="30" rows="1" class="form-control" spellcheck="true"
+                        placeholder="Any remark for this QC...?"></textarea>
                 </div>
 
             </div>
@@ -131,14 +142,14 @@
                                                         <div class="d-flex flex-column align-items-start mb-3">
                                                             <input type="radio" name="Check_<%= row.Question_ID %>"
                                                                 id="Check_<%= row.Question_ID %>_Yes" value="Yes"
-                                                                class="form-check-input"
+                                                                class="form-check-input" checked
                                                                 onchange="toggleRequired(this)"><label
                                                                 for="Check_<%= row.Question_ID %>_Yes">Yes</label>
                                                         </div>
                                                         <div class="d-flex flex-column align-items-start mb-3">
                                                             <input type="radio" name="Check_<%= row.Question_ID %>"
                                                                 id="Check_<%= row.Question_ID %>_No" value="No"
-                                                                class="form-check-input" checked
+                                                                class="form-check-input" 
                                                                 onchange="toggleRequired(this)"><label
                                                                 for="Check_<%= row.Question_ID %>_No">No</label>
                                                         </div>
@@ -151,7 +162,7 @@
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td><input type="text" class="form-control" required
+                                                <td><input type="text" class="form-control" 
                                                         id="Note_<%= row.Question_ID %>" placeholder="* Reviewer Note">
                                                     <input type="hidden" name="" value="<%= row.Weight%>"
                                                         id="Weight_<%= row.Question_ID %>">
@@ -249,6 +260,8 @@
                                 e.value = null;
                                 document.getElementById("qc_state").value = null;
                                 document.getElementById("qc_city").value = null;
+                                $('#ScoreArea').empty();
+                                $('#ScoreArea').width(0);
 
                             })
                     }
@@ -266,6 +279,7 @@
             }
             function getPreviousRecord(e) {
                 $('#ScoreArea').empty();
+                $('#ScoreArea').width(0);
                 var type = e.value;
                 var job_id = document.getElementById("cfas_no").value.replaceAll(" ", '');
                 if (job_id.length > 3 && type) {
@@ -275,15 +289,22 @@
                             job_id: job_id
                         }
                     }).then(res => {
+                        console.log(res)
                         if (res.status == 200) {
-                            updatePreviousScore(res.data.Data)
+                            if(res.data.Data!=null){
+                                updatePreviousScore(res.data.Data)
+                            }
+                            if(!res.data.Self_QC && type=="IQC" && !res.data.Data){
+                                alert("Would you want to fill out the IQC since the Self-QC has not been submitted for this job/CFAS?")
+                            }
                         }
                     }).catch(er => {
                         console.log(er)
                         $('#ScoreArea').empty();
+                        $('#ScoreArea').width(0);
                         alert(er.response.data.Message)
                     })
-                }else{
+                } else {
                     updatePreviousScore({})
                 }
 
@@ -399,7 +420,7 @@
                         console.log(e);
                         alert(e.response.data.Message);
                     })
-            })
+            });
 
             function toggleRequired(radioButton) {
                 const noteInputId = 'Note_' + radioButton.name.split('_')[1];
@@ -419,7 +440,7 @@
                 const div = document.getElementById("ScoreArea");
                 if (data.length > 0) {
                     $('#ScoreArea').empty();
-                    div.style.width='30dvw'
+                    div.style.width = '30dvw'
                     for (let i = 0; i < data.length; i++) {
 
                         div.innerHTML += `
@@ -428,8 +449,8 @@
                             <input type="text" class="form-control" id="" class="form-select"value='${data[i]["Percentage"]}' required disabled>
                         </div>`
                     }
-                }else{
-div.style.width='max-content'
+                } else {
+                    div.style.width = 'max-content'
                 }
             }
         </script>

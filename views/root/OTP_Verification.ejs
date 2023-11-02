@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="../../static/css/loginpage.css">
 
 </head>
-<%- include('../partials/header') %>
+
   <style>
     .otp-field {
       flex-direction: row;
@@ -60,9 +60,20 @@
       text-decoration: none;
     }
   </style>
-
+<div class="loader" id="loader">
+  <div class="cycles">
+      <div id="cycle1" class="cycle"></div>
+      <div id="cycle2" class="cycle"></div>
+      <div id="cycle3" class="cycle"></div>
+      <div id="cycle4" class="cycle"></div>
+      <div id="cycle5" class="cycle"></div>
+  </div>
+  <div class="loadng-label">Loading Assets...</div>
+</div>
   <body>
-
+<header>
+  <%- include('../partials/header') %>
+</header>
     <body class="container-fluid bg-body-tertiary d-block">
       <div class="d-flex justify-content-center">
         <div class="session">

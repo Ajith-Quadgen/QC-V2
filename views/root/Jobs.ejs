@@ -8,6 +8,16 @@
     <title>Jobs</title>
     <%- include('../partials/dependencies') %>
 </head>
+<div class="loader" id="loader">
+    <div class="cycles">
+        <div id="cycle1" class="cycle"></div>
+        <div id="cycle2" class="cycle"></div>
+        <div id="cycle3" class="cycle"></div>
+        <div id="cycle4" class="cycle"></div>
+        <div id="cycle5" class="cycle"></div>
+    </div>
+    <div class="loadng-label">Loading Assets...</div>
+</div>
 
 <body>
     <header>
@@ -22,7 +32,7 @@
                 <button class="btn btn-success" type="button" id="FilterBtn"><i class="bi bi-search"></i></button>
             </div>
             <p class="form-label">Select Only CSV File</p>
-            <label class="input-group-text" for="UserExcelFile">Select Job Data</label>
+            <label class="input-group-text" for="UserExcelFile">Browse</label>
             <input type="file" class="form-control m-2" name="UserExcelFile" id="UserExcelFile" accept=".csv" required
                 style="display: none;">
             <button type="submit" class="btn btn-primary m-2">Bulk Upload &nbsp; <i
@@ -41,10 +51,16 @@
                         <th scope="col">State</th>
                         <th scope="col">City</th>
                         <!-- <th scope="col">Work Print Number</th> -->
-                        <th scope="col">Total Responses</th>
+                        <th scope="col">Total Responses <button type="button"
+                            class="btn btn-sm btn-outline-light border border-0" id="noofResponsesSort"><i
+                                class="bi bi-arrow-down-up"></i></button></th>
                         <th scope="col">Created By</th>
-                        <th scope="col">Created Date</th>
-                        <th scope="col">Modified Date</th>
+                        <th scope="col">Created Date <button type="button"
+                                class="btn btn-sm btn-outline-light border border-0" id="CreatDateSort"><i
+                                    class="bi bi-arrow-down-up"></i></button></th>
+                        <th scope="col">Modified Date <button type="button"
+                                class="btn btn-sm btn-outline-light border border-0" id="ModifiedDateSort"><i
+                                    class="bi bi-arrow-down-up"></i></button></th>
                         <th></th>
                     </tr>
                     <div id="loading-spinner"></div>
@@ -56,13 +72,13 @@
                                 <td>
                                     <%= index+1%>
                                 </td>
-                                <td >
+                                <td>
                                     <%= Data[index]["Job_Number"] %>
                                 </td>
                                 <td>
                                     <%= Data[index]['Customer'] %>
                                 </td>
-                                <td >
+                                <td>
                                     <%= Data[index]['State'] %>
                                 </td>
                                 <td>
@@ -71,7 +87,7 @@
                                 <td>
                                     <%= Data[index]['Number_Of_Responses'] %>
                                 </td>
-                                <td >
+                                <td>
                                     <%= Data[index]['Created_By'] %>
                                 </td>
                                 <td>
@@ -145,15 +161,15 @@
                             <label for="empId">Job Number</label>
                         </div>
                         <div class="toast bg-warning align-items-center border-0 mb-3 rounded-3" id="Job-Tost"
-                        role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="d-flex">
-                            <div class="toast-body fs-6">
-                                This Job/CFAS is already exist..!
+                            role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body fs-6">
+                                    This Job/CFAS is already exist..!
+                                </div>
+                                <button type="button" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast"
+                                    aria-label="Close"></button>
                             </div>
-                            <button type="button" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast"
-                                aria-label="Close"></button>
                         </div>
-                    </div>
                         <div class="mb-3">
                             <label for="Customer">Customer</label>
                             <select name="Customer" id="Customer" class="from-select form-control" aria-label="Select"
@@ -299,7 +315,7 @@
                     }
                 });
             })
-            function DeleteJob(JobID){
+            function DeleteJob(JobID) {
                 let confirm = prompt(`Do you really wish to remove the Job '${JobID}'...? (Yes/No)`)
                 const options = ['Yes', 'YES', 'Y', 'y']
                 if (options.includes(confirm)) {
@@ -316,6 +332,51 @@
                             window.location.reload()
                         })
                 }
+            }
+
+            document.getElementById("CreatDateSort").addEventListener("click", () => {
+                showLoadingSpinner();
+                var currentOrder = localStorage.getItem("JobSortingOrder");
+                var newOrder = currentOrder === 'asc' ? 'desc' : 'asc'
+                localStorage.setItem('JobSortingOrder', newOrder);
+                sortJob({field:'Created_Date',order:currentOrder})
+            });
+
+            document.getElementById("ModifiedDateSort").addEventListener("click", () => {
+                showLoadingSpinner();
+                var currentOrder = localStorage.getItem("JobSortingOrder");
+                var newOrder = currentOrder === 'asc' ? 'desc' : 'asc'
+                localStorage.setItem('JobSortingOrder', newOrder);
+                sortJob({field:'Modified_Date',order:currentOrder})
+            });
+            document.getElementById("noofResponsesSort").addEventListener("click", () => {
+                showLoadingSpinner();
+                var currentOrder = localStorage.getItem("JobSortingOrder");
+                var newOrder = currentOrder === 'asc' ? 'desc' : 'asc'
+                localStorage.setItem('JobSortingOrder', newOrder);
+                sortJob({field:'Number_Of_Responses',order:currentOrder})
+            });
+            async function sortJob(arg) {
+                await axios.post('/api/sortJob', {
+                    params: {
+                        filed: arg.field,
+                        order: arg.order
+                    }
+                }).then(async res => {
+                    if (res.status == 200) {
+                        if (res.data.length > 0) {
+                            await updateContentArea(res.data);
+                            hideLoadingSpinner();
+                        } else {
+                            hideLoadingSpinner();
+                            alert("Something Went Wrong.\nTry Again...")
+                        }
+                    }
+                })
+                    .catch(e => {
+                        console.log(e);
+                        alert("Unable to Apply the Sorting...\nPlease Contact Admin");
+                    })
             }
         </script>
 </body>

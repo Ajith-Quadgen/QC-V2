@@ -8,6 +8,16 @@
     <title>View Checklist</title>
     <%- include('../partials/dependencies') %>
 </head>
+<div class="loader" id="loader">
+    <div class="cycles">
+        <div id="cycle1" class="cycle"></div>
+        <div id="cycle2" class="cycle"></div>
+        <div id="cycle3" class="cycle"></div>
+        <div id="cycle4" class="cycle"></div>
+        <div id="cycle5" class="cycle"></div>
+    </div>
+    <div class="loadng-label">Loading Assets...</div>
+</div>
 
 <body>
     <header>
@@ -176,14 +186,23 @@
                         <div class="mb-3">
                             <label for="section">Select Section</label>
                             <select name="section" class="from-select form-control" id="section" aria-label="Select"
-                                required>
-                                <option value="" selected>Select the Section</option>
-                                <% Sections.forEach(record=> { %>
-                                    <option value="<%= record.Section %>">
-                                        <%= record.Section %>
-                                    </option>
-                                    <% }) %>
+                                required onchange="CheckAddNewSection(this)">
+                                <optgroup label="Select the Section">
+                                    <% Sections.forEach(record=> { %>
+                                        <option value="<%= record.Section %>">
+                                            <%= record.Section %>
+                                        </option>
+                                        <% }) %>
+                                </optgroup>
+                                <optgroup label="___">
+                                    <option value="create_new">Create New Section</option>
+                                </optgroup>
                             </select>
+                        </div>
+                        <div class="form-floating mb-3" style="display: none;" id="new_section">
+                            <input type="text" class="form-control" id="new_section_name" name="new_section_name"
+                                placeholder="key">
+                            <label for="new_section_name">Enter the Section Name</label>
                         </div>
                         <div class="form-floating mb-3">
                             <input type="text" class="form-control" id="item" placeholder="key" required>
@@ -301,10 +320,11 @@
             document.getElementById('addQCCheckForm').addEventListener("submit", async (e) => {
                 e.preventDefault();
                 showLoadingSpinner()
+                var section = document.getElementById("section").value === 'create_new' ? document.getElementById("new_section_name").value : document.getElementById("section").value
                 await axios.post('/admin/AddNewCheckPoint', {
                     params: {
                         "Checklist": document.getElementById("qc").value,
-                        "Section": document.getElementById("section").value,
+                        "Section": section,
                         "Item": document.getElementById("item").value,
                         "Description": document.getElementById("Description").value,
                         "Reference_Document": document.getElementById("referDocName").value,
@@ -438,6 +458,17 @@
                         //alert("Unable to Update the Checklist...\nPlease Contact Admin");
                     })
             })
+            function CheckAddNewSection(e) {
+                if (e.value == 'create_new') {
+                    document.getElementById('new_section').style.display = 'block'
+                    document.getElementById('new_section_name').setAttribute('required', '')
+                } else {
+                    document.getElementById('new_section_name').removeAttribute('required')
+
+                    document.getElementById('new_section').style.display = 'none'
+
+                }
+            }
         </script>
 
         <script>
