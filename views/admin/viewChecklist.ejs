@@ -40,11 +40,16 @@
                 <input type="file" class="form-control m-2" name="QCFile" id="QCFile"
                     accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                     required style="display: none;">
+
                 <button type="submit" class="btn btn-primary m-2">Upload &nbsp; <i
                         class="bi bi-cloud-arrow-up"></i></button>
                 <input type="button" value="Add New Check" class="btn btn-outline-primary m-2" data-bs-toggle="modal"
                     data-bs-target="#UserInputModel">
                 <% if (Checklist) { %>
+                    <label class="input-group-text" for="SupportingDoc">Browse the Supporting Doc</label>
+                    <input type="file" class="form-control m-2" name="SupportingDoc" id="SupportingDoc"
+                        accept="application/pdf" required style="display: none;">
+
                     <a href="/<%=Role%>/viewResponses/<%= Checklist%>" target="_self"><button type="button"
                             class="btn btn-outline-secondary m-2">View Responses</button> </a>
                     <% } %>
@@ -299,6 +304,27 @@
             </div>
         </div>
     </div>
+
+    <!-- Pdf Viewer QC Modal -->
+    <div class="modal fade" id="PDFViewer" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content ">
+                <div class="modal-header">
+                    <h3 class="modal-title fs-5" id="staticBackdropLabel">Add New Check Point
+                    </h3>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="pdfPreview" width="100%" height="600"></iframe>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="uploadsupportingDoc">Upload&nbsp;<i
+                            class="bi bi-send-fill"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
     <%- include('../partials/dependencies-js') %>
         <script>
             tinymce.init({
@@ -469,6 +495,47 @@
 
                 }
             }
+            document.getElementById('SupportingDoc').addEventListener('change', (event) => {
+                const fileInput = event.target;
+                if (fileInput.files.length > 0) {
+                    const selectedFile = fileInput.files[0];
+                    const reader = new FileReader();
+
+                    reader.onload = (e) => {
+                        const pdfData = e.target.result;
+                        const pdfPreview = document.getElementById('pdfPreview');
+                        pdfPreview.src = 'data:application/pdf;base64,' + btoa(new Uint8Array(pdfData).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+                    };
+                    $('#PDFViewer').modal('show')
+
+                    reader.readAsArrayBuffer(selectedFile);
+                }
+            });
+
+            document.getElementById("uploadsupportingDoc").addEventListener("click", async (e) => {
+                const fileInput = document.getElementById("SupportingDoc");
+                if (fileInput.files.length > 0) {
+                    var fromData = new FormData();
+                    const file = fileInput.files[0];
+                    fromData.append("SupportingDoc", file)
+                    await axios.post('/api/UploadSupportingDoc', fromData,{
+                        params:{
+                            QC: '<%- Checklist %>'
+                        }
+                    }).then(res => {
+                        if (res.status == 200) {
+                            const pdfPreview = document.getElementById('pdfPreview');
+                            pdfPreview.src = null;
+                             $("#PDFViewer").modal('hide');
+                             alert("Supporting Document Uploaded Successfully...!")
+                        }
+                    }).catch(e => {
+                        console.log(e);
+                        alert(e.response.data);
+                    })
+                }
+            });
+
         </script>
 
         <script>

@@ -48,6 +48,18 @@ const myStorage = multer.diskStorage({
 
 const Upload = multer({ storage: multer.memoryStorage() })
 
+const SupportingDocStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        var uploadDir = "./public/uploads/Supporting-Doc";
+        fs.mkdirSync(uploadDir, { recursive: true });
+        cb(null, uploadDir);
+    }, filename: function (req, file, cb) {
+        cb(null, Date.now() + '_' + "Doc" + path.extname(file.originalname));
+    }
+});
+const SupportingDocUpload = multer({ storage: SupportingDocStorage, limits: { fileSize: 1100000 } });
+
+
 api_Router.post('/AddUser', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin" || req.session.UserRole == "PMO" || req.session.UserRole == "Root") {
         let inputData = req.body.params;
@@ -1131,4 +1143,15 @@ api_Router.post('/updateFAQ', (req, res) => {
         return res.status(400).json({ Message: "Access Denied" })
     }
 })
+
+api_Router.post('/UploadSupportingDoc', SupportingDocUpload.single("SupportingDoc"), (req, res) => {
+    db.query("Update checklist set SupportingDocLink=? where Checklist_Name=?",[res.req.file.filename,req.query.QC],(error,result)=>{
+        if(error){
+            console.log(error)
+            return res.status(400).json({Message:"Internal Server Error"});
+        }else{
+            return res.status(200).json({Message:"Supporting Document Uploaded Successfully"});
+        }
+    })
+});
 module.exports = api_Router;

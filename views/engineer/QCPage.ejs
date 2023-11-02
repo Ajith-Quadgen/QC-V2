@@ -20,6 +20,7 @@
     </div>
     <div class="loadng-label">Loading Assets...</div>
 </div>
+
 <body>
 
     <header>
@@ -65,11 +66,22 @@
                             <label for="qc_city" class="form-label">City</label>
                             <input type="text" class="form-control" id="qc_city" class="form-select" required disabled>
                         </div>
+
                     </div>
                     <div class="row justify-content-left me-2" style="width: max-content;" id="ScoreArea">
 
                     </div>
+                    <%if (SupportingDoc){ %>
+                        <div >
+                            <a href="../../public/uploads/Supporting-Doc/<%= SupportingDoc %>" target="_blank"> <button
+                                    type="button" class="btn btn-sm btn-outline-primary rounded-3">Supporting Document <i
+                                        class="bi bi-file-earmark-pdf"></i></button></a>
+                        </div>
+                        <%}%>
+
+
                 </div>
+
                 <div class=" w-100" style="font-size: 13px;">
                     <label for="remarks" class="form-label">Remarks
                     </label>
@@ -149,7 +161,7 @@
                                                         <div class="d-flex flex-column align-items-start mb-3">
                                                             <input type="radio" name="Check_<%= row.Question_ID %>"
                                                                 id="Check_<%= row.Question_ID %>_No" value="No"
-                                                                class="form-check-input" 
+                                                                class="form-check-input"
                                                                 onchange="toggleRequired(this)"><label
                                                                 for="Check_<%= row.Question_ID %>_No">No</label>
                                                         </div>
@@ -162,7 +174,7 @@
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td><input type="text" class="form-control" 
+                                                <td><input type="text" class="form-control"
                                                         id="Note_<%= row.Question_ID %>" placeholder="* Reviewer Note">
                                                     <input type="hidden" name="" value="<%= row.Weight%>"
                                                         id="Weight_<%= row.Question_ID %>">
@@ -291,10 +303,10 @@
                     }).then(res => {
                         console.log(res)
                         if (res.status == 200) {
-                            if(res.data.Data!=null){
+                            if (res.data.Data != null) {
                                 updatePreviousScore(res.data.Data)
                             }
-                            if(!res.data.Self_QC && type=="IQC" && !res.data.Data){
+                            if (!res.data.Self_QC && type == "IQC" && !res.data.Data) {
                                 alert("Would you want to fill out the IQC since the Self-QC has not been submitted for this job/CFAS?")
                             }
                         }
@@ -440,11 +452,17 @@
                 const div = document.getElementById("ScoreArea");
                 if (data.length > 0) {
                     $('#ScoreArea').empty();
-                    div.style.width = '30dvw'
+                    div.style.width = '15dvw';
+                    innerwidth = '100'
+                    data.forEach(record => {
+                        if (record.Type == 'IQC') {
+                            innerwidth = '50'
+                            div.style.width = '30dvw'
+                        }
+                    })
                     for (let i = 0; i < data.length; i++) {
-
                         div.innerHTML += `
-                        <div class="col-md-3" style="width: 50%">
+                        <div class="col-md-3" style="width: ${innerwidth}%">
                             <label for="" class="form-label">${data[i]["Type"]} | ${data[i]["Submitted_By"]}</label>
                             <input type="text" class="form-control" id="" class="form-select"value='${data[i]["Percentage"]}' required disabled>
                         </div>`
