@@ -18,6 +18,7 @@
     </div>
     <div class="loadng-label">Loading Assets...</div>
 </div>
+
 <body>
     <header>
         <% if (Role=="Engineer" ) { %>
@@ -130,115 +131,120 @@
             </table>
         </div>
     </main>
-    <% if (Role=="Admin" ) { %>
-        <!-- Adding Customer Model -->
-        <div class="modal fade" id="UserInputModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-            aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-xl">
-                <div class="modal-content ">
-                    <div class="modal-header">
-                        <h3 class="modal-title fs-5" id="staticBackdropLabel">Add New Customer
-                        </h3>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <%- include('../partials/dependencies-js') %>
+
+        <% if (Role=="Admin" ) { %>
+            <!-- Adding Customer Model -->
+            <div class="modal fade" id="UserInputModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-xl">
+                    <div class="modal-content ">
+                        <div class="modal-header">
+                            <h3 class="modal-title fs-5" id="staticBackdropLabel">Add New Customer
+                            </h3>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="#" method="post" id="addCustomerForm">
+                            <div class="modal-body">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="Customer_Name" placeholder="key" min="5"
+                                        required>
+                                    <label for="Customer_Name">Customer Name</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="Customers_Desc" placeholder="key">
+                                    <label for="Customers_Desc">Description</label>
+                                </div>
+
+                                <div class="form-floating mb-3">
+                                    <input type="file" class="form-control" id="Customer_Logo" placeholder="key"
+                                        alt="Customer-Logo" accept="image/png" required
+                                        onchange="showLogo(this,'Customer_logo_Area')">
+                                    <label for="Customer_Logo">Logo <em style="color: red;">Max: 400 KB</em> </label>
+                                </div>
+                                <div class="mb-3" style="width: 300; height: 300;">
+                                    <img src="" alt="" srcset="" id="Customer_logo_Area"
+                                        style="  width: -webkit-fill-available; height: -webkit-fill-available;  object-fit: contain;">
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" id="AddCustomer">Add &nbsp;<i
+                                        class="bi bi-send-fill"></i></button>
+                            </div>
+                        </form>
                     </div>
-                    <form action="#" method="post" id="addCustomerForm">
-                        <div class="modal-body">
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="Customer_Name" placeholder="key" min="5"
-                                    required>
-                                <label for="Customer_Name">Customer Name</label>
-                            </div>
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="Customers_Desc" placeholder="key">
-                                <label for="Customers_Desc">Description</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input type="file" class="form-control" id="Customer_Logo" placeholder="key"
-                                    alt="Customer-Logo" accept="image/png" required
-                                    onchange="showLogo(this,'Customer_logo_Area')">
-                                <label for="Customer_Logo">Logo <em style="color: red;">Max: 400 KB</em> </label>
-                            </div>
-                            <div class="mb-3" style="width: 300; height: 300;">
-                                <img src="" alt="" srcset="" id="Customer_logo_Area"
-                                    style="  width: -webkit-fill-available; height: -webkit-fill-available;  object-fit: contain;">
-                            </div>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary" id="AddCustomer">Add &nbsp;<i
-                                    class="bi bi-send-fill"></i></button>
-                        </div>
-                    </form>
                 </div>
             </div>
-        </div>
+            <!-- Adding Checklist Model -->
+            <div class="modal fade" id="ChecklistModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-xl">
+                    <div class="modal-content ">
+                        <div class="modal-header">
+                            <h3 class="modal-title fs-5" id="staticBackdropLabel">Create Checklist
+                            </h3>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="#" method="post" id="addChecklistForm">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="Customer" class="form-label">Select Customer</label>
+                                    <select id="Customer" class="form-select" required> </select>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="Checklist_Name" placeholder="key"
+                                        min="5" required>
+                                    <label for="Checklist_Name">Checklist Name</label>
+                                </div>
 
-        <!-- Adding Checklist Model -->
-        <div class="modal fade" id="ChecklistModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-            aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-xl">
-                <div class="modal-content ">
-                    <div class="modal-header">
-                        <h3 class="modal-title fs-5" id="staticBackdropLabel">Create Checklist
-                        </h3>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <div class="form-floating mb-3">
+                                    <input type="file" class="form-control" id="Checklist_Icon" placeholder="key"
+                                        accept="image/png" required onchange="showLogo(this,'Customer_Icon_Area')">
+                                    <label for="Checklist_Icon">Logo <em style="color: red;">Max: 400 KB</em> </label>
+                                </div>
+                                <div class="form-control mb-3" style="width: 300; height: 300;">
+                                    <img src="" alt="Customer_Icon" srcset="" id="Customer_Icon_Area"
+                                        style="  width: -webkit-fill-available; height: -webkit-fill-available;  object-fit: contain;">
+                                </div>
+                                <div id="textbox-container">
+                                    <!-- Initial text input fields -->
+                                    <p>Add the Sections</p>
+                                    <div class="input-group m-3 p-2">
+                                        <input type="text" class="form-control" name="SectionName"
+                                            placeholder="Section 1" aria-label="Section">
+                                        <button onclick="removeTextBox(this)"
+                                            class="btn btn-outline-danger">Remove</button>
+                                    </div>
+                                    <div class=" input-group m-3 p-2">
+                                        <input type="text" class="form-control" name="SectionName"
+                                            placeholder="Section 2">
+                                        <button onclick="removeTextBox(this)"
+                                            class="btn btn-outline-danger">Remove</button>
+                                    </div>
+                                    <div class=" input-group m-3 p-2">
+                                        <input type="text" class="form-control" name="SectionName"
+                                            placeholder="Section 3">
+                                        <button onclick="removeTextBox(this)"
+                                            class="btn btn-outline-danger">Remove</button>
+                                    </div>
+                                </div>
+
+                                <button onclick="addTextBox()" type="button" class="btn btn-outline-info">Insert New
+                                    Section</button>
+
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" id="AddChecklist">Add &nbsp;<i
+                                        class="bi bi-send-fill"></i></button>
+                            </div>
+                        </form>
                     </div>
-                    <form action="#" method="post" id="addChecklistForm">
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="Customer" class="form-label">Select Customer</label>
-                                <select id="Customer" class="form-select" required> </select>
-                            </div>
-                            <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="Checklist_Name" placeholder="key" min="5"
-                                    required>
-                                <label for="Checklist_Name">Checklist Name</label>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input type="file" class="form-control" id="Checklist_Icon" placeholder="key"
-                                    accept="image/png" required onchange="showLogo(this,'Customer_Icon_Area')">
-                                <label for="Checklist_Icon">Logo <em style="color: red;">Max: 400 KB</em> </label>
-                            </div>
-                            <div class="form-control mb-3" style="width: 300; height: 300;">
-                                <img src="" alt="Customer_Icon" srcset="" id="Customer_Icon_Area"
-                                    style="  width: -webkit-fill-available; height: -webkit-fill-available;  object-fit: contain;">
-                            </div>
-                            <div id="textbox-container">
-                                <!-- Initial text input fields -->
-                                <p>Add the Sections</p>
-                                <div class="input-group m-3 p-2">
-                                    <input type="text" class="form-control" name="SectionName" placeholder="Section 1"
-                                        aria-label="Section">
-                                    <button onclick="removeTextBox(this)" class="btn btn-outline-danger">Remove</button>
-                                </div>
-                                <div class=" input-group m-3 p-2">
-                                    <input type="text" class="form-control" name="SectionName" placeholder="Section 2">
-                                    <button onclick="removeTextBox(this)" class="btn btn-outline-danger">Remove</button>
-                                </div>
-                                <div class=" input-group m-3 p-2">
-                                    <input type="text" class="form-control" name="SectionName" placeholder="Section 3">
-                                    <button onclick="removeTextBox(this)" class="btn btn-outline-danger">Remove</button>
-                                </div>
-                            </div>
-
-                            <button onclick="addTextBox()" type="button" class="btn btn-outline-info">Insert New
-                                Section</button>
-
-
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary" id="AddChecklist">Add &nbsp;<i
-                                    class="bi bi-send-fill"></i></button>
-                        </div>
-                    </form>
                 </div>
             </div>
-        </div>
-        <% } %>
-            <%- include('../partials/dependencies-js') %>
+            <% } %>
                 <script>
                     function addTextBox() {
                         const container = document.getElementById('textbox-container');

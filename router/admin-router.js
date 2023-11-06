@@ -83,17 +83,17 @@ admin_router.get("/Users", (req, res) => {
             if (error) throw error
             basicDetails.NameMail = result
         })
-        basicDetails.Roles = ["Admin","PMO", "Engineer"]
+        basicDetails.Roles = ["Admin", "PMO", "Engineer"]
         db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users where Role!='Root' ", function (error, result) {
             if (error) throw error
-            let modifiedData=result.map((e)=>{
-                const obj=Object.assign({},e);
-                if(obj['Remark']!=null && obj['Remark']!=undefined && obj['Remark']!==""){
-                    obj['Remark']=JSON.parse(obj['Remark'])
+            let modifiedData = result.map((e) => {
+                const obj = Object.assign({}, e);
+                if (obj['Remark'] != null && obj['Remark'] != undefined && obj['Remark'] !== "") {
+                    obj['Remark'] = JSON.parse(obj['Remark'])
                 }
                 return obj;
             })
-            res.render('../views/admin/Users', { Data: modifiedData, Checklist: checklist, Basic: basicDetails,title:"Users",Role: req.session.UserRole });
+            res.render('../views/admin/Users', { Data: modifiedData, Checklist: checklist, Basic: basicDetails, title: "Users", Role: req.session.UserRole });
         })
     } else {
         res.redirect('/')
@@ -108,7 +108,7 @@ admin_router.get("/Jobs", (req, res) => {
         })
         db.query("Select *,DATE_FORMAT(`Created_Date`,'%b %D %y %r') as Created_Date,DATE_FORMAT(`Modified_Date`,'%b %D %y %r') as ModifiedDate from jobs order by Modified_Date Desc limit 50", function (error, result) {
             if (error) throw error
-            res.render('../views/admin/Jobs', { Data: result, CustomerList: Customer,title:"Jobs",Role: req.session.UserRole });
+            res.render('../views/admin/Jobs', { Data: result, CustomerList: Customer, title: "Jobs", Role: req.session.UserRole });
         });
     } else {
         res.redirect('/')
@@ -120,7 +120,7 @@ admin_router.get("/Customers", (req, res) => {
             if (error) throw error
             db.query("select Customer_Name from customer", function (error, Customer_result) {
                 if (error) throw error
-                res.render('../views/admin/Customers', { Data: result, Customer_Data: Customer_result,title:"Customers",Role: req.session.UserRole });
+                res.render('../views/admin/Customers', { Data: result, Customer_Data: Customer_result, title: "Customers", Role: req.session.UserRole });
             })
         });
     } else {
@@ -186,7 +186,7 @@ admin_router.get('/ListChecklist/:Customer_Name', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         db.query("select * from checklist where Customer=?", [req.params.Customer_Name], (error, result) => {
             if (error) throw error
-            res.render("../views/admin/ListChecklist", { Data: result,title:`${req.params.Customer_Name}-Checklist`,Role: req.session.UserRole })
+            res.render("../views/admin/ListChecklist", { Data: result, title: `${req.params.Customer_Name}-Checklist`, Role: req.session.UserRole })
         })
     } else {
         res.redirect('/')
@@ -200,7 +200,14 @@ admin_router.get('/ViewChecklist/:QC_Name', (req, res) => {
             db.query("select Section from questions where Checklist=? group by Section;", [req.params.QC_Name], (error, result1) => {
                 if (error) throw error
                 sections = result1;
-                res.render("../views/admin/viewChecklist", { Data: result, Checklist: req.params.QC_Name, Sections: sections,title:`${req.params.QC_Name}`, Role: req.session.UserRole })
+
+                db.query("select SupportingDocLink from checklist where Checklist_Name=?", [req.params.QC_Name], (error, result2) => {
+                    if(error){
+                        console.log(error)
+                    }
+                    var SupportingDoc = (result2[0].SupportingDocLink)?result2[0].SupportingDocLink:null;
+                    return res.render("../views/admin/viewChecklist", { Data: result, Checklist: req.params.QC_Name, Sections: sections, title: `${req.params.QC_Name}`, Role: req.session.UserRole, SupportingDoc: SupportingDoc })
+                })
             })
         })
     } else {
@@ -212,7 +219,7 @@ admin_router.get('/viewResponses/:QC_Name', (req, res) => {
     if (req.session.UserID && req.session.UserRole == "Admin") {
         db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as New_Submitted_Date from responses where Checklist=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc", [req.params.QC_Name], (error, result) => {
             if (error) throw error
-            res.render("../views/admin/viewResponses", { Data: result, Checklist: req.params.QC_Name, title: req.params.QC_Name,Role: req.session.UserRole })
+            res.render("../views/admin/viewResponses", { Data: result, Checklist: req.params.QC_Name, title: req.params.QC_Name, Role: req.session.UserRole })
         })
     } else {
         res.redirect('/')
@@ -224,11 +231,11 @@ admin_router.post('/AddNewCheckPoint', (req, res) => {
         db.query("insert into questions set?", [inputData], async (error, result) => {
             if (error) {
                 console.log(error)
-                res.status(400).json({Message:"Internal Server Error"})
-            }else{
+                res.status(400).json({ Message: "Internal Server Error" })
+            } else {
                 db.query("select * from questions where Checklist=? order by Question_ID desc", [inputData.Checklist], (error, result) => {
                     if (error) throw error
-                    res.status(200).json({Message:"New Check Point is added to the checklist",Data:result})
+                    res.status(200).json({ Message: "New Check Point is added to the checklist", Data: result })
                 })
             }
         })

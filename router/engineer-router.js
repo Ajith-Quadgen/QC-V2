@@ -110,8 +110,11 @@ engineer_router.get("/QC/:QC_Name", (req, res) => {
                     }
                     organizedData[Section].push(row);
                 });
-                res.render('../views/engineer/QCPage', { Data: organizedData, title: result[0].Checklist, Role: req.session.UserRole, IncludeBackButton: false })
-            } else {
+
+                db.query("select SupportingDocLink from checklist where Checklist_Name=?", [req.params.QC_Name], (error, result1) => {
+                    SupportingDoc = result1[0].SupportingDocLink;
+                    return res.render('../views/engineer/QCPage', { Data: organizedData, title: result[0].Checklist, Role: req.session.UserRole, IncludeBackButton: false, SupportingDoc: SupportingDoc });
+                })            } else {
                 res.send("Checklist is Not Prepared Yet, Contact Manager")
             }
         })

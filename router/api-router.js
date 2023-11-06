@@ -57,7 +57,7 @@ const SupportingDocStorage = multer.diskStorage({
         cb(null, Date.now() + '_' + "Doc" + path.extname(file.originalname));
     }
 });
-const SupportingDocUpload = multer({ storage: SupportingDocStorage, limits: { fileSize: 1100000 } });
+const SupportingDocUpload = multer({ storage: SupportingDocStorage, limits: { fileSize: 11000000 } });
 
 
 api_Router.post('/AddUser', (req, res) => {

@@ -53,6 +53,13 @@
                     <a href="/<%=Role%>/viewResponses/<%= Checklist%>" target="_self"><button type="button"
                             class="btn btn-outline-secondary m-2">View Responses</button> </a>
                     <% } %>
+                    <%if (SupportingDoc){ %>
+                        <div >
+                            <a href="../../public/uploads/Supporting-Doc/<%= SupportingDoc %>" target="_blank"> <button
+                                    type="button" class="btn btn-sm btn-outline-primary rounded-3">Supporting Document <i
+                                        class="bi bi-file-earmark-pdf"></i></button></a>
+                        </div>
+                        <%}%>
             </form>
             <%}%>
                 <div class="d-flex w-100 flex-column-reverse">

@@ -92,6 +92,7 @@
                                 </table>
         </div>
     </main>
+    <%- include('../partials/dependencies-js') %>
     <div class="modal fade" id="UserInputModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -141,7 +142,7 @@
             </div>
         </div>
     </div>
-    <%- include('../partials/dependencies-js') %>
+
         <script>
 
             document.getElementById('addUserForm').addEventListener("submit", async (e) => {

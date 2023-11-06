@@ -25,7 +25,7 @@
 <body>
     <header>
         <% if (Role=="Engineer" ) { %>
-            <%- include('partials/engineer-header',{title:title,IncludeBackButton:0}) %>
+            <%- include('partials/engineer-header',{title:"OSP QC-Portal-FAQ",IncludeBackButton:0}) %>
                 <% }else if(Role=="Admin" ){ %>
                     <%- include('partials/admin-header',{title:"OSP QC-Portal-FAQ"}) %>
                         <% }else if(Role=="PMO" ){ %>

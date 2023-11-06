@@ -33,7 +33,7 @@
             <div style="height: 200px; width: 200px;">
                 <canvas id="UserChart" ></canvas>
             </div>
-            <div class="profile-card d-flex flex-row " style="height: 110px;">
+            <div class="profile-card d-flex flex-row " style="max-height: 110px;">
                 <div class="right-side">
                     <i class="bi bi-person-badge"></i>
                 </div>
@@ -59,7 +59,49 @@
             </div>
 
         </section>
+        <!-- <section class="d-flex justify-content-end flex-wrap">
+            <div class="profile-card m-2" style="position: relative; max-height: 600px; min-height: 300px; overflow: auto;">
+                <h3 class="bg-danger bg-gradient rounded-top text-center">Notifications</h3>
+                <button type="button" class="btn btn-primary m-2 rounded-pill" style="position: absolute; bottom: 0; right: 0;" data-bs-toggle="modal"
+                data-bs-target="#UserInputModel"><i class="bi bi-pencil-square"></i></button>
+            </div>
+        </section> -->
     </main>
+    <div class="modal fade" id="UserInputModel" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content ">
+            <div class="modal-header">
+                <h3 class="modal-title fs-5" id="staticBackdropLabel">Notifications 
+                </h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="#" method="post" id="Add_Notification_Form">
+                <div class="modal-body">
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" id="Message" placeholder="key" required></textarea>
+                        <label for="Message">Message</label>
+                    </div>
+                    <div class="row">
+                    <div class=" col form-floating mb-3">
+                        <input type="datetime-local" class="form-control" id="start_date" placeholder="key" required>
+                        <label for="start_date">Start Date</label>
+                    </div>
+                    <div class="col form-floating mb-3">
+                        <input type="datetime-local" class="form-control" id="end_Date" placeholder="key" required>
+                        <label for="end_Date">End Date</label>
+                    </div>
+                </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" id="Add_Notification">Add &nbsp;<i
+                            class="bi bi-send-fill"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 </body>
 <%- include('../partials/dependencies-js') %>
     <script>

@@ -118,10 +118,10 @@ root_router.get('/users', (req, res) => {
         basicDetails.Roles = ["Admin", "PMO", "Engineer"]
         db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users where Role!='Root'", function (error, result) {
             if (error) throw error
-            let modifiedData=result.map((e)=>{
-                const obj=Object.assign({},e);
-                if(obj['Remark']!=null && obj['Remark']!=undefined && obj['Remark']!==""){
-                    obj['Remark']=JSON.parse(obj['Remark'])
+            let modifiedData = result.map((e) => {
+                const obj = Object.assign({}, e);
+                if (obj['Remark'] != null && obj['Remark'] != undefined && obj['Remark'] !== "") {
+                    obj['Remark'] = JSON.parse(obj['Remark'])
                 }
                 return obj;
             })
@@ -198,7 +198,10 @@ root_router.get('/ViewChecklist/:QC_Name', (req, res) => {
             db.query("select Section from questions where Checklist=? group by Section;", [req.params.QC_Name], (error, result1) => {
                 if (error) throw error
                 sections = result1;
-                res.render("../views/admin/viewChecklist", { Data: result, Checklist: req.params.QC_Name, Sections: sections, title: `${req.params.QC_Name}`, Role: req.session.UserRole })
+                db.query("select SupportingDocLink from checklist where Checklist_Name=?", [req.params.QC_Name], (error, result2) => {
+                    var SupportingDoc = result2[0].SupportingDocLink;
+                    return res.render("../views/admin/viewChecklist", { Data: result, Checklist: req.params.QC_Name, Sections: sections, title: `${req.params.QC_Name}`, Role: req.session.UserRole, SupportingDoc: SupportingDoc })
+                })
             })
         })
     } else {
@@ -257,7 +260,7 @@ root_router.get('/viewResponses/:QC_Name/', (req, res) => {
     const sortOrder = order === 'asc' ? 'ASC' : 'DESC';
     console.log(req.query)
     console.log(req.params)
-    let sql = "select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as New_Submitted_Date from responses where Checklist='"+req.params.QC_Name+"' group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By";
+    let sql = "select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as New_Submitted_Date from responses where Checklist='" + req.params.QC_Name + "' group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By";
     if (field && order) {
         sql += ` ORDER BY ${field} ${sortOrder}`;
     } else {
@@ -267,7 +270,7 @@ root_router.get('/viewResponses/:QC_Name/', (req, res) => {
         db.query(sql, (error, result) => {
             if (error) {
                 console.log(error)
-            }else{
+            } else {
                 res.render("../views/admin/viewResponses", { Data: result, Checklist: req.params.QC_Name, title: req.params.QC_Name, Role: req.session.UserRole })
             }
         })
@@ -277,7 +280,7 @@ root_router.get('/viewResponses/:QC_Name/', (req, res) => {
 })
 
 root_router.get("/QC/:QC_Name", (req, res) => {
-    let SupportingDoc='';
+    let SupportingDoc = '';
     if (req.session.UserID) {
         db.query("Select * from questions where checklist=? and Status='Active' ", [req.params.QC_Name], (error, result) => {
             if (result.length > 0) {
@@ -299,10 +302,10 @@ root_router.get("/QC/:QC_Name", (req, res) => {
                     }
                     organizedData[Section].push(row);
                 });
-               
-                db.query("select SupportingDocLink from checklist where Checklist_Name=?",[req.params.QC_Name],(error,result1)=>{
-                   SupportingDoc=result1[0].SupportingDocLink;
-                  return res.render('../views/engineer/QCPage', { Data: organizedData, title: result[0].Checklist, Role: req.session.UserRole, IncludeBackButton: false,SupportingDoc:SupportingDoc });
+
+                db.query("select SupportingDocLink from checklist where Checklist_Name=?", [req.params.QC_Name], (error, result1) => {
+                    SupportingDoc = result1[0].SupportingDocLink;
+                    return res.render('../views/engineer/QCPage', { Data: organizedData, title: result[0].Checklist, Role: req.session.UserRole, IncludeBackButton: false, SupportingDoc: SupportingDoc });
                 })
             } else {
                 res.send("Checklist is Not Prepared Yet, Contact Manager")
