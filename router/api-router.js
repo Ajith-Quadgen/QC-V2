@@ -91,23 +91,23 @@ api_Router.post('/AddUser', (req, res) => {
                     if (inputData.Role == "Employee") {
                         attachment = [{
                             filename: "Step by Step Process.pdf",
-                            path: `./public/Uploads/User-Guid/Employee-Guid.pdf`
+                            path: path.resolve(__dirname,`./public/Uploads/User-Guid/Employee-Guid.pdf`)
                         }]
                     } else if (inputData.Role == "PMO") {
                         attachment = [{
-                            path: `./public/Uploads/User-Guid/Employee-Guid.pdf`
+                            path: path.resolve(__dirname,`./public/Uploads/User-Guid/Employee-Guid.pdf`)
                         },
                         {
-                            path: `./public/Uploads/User-Guid/PMO-Guid.pdf`
+                            path: path.resolve(__dirname,`./public/Uploads/User-Guid/PMO-Guid.pdf`)
                         }]
                     } else if (inputData.Role = "Admin") {
                         attachment = [{
-                            path: `./public/Uploads/User-Guid/Employee-Guid.pdf`
+                            path: path.resolve(__dirname,`./public/Uploads/User-Guid/Employee-Guid.pdf`)
                         },
                         {
-                            path: `./public/Uploads/User-Guid/PMO-Guid.pdf`
+                            path:path.resolve(__dirname,`./public/Uploads/User-Guid/PMO-Guid.pdf`)
                         }, {
-                            path: `./public/Uploads/User-Guid/Admin-Guid.pdf`
+                            path: path.resolve(__dirname,`./public/Uploads/User-Guid/Admin-Guid.pdf`)
                         }]
                     }
                     const maildata = {
