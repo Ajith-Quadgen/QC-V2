@@ -61,7 +61,7 @@ db.connect((error) => {
   }
 });
 
-const port = 5000;
+const port = 5500;
 const host = "172.17.1.22"
 const privateKey = fs.readFileSync('key.pem');
 const certificate = fs.readFileSync('cert.pem')
