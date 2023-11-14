@@ -179,7 +179,7 @@ function getTimeStamp(){
     })
     PMO_router.get('/viewResponses/:QC_Name', (req, res) => {
         if (req.session.UserID && req.session.UserRole == "PMO") {
-            db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as Submitted_Date from responses where Checklist=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc", [req.params.QC_Name], (error, result) => {
+            db.query("select Checklist,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By,DATE_FORMAT(`Submitted_Date`,'%b %D %y %r') as New_Submitted_Date from responses where Checklist=? group by Checklist,Submitted_Date,Job_ID,State,City,Type,Iteration,Percentage,Submitted_By order by Submitted_Date desc", [req.params.QC_Name], (error, result) => {
                 if (error) throw error
                 res.render("../views/admin/viewResponses", { Data: result, Checklist: req.params.QC_Name, title: req.params.QC_Name,Role: req.session.UserRole })
             })
