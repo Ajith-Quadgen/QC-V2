@@ -243,23 +243,23 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
                         if (user.Role == "Employee") {
                             attachment = [{
                                 filename: "Step by Step Process.pdf",
-                                path: `./public/Uploads/User-Guid/Employee-Guid.pdf`
+                                path: path.resolve(__dirname,`./public/Uploads/User-Guid/Employee-Guid.pdf`)
                             }]
                         } else if (user.Role == "PMO") {
                             attachment = [{
-                                path: `./public/Uploads/User-Guid/Employee-Guid.pdf`
+                                path: path.resolve(__dirname,`./public/Uploads/User-Guid/Employee-Guid.pdf`)
                             },
                             {
-                                path: `./public/Uploads/User-Guid/PMO-Guid.pdf`
+                                path: path.resolve(__dirname,`./public/Uploads/User-Guid/PMO-Guid.pdf`)
                             }]
                         } else if (user.Role = "Admin") {
                             attachment = [{
-                                path: `./public/Uploads/User-Guid/Employee-Guid.pdf`
+                                path: path.resolve(__dirname,`./public/Uploads/User-Guid/Employee-Guid.pdf`)
                             },
                             {
-                                path: `./public/Uploads/User-Guid/PMO-Guid.pdf`
+                                path:path.resolve(__dirname,`./public/Uploads/User-Guid/PMO-Guid.pdf`)
                             }, {
-                                path: `./public/Uploads/User-Guid/Admin-Guid.pdf`
+                                path: path.resolve(__dirname,`./public/Uploads/User-Guid/Admin-Guid.pdf`)
                             }]
                         }
                         return {
