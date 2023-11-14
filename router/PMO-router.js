@@ -22,7 +22,13 @@ function getTimeStamp(){
             })
             db.query("select * from customer", (error, result) => {
                 if (error) throw error
-                res.render('../views/admin/adminHome', { Data: result, Log: log, title: "PMO-Dashboard", User: userData, Role: req.session.UserRole })
+                db.query("select * from notifications where ? >= Start_Date and ? <= End_Date", [new Date(), new Date()], (error, notifications) => {
+                    if (error) {
+                      console.log(error);
+                    } else {
+                        res.render('../views/admin/adminHome', { Data: result, Log: log, title: "PMO-Dashboard", User: userData, Role: req.session.UserRole,notifications:notifications?notifications:null })
+                    }
+                  })
             })
         } else {
             res.redirect('/')
