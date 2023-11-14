@@ -67,6 +67,7 @@ root_router.get("/home", (req, res) => {
 })
 
 root_router.get("/", (req, res) => {
+    const currentDate=new Date();
     if (req.session.UserID && req.session.UserRole == "Root" && req.session.LoginOTPVerification) {
         var userData, UserCount, ChecklistCount;
         db.query(`SELECT  SUM(CASE WHEN Active = '1' THEN 1 ELSE 0 END) AS active_user,  SUM(CASE WHEN Active = '0' THEN 1 ELSE 0 END) AS inactive_users FROM users`, (error, result) => {
@@ -83,7 +84,13 @@ root_router.get("/", (req, res) => {
         db.query('select Customer,count(*) as No_Of_Checklist from checklist group by Customer', (error, result) => {
             if (error) throw error
             ChecklistCount = result;
-            return res.render('../views/root/rootHome', { title: "Master-Dashboard", User: userData, Role: req.session.UserRole, UserCount: UserCount[0], ChecklistCount: ChecklistCount })
+            db.query("select *, DATE_FORMAT(`End_Date`,'%b %D %y %r') as N_End_Date,DATE_FORMAT(`Start_Date`,'%b %D %y %r') as N_Start_Date  from notifications order by Created_On Desc",(error,notifications)=>{
+                if(error){
+                    console.log(error);
+                }else{
+                    return res.render('../views/root/rootHome', { title: "Master-Dashboard", User: userData, Role: req.session.UserRole, UserCount: UserCount[0], ChecklistCount: ChecklistCount,notifications:notifications?notifications:null })
+                }
+            })
         })
     } else {
         res.redirect('/')

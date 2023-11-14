@@ -368,3 +368,53 @@ nav .icon-burger .line {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+
+  .ticker {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    margin: 0 auto;
+    position: fixed;
+    bottom: 3px;
+    right: 0px;
+    z-index: 20;
+    font-family: "Oswald", serif;
+    height: 35px;
+  }
+  
+  .news {
+    width: 100%;
+    background: #fff;
+    border: solid 1px #c8102e;
+  }
+  .news-title {
+    width: 100px;
+    text-align: center;
+    background: #c8102e;
+    position: absolute;
+    z-index: 10;
+    height: 35px;
+    text-shadow: 1px 1px #000;
+  }
+  .news-title:after {
+    position: absolute;
+    content: "";
+    right: -39px;
+    top: 0px;
+  }
+  .news-title h5 {
+    font-size: 12px;
+    margin: 14% 0;
+    color: #fff;
+    padding: 0px 5px;
+  }
+  .news marquee {
+    font-size: 14px;
+    margin-top: 5px;
+  }
+  .news-content p {
+    margin-right: 41px;
+    display: inline;
+    color: #222;
+  }
+  

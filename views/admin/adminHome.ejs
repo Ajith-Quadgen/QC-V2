@@ -34,18 +34,18 @@
     <main class="d-flex flex-column mb-3 justify-content-center w-100"
         style="position: absolute; top: 100px; align-self: baseline;">
         <section class="d-flex justify-content-end flex-wrap">
-            <div class="profile-card d-flex flex-row ">
+            <div class="profile-card d-flex flex-row " style="max-height: 110px;">
                 <div class="right-side">
                     <i class="bi bi-person-badge"></i>
                 </div>
                 <div class="left-side">
                     <figure>
-                        <blockquote class="blockquote">
+                        <blockquote class="blockquote" style="font-size: 14px;">
                             <p>
                                 <%= User.Full_Name %>
                             </p>
                         </blockquote>
-                        <figcaption class="blockquote-footer">
+                        <figcaption class="blockquote-footer" style="font-size: 12px;">
                             <%= User.Designation %> (<%= User.Employee_ID %>) <br>
                                     <i class="bi bi-envelope-at-fill"></i>
                                     <%= User.Email_ID %><br>
@@ -137,6 +137,22 @@
                 <% } %>
         </section>
     </main>
+    <% if (Object.values(notifications).length>0) { %>
+        <div class="ticker">
+          <div class="news-title bg-danger bg-gradient">
+            <h5>Notifications</h5>
+          </div>
+          <div class="news">
+            <marquee class="news-content">
+              <% notifications.forEach(function(record) { %>
+                <p>
+                  <%= record.Message %>
+                </p>
+                <% }); %>
+            </marquee>
+          </div>
+        </div>
+        <% } %>
     <%- include('../partials/dependencies-js') %>
 </body>
 

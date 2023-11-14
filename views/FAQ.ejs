@@ -45,7 +45,7 @@
             <img src="../static/images/faq.png" alt=""
                 style="width: auto; height: inherit; object-fit: contain;position: absolute;right: 5px; filter: drop-shadow(0 0 0.75rem #bdd7ff);">
         </div>
-        <section id="FAQ_Section">
+        <section id="FAQ_Section" class="position-absolute">
             <%- Data %>
         </section>
 
@@ -78,12 +78,27 @@
             </div>
         </div>
     <%}%>
+    
+    <div class="ticker">
+        <div class="news-title bg-danger bg-gradient">
+            <h5>Notifications</h5>
+        </div>
+        <div class="news">
+            <marquee class="news-content">
+                <% notifications.forEach(function(record) { %>
+                    <p>
+                        <%= record.Message %>
+                    </p>
+                    <% }); %>
+            </marquee>
+        </div>
+    </div>
             <%- include('partials/dependencies-js') %>
                 <script>
                     tinymce.init({
                         // Select the element(s) to add TinyMCE to using any valid CSS selector
                         selector: "#updateFAQ",
-                        plugins: "preview powerpaste casechange searchreplace autolink autosave save directionality advcode visualblocks visualchars fullscreen image link media mediaembed  codesample advtable table charmap pagebreak nonbreaking anchor advlist lists checklist wordcount tinymcespellchecker a11ychecker help formatpainter permanentpen pageembed linkchecker emoticons export",
+                        plugins: "preview  searchreplace autolink autosave save directionality  visualblocks visualchars fullscreen image link media   codesample  table charmap pagebreak nonbreaking anchor advlist lists wordcount   help    linkchecker emoticons ",
                         height: '300px',
                         toolbar_sticky: true,
                         icons: 'thin',

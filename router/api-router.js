@@ -74,7 +74,7 @@ api_Router.post('/AddUser', (req, res) => {
                 inputData['Reporting_Manager_Mail'] = result[0].Email_ID;
                 delete inputData.Reporting_Manager_ID;
             }
-            db.query("insert into users set?", [inputData], (error, result) => {
+            db.query("insert into users set?", [inputData], async (error, result) => {
                 if (error) {
                     console.log(error)
                     if (error.code == 'ER_DUP_ENTRY') {
@@ -84,18 +84,80 @@ api_Router.post('/AddUser', (req, res) => {
                     } else {
                         return res.status(400).json({ Message: "Internal Server Error" })
                     }
-                } db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users", function (error, result) {
-                    if (error) throw error
-                    let modifiedData = result.map((e) => {
-                        const obj = Object.assign({}, e);
-                        if (obj['Remark'] != null && obj['Remark'] != undefined && obj['Remark'] !== "") {
-                            obj['Remark'] = JSON.parse(obj['Remark'])
+                } else {
+                    const DefaultPassword = 'User@123';
+                    const portalURL = 'https://172.17.1.22:5000'
+                    let attachment = [];
+                    if (inputData.Role == "Employee") {
+                        attachment = [{
+                            filename: "Step by Step Process.pdf",
+                            path: `./public/Uploads/User-Guid/Employee-Guid.pdf`
+                        }]
+                    } else if (inputData.Role == "PMO") {
+                        attachment = [{
+                            path: `./public/Uploads/User-Guid/Employee-Guid.pdf`
+                        },
+                        {
+                            path: `./public/Uploads/User-Guid/PMO-Guid.pdf`
+                        }]
+                    } else if (inputData.Role = "Admin") {
+                        attachment = [{
+                            path: `./public/Uploads/User-Guid/Employee-Guid.pdf`
+                        },
+                        {
+                            path: `./public/Uploads/User-Guid/PMO-Guid.pdf`
+                        }, {
+                            path: `./public/Uploads/User-Guid/Admin-Guid.pdf`
+                        }]
+                    }
+                    const maildata = {
+                        from: 'software.development@quadgenwireless.com',
+                        to: inputData.Email_ID,
+                        subject: "Welcome to OSP QC-Portal",
+                        html: `<!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Document</title>
+                    </head>
+                    <body>
+                        <div class="container" style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                            <h1 style="color: #333;">Dear, ${inputData.Full_Name}!</h1>
+                            <p style="color: #666;">We are thrilled to welcome you to our platform! Your new user account has been successfully created, and we're excited to have you on board.</p>
+                            <p style="color: #666;">To help you get started and make the most of your experience with us, we have attached a comprehensive guide. This guide will walk you through the essential steps and processes to navigate our platform effectively. Whether you are a seasoned user or a newcomer, this document will be a valuable resource.</p>
+                            <p style="color: #666;">Your login credentials are as follows:</p>
+                            <p style="color: #666;"><strong>Username:</strong> ${inputData.Employee_ID}</p>
+                            <p style="color: #666;"><strong>Password:</strong> ${DefaultPassword}</p>
+                            <p style="color: #666;">Please change your password once you have successfully logged in. Be sure to keep your login information secure & confidential</p>
+                            <p style="color: #666;">You can access our portal by visiting <a href="${portalURL}">${portalURL}</a>.</p>
+                            <p style="color: #666;">If you have any questions or encounter any challenges, please don't hesitate to reach out to our support team at <a href="mailto:software.development@quadgenwireless.com">software.development@quadgenwireless.com</a>.</p>
+                    </body>
+                    </html>   `,
+                        attachments: attachment,
+                    }
+                    transporter.sendMail(maildata, (error, info) => {
+                        if (error) {
+                            console.log(error)
+                        } else {
+                            console.log("User Added Email Sent:" + info)
                         }
-                        return obj;
+                    });
+                    db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users", function (error1, result) {
+                        if (error1) {
+                            console.log(error1)
+                        } else {
+                            let modifiedData = result.map((e) => {
+                                const obj = Object.assign({}, e);
+                                if (obj['Remark'] != null && obj['Remark'] != undefined && obj['Remark'] !== "") {
+                                    obj['Remark'] = JSON.parse(obj['Remark'])
+                                }
+                                return obj;
+                            });
+                            return res.status(200).json({ Message: 'User Added Successfully...', Data: modifiedData });
+                        }
                     })
-                    return res.status(200).json({ Message: 'User Added Successfully...', Data: modifiedData });
-
-                })
+                }
             })
         })
     } else {
@@ -174,13 +236,37 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
                         });
                         insertionPromises.push(insertionPromise);
                     });
-                    const DefaultPassword='User@123';
-                    const portalURL='https://172.17.1.22:5000'
-                    const emailData = data.map((user) => ({
-                        from: 'software.development@quadgenwireless.com',
-                        to: user.Email_ID,
-                        subject: "Welcome to OSP QC-Portal",
-                        html: `<!DOCTYPE html>
+                    const DefaultPassword = 'User@123';
+                    const portalURL = 'https://172.17.1.22:5000'
+                    const emailData = data.map((user) => {
+                        let attachment = [];
+                        if (user.Role == "Employee") {
+                            attachment = [{
+                                filename: "Step by Step Process.pdf",
+                                path: `./public/Uploads/User-Guid/Employee-Guid.pdf`
+                            }]
+                        } else if (user.Role == "PMO") {
+                            attachment = [{
+                                path: `./public/Uploads/User-Guid/Employee-Guid.pdf`
+                            },
+                            {
+                                path: `./public/Uploads/User-Guid/PMO-Guid.pdf`
+                            }]
+                        } else if (user.Role = "Admin") {
+                            attachment = [{
+                                path: `./public/Uploads/User-Guid/Employee-Guid.pdf`
+                            },
+                            {
+                                path: `./public/Uploads/User-Guid/PMO-Guid.pdf`
+                            }, {
+                                path: `./public/Uploads/User-Guid/Admin-Guid.pdf`
+                            }]
+                        }
+                        return {
+                            from: 'software.development@quadgenwireless.com',
+                            to: user.Email_ID,
+                            subject: "Welcome to OSP QC-Portal",
+                            html: `<!DOCTYPE html>
                         <html lang="en">
                         <head>
                             <meta charset="UTF-8">
@@ -189,17 +275,20 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
                         </head>
                         <body>
                             <div class="container" style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-                                <h1 style="color: #333;">Welcome, ${user.Full_Name}!</h1>
-                                <p style="color: #666;">You have been successfully added to our portal.</p>
+                                <h1 style="color: #333;">Dear, ${user.Full_Name}!</h1>
+                                <p style="color: #666;">We are thrilled to welcome you to our platform! Your new user account has been successfully created, and we're excited to have you on board.</p>
+                                <p style="color: #666;">To help you get started and make the most of your experience with us, we have attached a comprehensive guide. This guide will walk you through the essential steps and processes to navigate our platform effectively. Whether you are a seasoned user or a newcomer, this document will be a valuable resource.</p>
                                 <p style="color: #666;">Your login credentials are as follows:</p>
                                 <p style="color: #666;"><strong>Username:</strong> ${user.Employee_ID}</p>
                                 <p style="color: #666;"><strong>Password:</strong> ${DefaultPassword}</p>
-                                <p style="color: #666;">Please change your password once you have successfully logged in. Be sure to keep your login information secure.</p>
+                                <p style="color: #666;">Please change your password once you have successfully logged in. Be sure to keep your login information secure & confidential</p>
                                 <p style="color: #666;">You can access our portal by visiting <a href="${portalURL}">${portalURL}</a>.</p>
-                                <p style="color: #666;">If you have any questions or need assistance, please don't hesitate to contact our support team at <a href="mailto:software.development@quadgenwireless.com">software.development@quadgenwireless.com</a>.</p>
+                                <p style="color: #666;">If you have any questions or encounter any challenges, please don't hesitate to reach out to our support team at <a href="mailto:software.development@quadgenwireless.com">software.development@quadgenwireless.com</a>.</p>
                         </body>
                         </html>   `,
-                    }));
+                            attachments: attachment,
+                        }
+                    });
                     const emailPromises = emailData.map((mailOptions) => {
                         return new Promise(async (resolve, reject) => {
                             try {
@@ -222,7 +311,7 @@ api_Router.post('/uploadUsers', Upload.single('UserExcelFile'), (req, res) => {
                             console.error("Error sending emails:", error);
                             transporter.close();
                         });
-                    Promise.all([insertionPromises,emailPromises])
+                    Promise.all([insertionPromises, emailPromises])
                         .then(() => {
                             console.log('All Users data inserted successfully.');
                             db.query("Select *,DATE_FORMAT(`Lastseen`,'%b %D %y %r') as lastSeen from users where Role!='Root'", function (error, Data) {
@@ -1145,13 +1234,41 @@ api_Router.post('/updateFAQ', (req, res) => {
 })
 
 api_Router.post('/UploadSupportingDoc', SupportingDocUpload.single("SupportingDoc"), (req, res) => {
-    db.query("Update checklist set SupportingDocLink=? where Checklist_Name=?",[res.req.file.filename,req.query.QC],(error,result)=>{
-        if(error){
+    db.query("Update checklist set SupportingDocLink=? where Checklist_Name=?", [res.req.file.filename, req.query.QC], (error, result) => {
+        if (error) {
             console.log(error)
-            return res.status(400).json({Message:"Internal Server Error"});
-        }else{
-            return res.status(200).json({Message:"Supporting Document Uploaded Successfully"});
+            return res.status(400).json({ Message: "Internal Server Error" });
+        } else {
+            return res.status(200).json({ Message: "Supporting Document Uploaded Successfully" });
         }
     })
 });
+api_Router.post('/addNotification', (req, res) => {
+    let InputData=req.body.params;
+    InputData["Created_By"]=req.session.UserName;
+    InputData["Created_On"]=getTimeStamp()
+    db.query("insert into notifications set?", [InputData], async (error, result) => {
+        if(error){
+            console.log(error);
+            return res.status(400).json({Message:"Internal Server Error..\nUnable to Add the Notification."})
+        }else{
+            return res.status(200).json({Message:"Notification Added Successfully."})
+        }
+
+    })
+
+})
+api_Router.post("/deleteNotification",(req,res)=>{
+    let Id=req.body.params.ID;
+    db.query("delete from notifications where Notifications_ID=?",[Id],(error,result)=>{
+        if(error){
+            console.log(error)
+            return res.status(400).json({Message:"Something went wrong unable to Delete the Notifications"});
+        }else{
+            if(result.affectedRows>0){
+                return res.status(200).json({Message:"Notification Deleted Successfully..!"})
+            }
+        }
+    })
+})
 module.exports = api_Router;

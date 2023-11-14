@@ -105,12 +105,25 @@ function getTimeStamp() {
   return (new Date().toISOString().slice(0, 10) + " " + new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata' }));
 }
 app.get('/', (req, res) => {
+
+  
   if (req.query.Message) {
-    res.render('login', { Message: req.query.Message, type: "Info" });
+    db.query("select * from notifications where ? >= Start_Date and ? <= End_Date", [new Date(),new Date()], (error, notifications) => {
+      if (error) {
+        console.log(error);
+      } else {
+        res.render('login', { Message: req.query.Message, type: "Info", notifications: notifications ? notifications : null });
+      }
+    })
 
   } else {
-    res.render('login', { Message: false, type: "Info" });
-
+    db.query("select * from notifications where ? >= Start_Date and ? <= End_Date", [new Date(), new Date()], (error, notifications) => {
+      if (error) {
+        console.log(error);
+      } else {
+        res.render('login', { Message: false, type: "Info", notifications: notifications ? notifications : null });
+      }
+    })
   }
 })
 app.get('/login', (req, res) => {
@@ -133,7 +146,13 @@ app.get('/login', (req, res) => {
         break;
     }
   } else {
-    res.render('login', { Message: "Login Required", type: "Info" });
+    db.query("select * from notifications where ? >= Start_Date and ? <= End_Date", [new Date(), new Date()], (error, notifications) => {
+      if (error) {
+        console.log(error);
+      } else {
+        res.render('login', { Message: "Login Required", type: "Info", notifications: notifications ? notifications : null });
+      }
+    })
   }
 });
 
@@ -160,10 +179,10 @@ app.post('/AuthenticateLogin', (req, res) => {
       } else if (result[0]['Role'] == "PMO") {
         res.redirect('/PMO');
       } else if (result[0]['Role'] == "Root") {
-        res.redirect('/root/LoginVerification');
-        // req.session.LoginOTPVerification = true;
-        // req.session.UserRole = "Root"
-        //res.redirect('/root');
+        //res.redirect('/root/LoginVerification');
+        req.session.LoginOTPVerification = true;
+        req.session.UserRole = "Root"
+        res.redirect('/root');
       } else {
         return res.send("Internal Server Error");
       }
@@ -185,9 +204,15 @@ app.get('/ChangePassword', (req, res) => {
   }
 });
 
-app.get('/faq', async(req, res) => {
-  fs.readFile('faq.txt', 'utf-8', (error, data) => {
-  res.render("FAQ",{Data:data?data:error,Role: req.session.UserRole})
+app.get('/faq', async (req, res) => {
+  db.query("select * from notifications where ? >= Start_Date and ? <= End_Date", [new Date(), new Date()], (error, notifications) => {
+    if (error) {
+      console.log(error);
+    } else {
+      fs.readFile('faq.txt', 'utf-8', (error, data) => {
+        res.render("FAQ", { Data: data ? data : error, Role: req.session.UserRole, notifications: notifications })
+      })
+    }
   })
 
 })
