@@ -7,7 +7,7 @@ const db = mysql.createConnection({
     // database: 'qc-portal',
 
     password:'@Quadgen23',
-    database: 'qc-qc-portal',
+    database: 'qc-portal',
     
     multipleStatements: true
   });
