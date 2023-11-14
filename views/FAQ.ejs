@@ -78,7 +78,7 @@
             </div>
         </div>
     <%}%>
-    
+    <% if (Object.values(notifications).length>0) { %>
     <div class="ticker">
         <div class="news-title bg-danger bg-gradient">
             <h5>Notifications</h5>
@@ -93,6 +93,7 @@
             </marquee>
         </div>
     </div>
+    <%}%>
             <%- include('partials/dependencies-js') %>
                 <script>
                     tinymce.init({

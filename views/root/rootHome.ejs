@@ -63,11 +63,11 @@
         <section class="d-flex justify-content-end flex-wrap">
             <div class="profile-card m-2"
                 style="position: relative;  height: 260px; overflow: auto;box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">
-                <div class="d-flex justify-content-between sticky-top bg-danger bg-gradient ">
-                    <h5 class=" rounded-top text-center w-100">Notifications</h5>
+                <div class="d-flex justify-content-between sticky-top bg-danger bg-gradient text-white">
+                    <h5 class=" rounded-top text-center w-100">Notification</h5>
 
-                    <button type="button" class="btn btn-outline-dark border border-0" data-bs-toggle="modal"
-                        data-bs-target="#UserInputModel"><i class="bi bi-pencil-square"></i></button>
+                    <button type="button" class="btn btn-outline-dark border border-0 text-white" data-bs-toggle="modal"
+                        data-bs-target="#UserInputModel"><i class="bi bi-plus-circle"></i></button>
                 </div>
                 <ol>
                     <% notifications.forEach(function(record) { %>
@@ -90,7 +90,7 @@
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content ">
                 <div class="modal-header">
-                    <h3 class="modal-title fs-5 " id="staticBackdropLabel">Notifications
+                    <h3 class="modal-title fs-5 " id="staticBackdropLabel">Add Notification
                     </h3>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
