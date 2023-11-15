@@ -206,7 +206,10 @@ root_router.get('/ViewChecklist/:QC_Name', (req, res) => {
                 if (error) throw error
                 sections = result1;
                 db.query("select SupportingDocLink from checklist where Checklist_Name=?", [req.params.QC_Name], (error, result2) => {
-                    var SupportingDoc = result2[0].SupportingDocLink;
+                    var SupportingDoc=""
+                    if(result2.length>0){
+                        SupportingDoc = result2[0].SupportingDocLink;
+                    }
                     return res.render("../views/admin/viewChecklist", { Data: result, Checklist: req.params.QC_Name, Sections: sections, title: `${req.params.QC_Name}`, Role: req.session.UserRole, SupportingDoc: SupportingDoc })
                 })
             })

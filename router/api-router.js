@@ -1018,7 +1018,13 @@ api_Router.get('/GetUser', (req, res) => {
                 console.log(error)
                 res.status(400).send("Internal Server Error")
             } else if (result.length > 0) {
-                res.status(200).send(result)
+                let modifiedData =result.map((e) => {
+                    const obj = Object.assign({}, e);
+                    if (obj['Remark'] != null && obj['Remark'] != undefined && obj['Remark'] !== "") {
+                        obj['Remark'] = JSON.parse(obj['Remark'])
+                    }
+                })
+                res.status(200).send(modifiedData)
             } else {
                 res.status(400).send("Data Not Found")
             }
